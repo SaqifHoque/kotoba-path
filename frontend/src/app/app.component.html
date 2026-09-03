@@ -1,0 +1,15 @@
+<div class="shell" *ngIf="!loading && path; else loadingView">
+  <aside [class.open]="menuOpen">
+    <a class="brand" href="#"><span>言</span><div><strong>Kotoba Path</strong><small>日本語を一歩ずつ</small></div></a>
+    <div class="primary-nav"><button [class.active]="view==='learn'" (click)="view='learn';menuOpen=false"><b>道</b><span>Learning path</span></button><button [class.active]="view==='catalog'" (click)="view='catalog';menuOpen=false"><b>典</b><span>Encyclopedia</span></button></div>
+    <nav *ngIf="view==='learn'"><span class="nav-label">Your journey</span><button *ngFor="let lesson of path.lessons" [class.active]="active?.id===lesson.id" [class.done]="isDone(lesson.id)" [class.locked]="isLocked(lesson)" (click)="select(lesson)"><i>{{isDone(lesson.id)?'✓':isLocked(lesson)?'·':lesson.order}}</i><span><small>{{lesson.type}}</small>{{lesson.title}}</span></button></nav>
+    <div class="sidebar-foot"><span>今日の言葉</span><strong>一歩一歩</strong><small>One step at a time</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><button class="menu" (click)="menuOpen=!menuOpen">☰</button><div><span>{{view==='learn'?'Beginner path':'Visual reference'}}</span><b>{{view==='learn'?'Foundations':'Reading encyclopedia'}}</b></div><div class="progress-copy" *ngIf="view==='learn'"><span>{{completed}} of {{path.lessons.length}} lessons</span><div><i [style.width.%]="percentage"></i></div></div></header>
+    <ng-container *ngIf="view==='learn'"><section class="hero"><div><span class="kicker">Your learning path</span><h1>Small steps.<br><em>Real Japanese.</em></h1><p>Learn the shapes. Build the kanji. Read with confidence.</p></div><app-progress-ring [percentage]="percentage"></app-progress-ring></section><app-lesson-card *ngIf="active" [lesson]="active" [total]="path.lessons.length" (completed)="complete($event)"></app-lesson-card></ng-container>
+    <app-encyclopedia *ngIf="view==='catalog'"></app-encyclopedia>
+    <p class="footer-note">ことばの道 · Made for slow, steady learning</p>
+  </main>
+</div>
+<ng-template #loadingView><div class="loading"><span>言</span><p>Preparing your path…</p></div></ng-template>
