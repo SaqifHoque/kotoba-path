@@ -1,0 +1,69 @@
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nihongo
+      POSTGRES_USER: nihongo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nihongo-local}
+    volumes:
+      - nihongo-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nihongo -d nihongo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - nihongo-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: nihongo-learning-backend:local
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://database:5432/nihongo
+      DATABASE_USERNAME: nihongo
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-nihongo-local}
+      IMPORT_DATA: "true"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - nihongo-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: nihongo-learning-frontend:local
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nihongo-network
+
+networks:
+  nihongo-network:
+    driver: bridge
+
+volumes:
+  nihongo-data:
