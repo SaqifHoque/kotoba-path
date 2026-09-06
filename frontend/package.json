@@ -2,7 +2,7 @@
   "name": "nihongo-trail",
   "version": "1.0.0",
   "private": true,
-  "scripts": {"start": "ng serve", "build": "ng build", "test": "ng test --watch=false"},
+  "scripts": {"start": "ng serve", "build": "ng build", "test": "ng test --watch=false", "generate:kanji": "node tools/generate-kanji-curriculum.mjs", "test:curriculum": "sh tools/test-curriculum.sh"},
   "dependencies": {
     "@angular/animations": "^17.3.12", "@angular/common": "^17.3.12", "@angular/compiler": "^17.3.12",
     "@angular/core": "^17.3.12", "@angular/forms": "^17.3.12", "@angular/platform-browser": "^17.3.12",
