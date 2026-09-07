@@ -33,6 +33,8 @@ temp/
 
 # Backend build output
 backend/target/
+backend/data/
+data/
 backend/.classpath
 backend/.project
 backend/.settings/
