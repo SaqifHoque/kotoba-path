@@ -33,7 +33,7 @@ public class StudyProfileController {
             : Collections.emptyList();
         if (rows.isEmpty()) {
             id = UUID.randomUUID().toString();
-            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"profile\":null,\"kanji\":{}}");
+            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"profile\":null,\"kanji\":{},\"vocabulary\":{}}");
             response.addHeader("Set-Cookie", ResponseCookie.from("kotoba_profile", id)
                 .httpOnly(true).secure(request.isSecure()).sameSite("Strict")
                 .path("/api/study-profile").maxAge(31536000).build().toString());
@@ -41,6 +41,7 @@ public class StudyProfileController {
         }
         ObjectNode state = (ObjectNode) json.readTree((String) rows.get(0).get("state_json"));
         if (!state.has("profile")) state.putNull("profile");
+        if (!state.has("vocabulary")) state.set("vocabulary", json.createObjectNode());
         state.put("revision", ((Number) rows.get(0).get("revision")).longValue());
         return state;
     }
@@ -63,6 +64,13 @@ public class StudyProfileController {
             if (savedProfile == null) state.putNull("profile"); else state.set("profile", savedProfile);
         }
         state.set("kanji", body.get("kanji"));
+        if (body.has("vocabulary")) state.set("vocabulary", body.get("vocabulary"));
+        else {
+            // Clients from before vocabulary practice must not erase saved reading reviews.
+            List<String> previous = jdbc.query("select state_json from study_profile where id=?", (rs, row) -> rs.getString(1), id);
+            JsonNode savedVocabulary = previous.isEmpty() ? null : json.readTree(previous.get(0)).get("vocabulary");
+            state.set("vocabulary", savedVocabulary == null ? json.createObjectNode() : savedVocabulary);
+        }
         int changed = jdbc.update("update study_profile set state_json=?,revision=revision+1 where id=? and revision=?",
             state.toString(), id, revision);
         if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Reload and merge before saving.");
@@ -107,5 +115,18 @@ public class StudyProfileController {
             JsonNode due = p.path("due");
             require(due.isIntegralNumber() && due.canConvertToLong() && due.asLong() >= 0 && due.asLong() <= 8640000000000000L);
         });
+        JsonNode vocabulary = body.get("vocabulary");
+        if (vocabulary != null) {
+            require(vocabulary.isObject() && vocabulary.size() <= 6000);
+            vocabulary.fields().forEachRemaining(entry -> {
+                require(!entry.getKey().isEmpty() && entry.getKey().length() <= 200);
+                JsonNode p = entry.getValue();
+                require(p.isObject() && p.path("learned").isBoolean());
+                require(p.path("stage").isInt() && p.path("stage").asInt() >= 0 && p.path("stage").asInt() <= 6);
+                require(p.path("attempts").isInt() && p.path("attempts").asInt() >= 1);
+                JsonNode due = p.path("due");
+                require(due.isIntegralNumber() && due.canConvertToLong() && due.asLong() >= 0 && due.asLong() <= 8640000000000000L);
+            });
+        }
     }
 }
