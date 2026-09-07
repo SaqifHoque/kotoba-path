@@ -19,6 +19,23 @@ class StudyProfileControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
 
+    @Test void forgePersistsIndependentlyAndOldClientsCannotEraseIt() throws Exception {
+        MvcResult initial=mvc.perform(get("/api/study-profile")).andReturn();
+        Cookie cookie=initial.getResponse().getCookie("kotoba_profile");
+        ObjectNode state=(ObjectNode)json.readTree(initial.getResponse().getContentAsString());
+        ObjectNode forge=json.createObjectNode().put("version",1).put("unlockedLevel",1).put("dailyLimit",10).put("settingsAt",0);
+        ObjectNode record=json.createObjectNode().put("lessonAt",10).put("note","one line").put("noteAt",10);
+        record.set("meaning",json.readTree("{\"stage\":1,\"due\":100,\"reviews\":0,\"correct\":0,\"misses\":0,\"updatedAt\":10}"));
+        ObjectNode records=json.createObjectNode();records.set("r:一",record);forge.set("records",records);state.set("forge",forge);
+        mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isOk());
+        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.forge.records['r:一'].meaning.stage").value(1));
+        state.remove("forge");state.put("revision",1);
+        mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isOk());
+        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.forge.records['r:一'].note").value("one line"));
+        ((ObjectNode)record.get("meaning")).put("stage",10);state.set("forge",forge);state.put("revision",2);
+        mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isBadRequest());
+    }
+
     @Test void persistsIsolatesAndRejectsStaleSnapshots() throws Exception {
         MvcResult initial=mvc.perform(get("/api/study-profile")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andReturn();
         Cookie cookie=initial.getResponse().getCookie("kotoba_profile");
