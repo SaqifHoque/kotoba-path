@@ -1,4 +1,5 @@
 export interface KanjiCard {
+  radicalImage?: string;
   character: string; meaning: string; onyomi: string; kunyomi: string;
   grade: number; strokes: number; radical: string; radicalMeaning: string; examples: string[][];
 }
