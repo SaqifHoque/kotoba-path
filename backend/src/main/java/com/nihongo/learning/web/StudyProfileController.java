@@ -33,20 +33,21 @@ public class StudyProfileController {
             : Collections.emptyList();
         if (rows.isEmpty()) {
             id = UUID.randomUUID().toString();
-            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"kanji\":{}}");
+            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"profile\":null,\"kanji\":{}}");
             response.addHeader("Set-Cookie", ResponseCookie.from("kotoba_profile", id)
                 .httpOnly(true).secure(request.isSecure()).sameSite("Strict")
                 .path("/api/study-profile").maxAge(31536000).build().toString());
             rows = jdbc.queryForList("select revision,state_json from study_profile where id=?", id);
         }
         ObjectNode state = (ObjectNode) json.readTree((String) rows.get(0).get("state_json"));
+        if (!state.has("profile")) state.putNull("profile");
         state.put("revision", ((Number) rows.get(0).get("revision")).longValue());
         return state;
     }
 
     @PutMapping(consumes="application/json")
     public Map<String,Long> save(@CookieValue(value="kotoba_profile", required=false) String id,
-                                @RequestBody JsonNode body, HttpServletRequest request) {
+                                @RequestBody JsonNode body, HttpServletRequest request) throws Exception {
         if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         if ("cross-site".equals(request.getHeader("Sec-Fetch-Site"))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -54,6 +55,13 @@ public class StudyProfileController {
         validate(body);
         long revision = body.path("revision").longValue();
         ObjectNode state = json.createObjectNode();
+        if (body.has("profile")) state.set("profile", body.get("profile"));
+        else {
+            // A client from before placement profiles existed must not erase the newer field.
+            List<String> previous = jdbc.query("select state_json from study_profile where id=?", (rs, row) -> rs.getString(1), id);
+            JsonNode savedProfile = previous.isEmpty() ? null : json.readTree(previous.get(0)).get("profile");
+            if (savedProfile == null) state.putNull("profile"); else state.set("profile", savedProfile);
+        }
         state.set("kanji", body.get("kanji"));
         int changed = jdbc.update("update study_profile set state_json=?,revision=revision+1 where id=? and revision=?",
             state.toString(), id, revision);
@@ -74,6 +82,20 @@ public class StudyProfileController {
         JsonNode revision = body.path("revision");
         require(revision.isIntegralNumber() && revision.canConvertToLong()
             && revision.asLong() >= 0 && revision.asLong() < 9007199254740991L);
+        JsonNode profile = body.get("profile");
+        if (profile != null && !profile.isNull()) {
+            require(profile.isObject() && Arrays.asList("N5", "N4", "N3", "N2", "N1", "unsure").contains(profile.path("level").asText()));
+            require(Arrays.asList("studying", "comfortable").contains(profile.path("familiarity").asText()));
+            JsonNode updatedAt = profile.path("updatedAt");
+            require(updatedAt.isIntegralNumber() && updatedAt.canConvertToLong() && updatedAt.asLong() >= 0
+                && updatedAt.asLong() < 9007199254740991L);
+            JsonNode placement = profile.get("placement");
+            if (placement != null && !placement.isNull()) {
+                require(placement.isObject() && placement.path("correct").isInt() && placement.path("total").asInt() == 5);
+                require(placement.path("correct").asInt() >= 0 && placement.path("correct").asInt() <= 5);
+                require(Arrays.asList("N5", "N4", "N3", "N2", "N1").contains(placement.path("suggested").asText()));
+            }
+        }
         JsonNode reviews = body.path("kanji");
         require(reviews.isObject() && reviews.size() <= 2000);
         reviews.fields().forEachRemaining(entry -> {
