@@ -5,18 +5,21 @@ import { KanjiCard, ReviewProgress, parseProgress } from './kanji-engine';
 import { mergeReviews } from './study-progress';
 import { BANDS, Proficiency } from './proficiency';
 import { buildVocabulary } from './practice-engine';
+import { ForgeState, Subject, buildForge, emptyForge, mergeForge, parseForge } from '../forge/forge-engine';
 
-interface StudyState { revision: number; profile: Proficiency | null; kanji: ReviewProgress; vocabulary: ReviewProgress; }
+interface StudyState { revision: number; profile: Proficiency | null; kanji: ReviewProgress; vocabulary: ReviewProgress; forge: ForgeState; }
 
 @Injectable({providedIn: 'root'})
 export class StudySyncService {
-  readonly state = new BehaviorSubject<StudyState>({revision: 0, profile: null, kanji: {}, vocabulary: {}});
+  readonly state = new BehaviorSubject<StudyState>({revision: 0, profile: null, kanji: {}, vocabulary: {}, forge: emptyForge()});
+  forgeSubjects: Subject[] = [];
   status = 'Connecting to database…';
   warning = '';
   ready = false;
   private readonly key = 'kotoba-kanji-reviews-v1';
   private readonly profileKey = 'kotoba-proficiency-v1';
   private readonly vocabularyKey = 'kotoba-vocabulary-reviews-v1';
+  private readonly forgeKey = 'kotoba-forge-v1';
   private cards: KanjiCard[] = [];
   private words: {character: string}[] = [];
   private initialized = false;
@@ -33,10 +36,12 @@ export class StudySyncService {
     this.initialized = true;
     this.cards = cards;
     this.words = buildVocabulary(cards).map(word => ({character: word.id}));
+    this.forgeSubjects = buildForge(cards);
     try {
       this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.profileKey)),
         kanji: parseProgress(localStorage.getItem(this.key), cards),
-        vocabulary: parseProgress(localStorage.getItem(this.vocabularyKey), this.words)});
+        vocabulary: parseProgress(localStorage.getItem(this.vocabularyKey), this.words),
+        forge: parseForge(JSON.parse(localStorage.getItem(this.forgeKey) || 'null'), this.forgeSubjects)});
     }
     catch {
       this.canCache = false;
@@ -69,6 +74,14 @@ export class StudySyncService {
     void this.flush();
   }
 
+  updateForge(forge: ForgeState): void {
+    this.version++;
+    this.state.next({...this.state.value, forge});
+    this.dirty = true;
+    this.cache();
+    void this.flush();
+  }
+
   restore(kanji: ReviewProgress): void {
     this.canCache = true;
     this.warning = '';
@@ -94,12 +107,14 @@ export class StudySyncService {
     if (!Number.isSafeInteger(remote.revision) || remote.revision < 0) throw new Error('Invalid revision');
     const restored = parseProgress(JSON.stringify({version: 1, cards: remote.kanji}), this.cards);
     const vocabulary = parseProgress(JSON.stringify({version: 1, cards: remote.vocabulary ?? {}}), this.words);
+    const forge = parseForge(remote.forge, this.forgeSubjects);
     const profile = this.validProfile(remote.profile);
     const currentProfile = this.state.value.profile;
     this.state.next({revision: remote.revision,
       profile: !currentProfile || (profile && profile.updatedAt > currentProfile.updatedAt) ? profile : currentProfile,
       kanji: mergeReviews(this.state.value.kanji, restored),
-      vocabulary: mergeReviews(this.state.value.vocabulary, vocabulary)});
+      vocabulary: mergeReviews(this.state.value.vocabulary, vocabulary),
+      forge: mergeForge(this.state.value.forge, forge)});
     this.cache();
   }
 
@@ -126,6 +141,7 @@ export class StudySyncService {
       localStorage.setItem(this.key, JSON.stringify({version: 1, cards: this.state.value.kanji}));
       localStorage.setItem(this.profileKey, JSON.stringify(this.state.value.profile));
       localStorage.setItem(this.vocabularyKey, JSON.stringify({version: 1, cards: this.state.value.vocabulary}));
+      localStorage.setItem(this.forgeKey, JSON.stringify(this.state.value.forge));
     }
     catch { this.warning = 'Browser backup could not be saved. Export progress or wait for a successful database save.'; }
   }
