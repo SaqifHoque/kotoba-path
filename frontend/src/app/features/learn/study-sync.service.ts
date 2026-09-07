@@ -4,18 +4,21 @@ import { BehaviorSubject, firstValueFrom, timeout } from 'rxjs';
 import { KanjiCard, ReviewProgress, parseProgress } from './kanji-engine';
 import { mergeReviews } from './study-progress';
 import { BANDS, Proficiency } from './proficiency';
+import { buildVocabulary } from './practice-engine';
 
-interface StudyState { revision: number; profile: Proficiency | null; kanji: ReviewProgress; }
+interface StudyState { revision: number; profile: Proficiency | null; kanji: ReviewProgress; vocabulary: ReviewProgress; }
 
 @Injectable({providedIn: 'root'})
 export class StudySyncService {
-  readonly state = new BehaviorSubject<StudyState>({revision: 0, profile: null, kanji: {}});
+  readonly state = new BehaviorSubject<StudyState>({revision: 0, profile: null, kanji: {}, vocabulary: {}});
   status = 'Connecting to database…';
   warning = '';
   ready = false;
   private readonly key = 'kotoba-kanji-reviews-v1';
   private readonly profileKey = 'kotoba-proficiency-v1';
+  private readonly vocabularyKey = 'kotoba-vocabulary-reviews-v1';
   private cards: KanjiCard[] = [];
+  private words: {character: string}[] = [];
   private initialized = false;
   private canCache = true;
   private saving = false;
@@ -29,8 +32,11 @@ export class StudySyncService {
     if (this.initialized) return;
     this.initialized = true;
     this.cards = cards;
+    this.words = buildVocabulary(cards).map(word => ({character: word.id}));
     try {
-      this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.profileKey)), kanji: parseProgress(localStorage.getItem(this.key), cards)});
+      this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.profileKey)),
+        kanji: parseProgress(localStorage.getItem(this.key), cards),
+        vocabulary: parseProgress(localStorage.getItem(this.vocabularyKey), this.words)});
     }
     catch {
       this.canCache = false;
@@ -50,6 +56,14 @@ export class StudySyncService {
   updateProfile(profile: Proficiency): void {
     this.version++;
     this.state.next({...this.state.value, profile});
+    this.dirty = true;
+    this.cache();
+    void this.flush();
+  }
+
+  updateVocabulary(vocabulary: ReviewProgress): void {
+    this.version++;
+    this.state.next({...this.state.value, vocabulary});
     this.dirty = true;
     this.cache();
     void this.flush();
@@ -79,11 +93,13 @@ export class StudySyncService {
   private merge(remote: StudyState): void {
     if (!Number.isSafeInteger(remote.revision) || remote.revision < 0) throw new Error('Invalid revision');
     const restored = parseProgress(JSON.stringify({version: 1, cards: remote.kanji}), this.cards);
+    const vocabulary = parseProgress(JSON.stringify({version: 1, cards: remote.vocabulary ?? {}}), this.words);
     const profile = this.validProfile(remote.profile);
     const currentProfile = this.state.value.profile;
     this.state.next({revision: remote.revision,
       profile: !currentProfile || (profile && profile.updatedAt > currentProfile.updatedAt) ? profile : currentProfile,
-      kanji: mergeReviews(this.state.value.kanji, restored)});
+      kanji: mergeReviews(this.state.value.kanji, restored),
+      vocabulary: mergeReviews(this.state.value.vocabulary, vocabulary)});
     this.cache();
   }
 
@@ -109,6 +125,7 @@ export class StudySyncService {
     try {
       localStorage.setItem(this.key, JSON.stringify({version: 1, cards: this.state.value.kanji}));
       localStorage.setItem(this.profileKey, JSON.stringify(this.state.value.profile));
+      localStorage.setItem(this.vocabularyKey, JSON.stringify({version: 1, cards: this.state.value.vocabulary}));
     }
     catch { this.warning = 'Browser backup could not be saved. Export progress or wait for a successful database save.'; }
   }

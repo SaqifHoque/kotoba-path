@@ -22,7 +22,7 @@ export function schedule(previous: ReviewState | undefined, rating: Rating, now:
 export function dueCards(cards: KanjiCard[], progress: ReviewProgress, now: number): KanjiCard[] {
   return cards.filter(c => progress[c.character]?.due <= now).sort((a, b) => progress[a.character].due - progress[b.character].due);
 }
-export function parseProgress(raw: string | null, cards: KanjiCard[]): ReviewProgress {
+export function parseProgress(raw: string | null, cards: ReadonlyArray<Pick<KanjiCard, 'character'>>): ReviewProgress {
   if (!raw) return {};
   const value = JSON.parse(raw);
   if (value?.version !== 1 || !value.cards || typeof value.cards !== 'object' || Array.isArray(value.cards)) throw new Error('Invalid progress data');
