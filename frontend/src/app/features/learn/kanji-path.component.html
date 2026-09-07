@@ -2,13 +2,32 @@
 <div *ngIf="error" role="alert">{{error}} <button (click)="load()">Retry</button></div>
 <ng-container *ngIf="!loading && !error">
   <section class="intro">
-    <div><span class="eyebrow">日本語 · One level at a time</span><h1>A little practice.<br><em>A world of kanji.</em></h1><p>{{cards.length | number}} kanji. {{levels.length}} levels. A path that grows with you.</p></div>
+    <div><span class="eyebrow">日本語 · Kanji & reading</span><h1>Your starting point.<br><em>Your reading journey.</em></h1><p *ngIf="profile && profile.level!=='unsure'; else fullIntro">Practice matched to {{target}} · {{recommended.length}} kanji ahead. Your original level map stays available.</p><ng-template #fullIntro><p>{{cards.length | number}} kanji. {{levels.length}} levels. Choose where to begin below.</p></ng-template></div>
     <div class="score"><strong>{{completed}}<small> / {{levels.length}}</small></strong><span>levels cleared</span></div>
   </section>
   <div class="stats"><span><b>{{learned}}</b> kanji introduced</span><span><b>{{due.length}}</b> due for review</span><span>10–12 kanji per level</span></div>
   <div class="tabs" aria-label="Study mode"><button [attr.aria-pressed]="mode==='path'" (click)="changeMode('path')">道 Learning path</button><button [attr.aria-pressed]="mode==='review'" (click)="changeMode('review')">↻ Repetition <span>{{due.length}}</span></button></div>
-  <p role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></p>
+  <section class="review-panel proficiency" aria-label="Starting proficiency">
+    <h2>Where are you with Japanese?</h2>
+    <div class="profile-controls">
+      <div><label for="proficiency-level">Current proficiency</label><select id="proficiency-level" [(ngModel)]="selectedLevel" (ngModelChange)="placement=[]"><option value="unsure">Not sure / start from basics</option><option *ngFor="let band of bands" [value]="band">{{band}}</option></select></div>
+      <div *ngIf="selectedLevel!=='unsure'"><label for="proficiency-familiarity">What does that mean?</label><select id="proficiency-familiarity" [(ngModel)]="familiarity" (ngModelChange)="placement=[]"><option value="studying">I’m studying this level</option><option value="comfortable">I’m comfortable with this level</option></select></div>
+    </div>
+    <p>“Studying N3” starts with intermediate kanji. “Comfortable with N3” starts toward N2. Difficulty bands are approximate school-grade estimates, not official JLPT lists.</p>
+    <button (click)="saveProfile()" [disabled]="!sync.ready">Save starting point</button>
+    <button (click)="startPlacement()" [disabled]="!sync.ready">Optional 5-kanji self-check</button>
+    <p>{{assumed.length}} easier kanji assumed familiar, not mastered. Review dates and completed lessons are preserved when your starting point changes.</p>
+    <p *ngIf="profile?.placement as result">Last self-check: {{result.correct}} / {{result.total}} recognized. Suggested starting point: {{result.suggested}}. This is not a JLPT assessment. <button (click)="applySuggestion()">Use suggestion</button></p>
+    <p role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></p>
+  </section>
   <p class="notice" *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
+  <section *ngIf="placement.length" class="study" aria-label="Proficiency self-check">
+    <p>{{placementBand}} self-check · {{placementIndex+1}} / 5. Recall a meaning and a reading.</p>
+    <div class="glyph" lang="ja">{{placement[placementIndex].character}}</div>
+    <button *ngIf="!placementRevealed" (click)="placementRevealed=true">Reveal self-check answer</button>
+    <div *ngIf="placementRevealed"><p>{{placement[placementIndex].meaning}} · {{placement[placementIndex].onyomi}} · {{placement[placementIndex].kunyomi}}</p><button (click)="answerPlacement(false)">I needed the answer</button><button (click)="answerPlacement(true)">I knew both</button></div>
+    <button (click)="placement=[]">Cancel self-check</button>
+  </section>
   <p class="notice" *ngIf="message" role="status">{{message}}</p>
   <section *ngIf="session && card as current" class="study" aria-label="Kanji recall session">
     <header><span>{{sessionTitle}} · {{queue.length}} remaining</span><button (click)="session=false">Back to {{mode==='path' ? 'path' : 'reviews'}}</button></header>
@@ -30,10 +49,18 @@
       <p>{{due.length}} kanji due. Sessions contain up to 20 cards, oldest due first.</p>
       <button class="action" [disabled]="!due.length" (click)="startReview()">Start repetition</button>
       <p *ngIf="nextReview">Next review: {{nextReview | date:'medium'}}</p>
-      <p *ngIf="!learned && !due.length">Start level 1 to add your first kanji to the review schedule.</p>
+      <p *ngIf="!learned && !due.length">Start your recommended kanji to build a review schedule at your chosen difficulty.</p>
       <p class="schedule">Good recalls return after 1, 3, 7, 14, 30, 60, then 120 days. Hard returns tomorrow; Again returns in 10 minutes and restarts the interval. Reviews continue after you clear a level.</p>
     </section>
-    <section *ngIf="mode==='path'" class="map">
+    <section *ngIf="mode==='path' && !placement.length" class="review-panel recommendation">
+      <h2>{{target}} · Your next kanji</h2><p>New lessons start near your selected proficiency. Due reviews keep returning even if you change your starting point.</p>
+      <div class="preview" lang="ja"><span *ngFor="let c of recommended.slice(0,10)">{{c.character}}</span></div>
+      <button class="action" [disabled]="!recommended.length" (click)="startRecommended()">Start recommended kanji</button>
+      <button *ngIf="assumed.length" (click)="startFoundations()">Check 5 foundation kanji</button>
+      <p *ngIf="!recommended.length">You’ve introduced the kanji at this difficulty and above. Continue reviews to strengthen recall.</p>
+      <button (click)="showMap=!showMap">{{showMap ? 'Hide' : 'Browse'}} original {{levels.length}}-level map</button>
+    </section>
+    <section *ngIf="mode==='path' && showMap" class="map">
       <header class="unit"><div><span class="eyebrow">Chapter {{page+1}} of {{pageCount}}</span><h2>Levels {{visibleLevels[0].number}}–{{visibleLevels[visibleLevels.length-1].number}}</h2><p>Learn every kanji in a level to open the next.</p></div><button (click)="goCurrent()">Current level →</button></header>
       <div class="trail">
         <article *ngFor="let level of visibleLevels; let i=index; trackBy:trackLevel" class="stop" [class.left]="i%4===1" [class.right]="i%4===3" [class.done]="done(level)" [class.current]="level.number===nextLevel && !done(level)" [class.locked]="locked(level)">

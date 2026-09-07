@@ -25,15 +25,20 @@ class StudyProfileControllerTest {
         assertNotNull(cookie); assertTrue(cookie.isHttpOnly());
         assertTrue(initial.getResponse().getHeader("Set-Cookie").contains("SameSite=Strict"));
         ObjectNode state=(ObjectNode)json.readTree(initial.getResponse().getContentAsString());
+        assertTrue(state.get("profile").isNull());
+        state.set("profile",json.readTree("{\"level\":\"N3\",\"familiarity\":\"studying\",\"updatedAt\":1,\"placement\":{\"correct\":4,\"total\":5,\"suggested\":\"N2\"}}"));
         state.set("kanji",json.readTree("{\"日\":{\"learned\":true,\"stage\":1,\"due\":100,\"attempts\":2}}"));
         mvc.perform(put("/api/study-profile").cookie(cookie).header("Origin","http://localhost:4200").contentType("application/json").content(state.toString()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.revision").value(1));
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isConflict());
-        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2));
-        mvc.perform(get("/api/study-profile")).andExpect(jsonPath("$.kanji").isEmpty());
+        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2))
+            .andExpect(jsonPath("$.profile.level").value("N3")).andExpect(jsonPath("$.profile.placement.suggested").value("N2"));
+        mvc.perform(get("/api/study-profile")).andExpect(jsonPath("$.kanji").isEmpty()).andExpect(jsonPath("$.profile").isEmpty());
         state.put("revision",1);
+        state.remove("profile");
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isOk());
-        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2));
+        mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2))
+            .andExpect(jsonPath("$.profile.level").value("N3"));
         Cookie secure=mvc.perform(get("/api/study-profile").secure(true)).andReturn().getResponse().getCookie("kotoba_profile");
         assertTrue(secure.getSecure());
     }
@@ -47,6 +52,8 @@ class StudyProfileControllerTest {
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(bad)).andExpect(status().isBadRequest());
         String overflow=bad.replace("99","1").replace("\"due\":1","\"due\":18446744073709551616");
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(overflow)).andExpect(status().isBadRequest());
+        String badProfile="{\"revision\":0,\"profile\":{\"level\":\"N0\",\"familiarity\":\"studying\",\"updatedAt\":1},\"kanji\":{}}";
+        mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(badProfile)).andExpect(status().isBadRequest());
         mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji").isEmpty());
     }
 }
