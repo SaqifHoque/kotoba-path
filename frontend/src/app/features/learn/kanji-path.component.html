@@ -7,7 +7,8 @@
   </section>
   <div class="stats"><span><b>{{learned}}</b> kanji introduced</span><span><b>{{due.length}}</b> due for review</span><span>10–12 kanji per level</span></div>
   <div class="tabs" aria-label="Study mode"><button [attr.aria-pressed]="mode==='path'" (click)="changeMode('path')">道 Learning path</button><button [attr.aria-pressed]="mode==='review'" (click)="changeMode('review')">↻ Repetition <span>{{due.length}}</span></button></div>
-  <p class="notice" *ngIf="storageWarning" role="alert">{{storageWarning}}</p>
+  <p role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></p>
+  <p class="notice" *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
   <p class="notice" *ngIf="message" role="status">{{message}}</p>
   <section *ngIf="session && card as current" class="study" aria-label="Kanji recall session">
     <header><span>{{sessionTitle}} · {{queue.length}} remaining</span><button (click)="session=false">Back to {{mode==='path' ? 'path' : 'reviews'}}</button></header>
@@ -44,5 +45,5 @@
       <footer class="pagination"><button [disabled]="page===0" (click)="page=page-1">← Previous</button><span>{{page+1}} / {{pageCount}}</span><button [disabled]="page+1===pageCount" (click)="page=page+1">Next →</button></footer>
     </section>
   </ng-container>
-  <footer class="storage"><p>Progress is saved in this browser. Export a backup to keep it or move it to another device.</p><button (click)="exportProgress()">Export progress</button><label>Restore backup<input type="file" accept="application/json" (change)="importProgress($event)"></label><p>Kanji & examples: Kanji Alive. Ordered by school grade, then stroke count; these levels are not JLPT grades.</p></footer>
+  <footer class="storage"><p>Progress syncs to this browser’s database profile and is cached locally. Export a backup before changing browsers or clearing cookies; account login is not available yet.</p><button (click)="exportProgress()">Export progress</button><label>Restore backup<input type="file" accept="application/json" (change)="importProgress($event)"></label><p>Kanji & examples: Kanji Alive. Ordered by school grade, then stroke count; these levels are not JLPT grades.</p></footer>
 </ng-container>

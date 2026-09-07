@@ -1,29 +1,31 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { StudySyncService } from './study-sync.service';
 import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, parseProgress, Rating, ReviewProgress, schedule, unlocked } from './kanji-engine';
 
 @Component({selector: 'app-kanji-path', standalone: true, imports: [CommonModule],
   templateUrl: './kanji-path.component.html', styleUrls: ['./kanji-path.component.scss']})
 export class KanjiPathComponent implements OnInit, OnDestroy {
   cards: KanjiCard[] = []; levels: KanjiLevel[] = []; progress: ReviewProgress = {};
-  loading = true; error = ''; storageWarning = ''; page = 0; now = Date.now();
+  loading = true; error = ''; page = 0; now = Date.now();
   mode: 'path' | 'review' = 'path'; queue: KanjiCard[] = []; session = false;
   revealed = false; practice = false; sessionTitle = ''; message = ''; answered = 0;
-  private readonly key = 'kotoba-kanji-reviews-v1';
-  private canSave = true;
+  private syncSubscription?: Subscription;
   private timer?: ReturnType<typeof setInterval>;
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, public readonly sync: StudySyncService) {}
   ngOnInit(): void { this.load(); this.timer = setInterval(() => this.now = Date.now(), 10000); }
-  ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); }
+  ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); this.syncSubscription?.unsubscribe(); }
   load(): void {
     this.loading = true; this.error = '';
     this.http.get<KanjiCard[]>('assets/kanji-curriculum.json').subscribe({
       next: cards => {
         try { this.levels = buildLevels(cards); this.cards = cards; }
         catch { this.error = 'The kanji curriculum could not be read. Please retry.'; this.loading = false; return; }
-        try { this.progress = parseProgress(localStorage.getItem(this.key), cards); }
-        catch { this.canSave = false; this.storageWarning = 'Saved progress could not be read. Existing data is preserved; this session will not be saved.'; }
+        this.sync.initialize(cards);
+        this.syncSubscription?.unsubscribe();
+        this.syncSubscription = this.sync.state.subscribe(state => this.progress = state.kanji);
         this.page = Math.floor((this.nextLevel - 1) / 10); this.loading = false;
       },
       error: () => { this.loading = false; this.error = 'Could not load the kanji catalog. Check your connection and retry.'; }
@@ -73,7 +75,7 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
     if (!this.queue.length) {
       this.session = false;
       this.message = this.practice ? 'Practice complete. Your review dates are unchanged.' :
-        this.storageWarning ? 'Session complete. Export a backup to keep this progress.' : 'Session saved. Keep returning for your scheduled reviews.';
+        this.sync.warning ? 'Session complete. Export a backup to keep this progress.' : 'Session complete. Check sync status above and return for your scheduled reviews.';
     }
   }
   interval(rating: Rating): string {
@@ -83,9 +85,7 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
     return minutes < 60 ? `${minutes} min` : `${Math.round(minutes / 1440)} day(s)`;
   }
   private save(): void {
-    if (!this.canSave) return;
-    try { localStorage.setItem(this.key, JSON.stringify({version: 1, cards: this.progress})); }
-    catch { this.storageWarning = 'Your browser could not save progress. Keep this tab open and export a backup.'; }
+    this.sync.update(this.progress);
   }
   exportProgress(): void {
     const url = URL.createObjectURL(new Blob([JSON.stringify({version: 1, cards: this.progress})], {type: 'application/json'}));
@@ -98,11 +98,7 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
     try {
       if (file.size > 2000000) throw new Error('Too large');
       const restored = parseProgress(await file.text(), this.cards);
-      // Import merges rather than erasing newer progress on this browser.
-      for (const [key, value] of Object.entries(restored)) {
-        if (!this.progress[key] || value.attempts > this.progress[key].attempts) this.progress[key] = value;
-      }
-      this.canSave = true; this.storageWarning = ''; this.save(); this.session = false; this.queue = [];
+      this.sync.restore(restored); this.session = false; this.queue = [];
       this.message = 'Progress backup restored.';
     } catch { this.message = 'This backup could not be read. Your progress has not changed.'; }
     input.value = '';

@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+const {mergeReviews} = require(process.argv[2]);
+const first = {learned: true, stage: 1, due: 100, attempts: 1};
+const newerMiss = {learned: true, stage: 0, due: 50, attempts: 2};
+const local = {'日': first};
+const remote = {'月': first, '日': newerMiss};
+const merged = mergeReviews(local, remote);
+assert.deepEqual(merged, remote);
+assert.deepEqual(local, {'日': first});
+assert.deepEqual(mergeReviews(remote, local), remote);
+assert.deepEqual(mergeReviews(merged, merged), merged);
+assert.equal(merged['日'].attempts, 2);
+assert.equal(merged['日'].due, 50, 'a newer lapse overrides an older longer interval');
+const sameAttempt = {'日': {...first, due: 200}};
+assert.deepEqual(mergeReviews(local, sameAttempt), sameAttempt);
+assert.deepEqual(mergeReviews(sameAttempt, local), sameAttempt);
+console.log('PASS: idempotent progress merge, newer lapses, independent cards, unchanged inputs, tie handling.');
