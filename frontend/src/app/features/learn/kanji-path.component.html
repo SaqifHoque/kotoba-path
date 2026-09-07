@@ -28,6 +28,8 @@
     <div *ngIf="placementRevealed"><p>{{placement[placementIndex].meaning}} · {{placement[placementIndex].onyomi}} · {{placement[placementIndex].kunyomi}}</p><button (click)="answerPlacement(false)">I needed the answer</button><button (click)="answerPlacement(true)">I knew both</button></div>
     <button (click)="placement=[]">Cancel self-check</button>
   </section>
+  <button class="action studio-link" [attr.aria-pressed]="mode==='studio'" (click)="changeMode('studio')">Words & reading →</button>
+  <app-practice-studio *ngIf="mode==='studio'" [cards]="cards" [kanji]="progress" [assumed]="assumed" [target]="target" (kanjiRated)="rateMixed($event)"></app-practice-studio>
   <p class="notice" *ngIf="message" role="status">{{message}}</p>
   <section *ngIf="session && card as current" class="study" aria-label="Kanji recall session">
     <header><span>{{sessionTitle}} · {{queue.length}} remaining</span><button (click)="session=false">Back to {{mode==='path' ? 'path' : 'reviews'}}</button></header>
