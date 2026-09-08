@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { StudySyncService } from './study-sync.service';
+import { PracticeStudioComponent } from './practice-studio.component';
 import { BANDS, Band, Proficiency, assumedKanji, estimatedBand, placementSuggestion, recommendedCards, targetBand } from './proficiency';
 import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, parseProgress, Rating, ReviewProgress, schedule, unlocked } from './kanji-engine';
 
-@Component({selector: 'app-kanji-path', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-kanji-path', standalone: true, imports: [CommonModule, FormsModule, PracticeStudioComponent],
   templateUrl: './kanji-path.component.html', styleUrls: ['./kanji-path.component.scss']})
 export class KanjiPathComponent implements OnInit, OnDestroy {
   bands = BANDS; profile: Proficiency | null = null;
@@ -16,7 +17,7 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
   placementBand: Band = 'N5';
   cards: KanjiCard[] = []; levels: KanjiLevel[] = []; progress: ReviewProgress = {};
   loading = true; error = ''; page = 0; now = Date.now();
-  mode: 'path' | 'review' = 'path'; queue: KanjiCard[] = []; session = false;
+  mode: 'path' | 'review' | 'studio' = 'path'; queue: KanjiCard[] = []; session = false;
   revealed = false; practice = false; sessionTitle = ''; message = ''; answered = 0;
   private syncSubscription?: Subscription;
   private timer?: ReturnType<typeof setInterval>;
@@ -97,7 +98,12 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
   count(level: KanjiLevel): number { return level.cards.filter(c => this.progress[c.character]?.learned).length; }
   trackLevel(_: number, level: KanjiLevel): number { return level.number; }
   goCurrent(): void { this.page = Math.floor((this.nextLevel - 1) / 10); }
-  changeMode(mode: 'path' | 'review'): void { this.mode = mode; this.session = false; this.queue = []; this.message = ''; }
+  changeMode(mode: 'path' | 'review' | 'studio'): void { this.mode = mode; this.session = false; this.queue = []; this.message = ''; }
+  rateMixed(event: {card: KanjiCard; rating: Rating}): void {
+    this.now = Date.now();
+    this.progress = {...this.progress, [event.card.character]: schedule(this.progress[event.card.character], event.rating, this.now)};
+    this.save();
+  }
   start(level: KanjiLevel): void {
     if (this.locked(level)) return;
     this.practice = this.done(level);

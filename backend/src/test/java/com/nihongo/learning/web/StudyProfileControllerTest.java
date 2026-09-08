@@ -28,17 +28,21 @@ class StudyProfileControllerTest {
         assertTrue(state.get("profile").isNull());
         state.set("profile",json.readTree("{\"level\":\"N3\",\"familiarity\":\"studying\",\"updatedAt\":1,\"placement\":{\"correct\":4,\"total\":5,\"suggested\":\"N2\"}}"));
         state.set("kanji",json.readTree("{\"日\":{\"learned\":true,\"stage\":1,\"due\":100,\"attempts\":2}}"));
+        state.set("vocabulary",json.readTree("{\"日本:にほん\":{\"learned\":true,\"stage\":2,\"due\":200,\"attempts\":3}}"));
         mvc.perform(put("/api/study-profile").cookie(cookie).header("Origin","http://localhost:4200").contentType("application/json").content(state.toString()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.revision").value(1));
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isConflict());
         mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2))
-            .andExpect(jsonPath("$.profile.level").value("N3")).andExpect(jsonPath("$.profile.placement.suggested").value("N2"));
+            .andExpect(jsonPath("$.profile.level").value("N3")).andExpect(jsonPath("$.profile.placement.suggested").value("N2"))
+            .andExpect(jsonPath("$.vocabulary['日本:にほん'].attempts").value(3));
         mvc.perform(get("/api/study-profile")).andExpect(jsonPath("$.kanji").isEmpty()).andExpect(jsonPath("$.profile").isEmpty());
         state.put("revision",1);
         state.remove("profile");
+        state.remove("vocabulary");
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(state.toString())).andExpect(status().isOk());
         mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji.日.attempts").value(2))
-            .andExpect(jsonPath("$.profile.level").value("N3"));
+            .andExpect(jsonPath("$.profile.level").value("N3"))
+            .andExpect(jsonPath("$.vocabulary['日本:にほん'].attempts").value(3));
         Cookie secure=mvc.perform(get("/api/study-profile").secure(true)).andReturn().getResponse().getCookie("kotoba_profile");
         assertTrue(secure.getSecure());
     }
@@ -54,6 +58,8 @@ class StudyProfileControllerTest {
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(overflow)).andExpect(status().isBadRequest());
         String badProfile="{\"revision\":0,\"profile\":{\"level\":\"N0\",\"familiarity\":\"studying\",\"updatedAt\":1},\"kanji\":{}}";
         mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(badProfile)).andExpect(status().isBadRequest());
+        String badVocabulary="{\"revision\":0,\"profile\":null,\"kanji\":{},\"vocabulary\":{\"日本:にほん\":{\"learned\":true,\"stage\":9,\"due\":1,\"attempts\":1}}}";
+        mvc.perform(put("/api/study-profile").cookie(cookie).contentType("application/json").content(badVocabulary)).andExpect(status().isBadRequest());
         mvc.perform(get("/api/study-profile").cookie(cookie)).andExpect(jsonPath("$.kanji").isEmpty());
     }
 }

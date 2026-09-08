@@ -1,0 +1,35 @@
+<section class="studio" aria-label="Vocabulary and reading practice">
+  <span class="eyebrow">Put your kanji to work</span>
+  <h2>Words & reading</h2>
+  <p>{{available.length}} / {{words.length}} words unlocked · {{introduced}} introduced</p>
+  <p>New words prioritize {{target}} difficulty, using learned kanji and assumed foundations. Due reviews come first. Practice whole-word readings and short contexts.</p>
+  <nav aria-label="Practice type">
+    <button (click)="setMode('vocabulary')" [attr.aria-pressed]="mode==='vocabulary'">Vocabulary</button>
+    <button (click)="setMode('mixed')" [attr.aria-pressed]="mode==='mixed'">Mixed practice</button>
+  </nav>
+  <p *ngIf="warning" role="alert">{{warning}}</p><p *ngIf="message" role="status">{{message}}</p>
+  <ng-container>
+    <p *ngIf="mode==='mixed'">Alternate due kanji recall with vocabulary readings and meanings. Up to 20 exercises, with overdue words first.</p>
+    <button class="primary" *ngIf="!exercise" (click)="start()">{{mode==='mixed' ? 'Start mixed session' : 'Start vocabulary session'}}</button>
+    <article *ngIf="exercise as e" aria-live="polite">
+      <p>{{queue.length}} remaining · {{e.kind==='reading' ? 'Read this word in kana' : 'Recall the meaning aloud'}}</p>
+      <h3 lang="ja">{{prompt}}</h3>
+      <form *ngIf="e.kind==='reading' && !checked" (ngSubmit)="check()">
+        <label>Your reading <input name="reading" lang="ja" [(ngModel)]="answer" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <button type="submit" [disabled]="!answer.trim()">Check reading</button>
+        <button type="button" (click)="answer=''; check()">I don’t know</button>
+      </form>
+      <button *ngIf="e.kind!=='reading' && !checked" (click)="check()">Reveal answer</button>
+      <div *ngIf="checked">
+        <p *ngIf="e.kind==='reading'">{{correct ? 'Correct reading!' : 'Study the reading, then choose Again.'}}</p>
+        <p class="solution" lang="ja">{{solution}}</p>
+        <div *ngIf="e.kind==='reading' && e.word.context as context"><p lang="ja">{{context[0]}}</p><p>{{context[1]}}</p></div>
+        <p *ngIf="e.kind!=='reading'">Choose Again if you needed the answer.</p>
+        <div class="ratings"><button (click)="rate('again')">Again · 10 min</button><button [disabled]="e.kind==='reading' && !correct" (click)="rate('hard')">Hard · 1 day</button><button [disabled]="e.kind==='reading' && !correct" (click)="rate('good')">Good</button></div>
+      </div>
+      <button class="exit" (click)="queue=[]">End session</button>
+    </article>
+    <p *ngIf="!available.length">Learn kanji on the path to unlock vocabulary. Some words require kanji from several levels.</p>
+  </ng-container>
+  <footer><p>Vocabulary reviews are saved with your database profile and cached in this browser.</p><button (click)="export()">Export vocabulary backup</button><label>Restore vocabulary backup <input type="file" accept="application/json" (change)="restore($event)"></label></footer>
+</section>
