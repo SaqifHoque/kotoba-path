@@ -33,7 +33,7 @@ public class StudyProfileController {
             : Collections.emptyList();
         if (rows.isEmpty()) {
             id = UUID.randomUUID().toString();
-            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"profile\":null,\"kanji\":{},\"vocabulary\":{}}");
+            jdbc.update("insert into study_profile(id,revision,state_json) values(?,0,?)", id, "{\"profile\":null,\"kanji\":{},\"vocabulary\":{},\"forge\":{\"version\":1,\"records\":{},\"unlockedLevel\":1,\"dailyLimit\":10,\"settingsAt\":0}}");
             response.addHeader("Set-Cookie", ResponseCookie.from("kotoba_profile", id)
                 .httpOnly(true).secure(request.isSecure()).sameSite("Strict")
                 .path("/api/study-profile").maxAge(31536000).build().toString());
@@ -42,6 +42,7 @@ public class StudyProfileController {
         ObjectNode state = (ObjectNode) json.readTree((String) rows.get(0).get("state_json"));
         if (!state.has("profile")) state.putNull("profile");
         if (!state.has("vocabulary")) state.set("vocabulary", json.createObjectNode());
+        if (!state.has("forge")) state.set("forge", emptyForge());
         state.put("revision", ((Number) rows.get(0).get("revision")).longValue());
         return state;
     }
@@ -71,6 +72,13 @@ public class StudyProfileController {
             JsonNode savedVocabulary = previous.isEmpty() ? null : json.readTree(previous.get(0)).get("vocabulary");
             state.set("vocabulary", savedVocabulary == null ? json.createObjectNode() : savedVocabulary);
         }
+        if (body.has("forge")) state.set("forge", body.get("forge"));
+        else {
+            // Older clients must not erase this independent module's progress.
+            List<String> previous = jdbc.query("select state_json from study_profile where id=?", (rs, row) -> rs.getString(1), id);
+            JsonNode savedForge = previous.isEmpty() ? null : json.readTree(previous.get(0)).get("forge");
+            state.set("forge", savedForge == null ? emptyForge() : savedForge);
+        }
         int changed = jdbc.update("update study_profile set state_json=?,revision=revision+1 where id=? and revision=?",
             state.toString(), id, revision);
         if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Reload and merge before saving.");
@@ -86,7 +94,8 @@ public class StudyProfileController {
     }
 
     private void validate(JsonNode body) {
-        require(body.isObject() && body.toString().length() <= 2000000);
+        require(body.isObject() && body.toString().length() <= 8000000);
+        if (body.has("forge")) validateForge(body.get("forge"));
         JsonNode revision = body.path("revision");
         require(revision.isIntegralNumber() && revision.canConvertToLong()
             && revision.asLong() >= 0 && revision.asLong() < 9007199254740991L);
@@ -128,5 +137,40 @@ public class StudyProfileController {
                 require(due.isIntegralNumber() && due.canConvertToLong() && due.asLong() >= 0 && due.asLong() <= 8640000000000000L);
             });
         }
+    }
+
+    private ObjectNode emptyForge() {
+        ObjectNode forge = json.createObjectNode();
+        forge.put("version", 1); forge.set("records", json.createObjectNode());
+        forge.put("unlockedLevel", 1); forge.put("dailyLimit", 10); forge.put("settingsAt", 0);
+        return forge;
+    }
+
+    private void validateForge(JsonNode forge) {
+        require(forge.isObject() && forge.path("version").asInt() == 1);
+        require(forge.path("unlockedLevel").isInt() && forge.path("unlockedLevel").asInt() >= 1 && forge.path("unlockedLevel").asInt() <= 103);
+        require(forge.path("dailyLimit").isInt() && Arrays.asList(5, 10, 20).contains(forge.path("dailyLimit").asInt()));
+        validTime(forge.path("settingsAt"));
+        JsonNode records = forge.path("records"); require(records.isObject() && records.size() <= 6000);
+        records.fields().forEachRemaining(entry -> {
+            require(entry.getKey().matches("[rkv]:.{1,198}"));
+            JsonNode record = entry.getValue(); require(record.isObject());
+            validTime(record.path("lessonAt")); validTime(record.path("noteAt"));
+            require(record.path("note").isTextual() && record.path("note").asText().length() <= 1000);
+            validTrack(record.path("meaning"));
+            if (!entry.getKey().startsWith("r:")) validTrack(record.path("reading"));
+        });
+    }
+
+    private void validTime(JsonNode value) {
+        require(value.isIntegralNumber() && value.canConvertToLong() && value.asLong() >= 0 && value.asLong() <= 8640000000000000L);
+    }
+
+    private void validTrack(JsonNode track) {
+        require(track.isObject() && track.path("stage").isInt() && track.path("stage").asInt() >= 1 && track.path("stage").asInt() <= 9);
+        for (String key : Arrays.asList("reviews", "correct", "misses")) require(track.path(key).isInt() && track.path(key).asInt() >= 0);
+        require(track.path("correct").asLong() + track.path("misses").asLong() == track.path("reviews").asLong());
+        validTime(track.path("updatedAt"));
+        if (track.path("stage").asInt() == 9) require(track.path("due").isNull()); else validTime(track.path("due"));
     }
 }

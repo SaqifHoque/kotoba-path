@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,11 +28,18 @@ export function parseCsv(text) {
 export function generateCurriculum() {
 const rows = parseCsv(readFileSync(new URL('../../datasets/kanji-alive/ka_data.csv', import.meta.url), 'utf8'));
 const clean = value => value.trim().toLowerCase() === 'n/a' ? '' : value.trim();
+const radicals = parseCsv(readFileSync(new URL('../../datasets/kanji-alive/japanese-radicals.csv', import.meta.url), 'utf8'));
+const radicalImages = Object.fromEntries(radicals.map(radical => {
+  const filename = [radical['R-Filename'], radical['Reading-R'], radical['Anim-Filename']]
+    .map(value => clean(value) + '.svg')
+    .find(file => existsSync(new URL('../src/assets/radicals/' + file, import.meta.url)));
+  return [radical.Radical, filename];
+}));
 // 々 repeats the previous kanji; it has no independent reading to recall.
 const cards = rows.filter(r => r.kanji !== '々').map(r => ({
   character: r.kanji, meaning: r.kmeaning, onyomi: clean(r.onyomi_ja), kunyomi: clean(r.kunyomi_ja),
   grade: Number(r.kgrade) || 99, strokes: Number(r.kstroke), radical: r.radical,
-  radicalMeaning: r.rad_meaning, examples: JSON.parse(r.examples).slice(0, 3)
+  radicalMeaning: r.rad_meaning, examples: JSON.parse(r.examples).slice(0, 3), radicalImage: radicalImages[r.radical]
 }));
 if (new Set(cards.map(c => c.character)).size !== cards.length) throw new Error('Duplicate kanji');
 // Grade, then stroke count and code point: deterministic, beginning with simpler school kanji.

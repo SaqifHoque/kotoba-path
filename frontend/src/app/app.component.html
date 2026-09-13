@@ -2,12 +2,14 @@
   <aside [class.open]="menuOpen">
     <a class="brand" href="#"><span>言</span><div><strong>Kotoba Path</strong><small>日本語を一歩ずつ</small></div></a>
     <div class="primary-nav"><button [class.active]="view==='learn'" (click)="view='learn';menuOpen=false"><b>道</b><span>Learning & review</span></button><button [class.active]="view==='catalog'" (click)="view='catalog';menuOpen=false"><b>典</b><span>Encyclopedia</span></button></div>
+    <div class="primary-nav forge-nav"><button [class.active]="view==='forge'" (click)="view='forge';menuOpen=false"><b>鍛</b><span>Kanji Forge</span></button></div>
     <div class="sidebar-foot"><span>今日の言葉</span><strong>一歩一歩</strong><small>One step at a time</small></div>
   </aside>
   <main>
-    <header class="topbar"><button class="menu" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{view==='learn'?'Your kanji journey':'Visual reference'}}</span><b>{{view==='learn'?'Learn · recall · repeat':'Reading encyclopedia'}}</b></div></header>
+    <header class="topbar"><button class="menu" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{view==='forge'?'Kanji Forge':view==='learn'?'Your kanji journey':'Visual reference'}}</span><b>{{view==='forge'?'Learn · temper · master':view==='learn'?'Learn · recall · repeat':'Reading encyclopedia'}}</b></div></header>
     <app-kanji-path [hidden]="view!=='learn'"></app-kanji-path>
     <app-encyclopedia *ngIf="view==='catalog'"></app-encyclopedia>
+    <app-forge *ngIf="view==='forge'"></app-forge>
     <p class="footer-note">ことばの道 · One step at a time</p>
   </main>
 </div>

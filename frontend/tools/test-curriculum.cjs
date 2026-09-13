@@ -14,6 +14,8 @@ const cards = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/assets/kan
   assert.deepEqual(new Set(cards.map(c => c.character)), new Set(source.filter(r => r.kanji !== '々').map(r => r.kanji)));
   assert.equal(cards.length, 1234);
   assert(cards.every(c => c.meaning && c.examples.length && (c.onyomi || c.kunyomi)));
+  assert(cards.some(c => c.radicalImage));
+  assert(cards.filter(c => c.radicalImage).every(c => fs.existsSync(path.join(__dirname, '../src/assets/radicals', c.radicalImage))));
   const levels = buildLevels(cards);
   assert.equal(levels.length, 103);
   assert.equal(levels.filter(l => l.cards.length === 12).length, 101);
