@@ -92,9 +92,15 @@ Both images use multi-stage builds. Only the Spring Boot JAR and the compiled An
 ## Verify
 
 ```bash
-cd backend && mvn test
-cd frontend && npm run build
+mvn --file backend/pom.xml test
+npm --prefix frontend run test:engines
+npm --prefix frontend run build
 ```
+
+GitHub Actions runs both verification paths for every pull request and every
+push to `main`. The workflow installs dependencies from the committed lockfile,
+validates the generated curriculum, exercises every learning engine, and builds
+the production frontend bundle.
 
 Lesson progress is intentionally in-memory and hidden behind `ProgressRepository`. Encyclopedia content uses normalized PostgreSQL tables managed by Flyway and a repository port, keeping data import, persistence, application logic, and HTTP transport separate.
 
