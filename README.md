@@ -13,6 +13,7 @@ Progress is sequential: the API unlocks the next lesson after the current one is
 
 ## Features
 
+- optional username/password accounts with recovery keys and cross-device progress; see [learning accounts](docs/accounts.md);
 - gradual radical → kanji → vocabulary → sentence → passage learning path;
 - 1,235 frequency-ranked kanji and 321 unique radicals;
 - 800 visual components and 8,529 vocabulary entries;

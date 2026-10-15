@@ -24,7 +24,7 @@ The trouble-item workshop selects tracks with at least three mistakes and less t
 
 Forge is stored as a separate `forge` object in the existing database profile JSON and cached under `kotoba-forge-v1`. It includes independently versioned review tracks, unlocked level, settings, notes, and timestamps. Conflict merges preserve the more-reviewed track and newer notes/settings. Review counts are snapshots, not a full review-event log.
 
-Older clients that omit Forge in a profile update cannot erase saved Forge data. Existing profile rows need no schema change. JSON backup import validates records and merges without resetting other modes. Database profiles still use the existing browser cookie; account-based cross-device identity is not provided.
+Older clients that omit Forge in a profile update cannot erase saved Forge data. Existing profile rows need no schema change. JSON backup import validates records and merges without resetting other modes. Guest profiles use the existing browser cookie. Optional [learning accounts](accounts.md) preserve Forge progress across devices.
 
 ## Sources and scope
 
