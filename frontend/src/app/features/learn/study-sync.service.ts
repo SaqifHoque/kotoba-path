@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AccountService } from '../account/account.service';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, timeout } from 'rxjs';
 import { KanjiCard, ReviewProgress, parseProgress } from './kanji-engine';
@@ -29,7 +30,7 @@ export class StudySyncService {
   private connected = false;
   private version = 0;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, private readonly auth: AccountService) {}
 
   initialize(cards: KanjiCard[]): void {
     if (this.initialized) return;
@@ -38,10 +39,10 @@ export class StudySyncService {
     this.words = buildVocabulary(cards).map(word => ({character: word.id}));
     this.forgeSubjects = buildForge(cards);
     try {
-      this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.profileKey)),
-        kanji: parseProgress(localStorage.getItem(this.key), cards),
-        vocabulary: parseProgress(localStorage.getItem(this.vocabularyKey), this.words),
-        forge: parseForge(JSON.parse(localStorage.getItem(this.forgeKey) || 'null'), this.forgeSubjects)});
+      this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.auth.cacheKey(this.profileKey))),
+        kanji: parseProgress(localStorage.getItem(this.auth.cacheKey(this.key)), cards),
+        vocabulary: parseProgress(localStorage.getItem(this.auth.cacheKey(this.vocabularyKey)), this.words),
+        forge: parseForge(JSON.parse(localStorage.getItem(this.auth.cacheKey(this.forgeKey)) || 'null'), this.forgeSubjects)});
     }
     catch {
       this.canCache = false;
@@ -93,6 +94,12 @@ export class StudySyncService {
     this.saving = true;
     this.status = 'Connecting to database…';
     try {
+      if (!this.auth.available) {
+        const previous = this.auth.account.id;
+        await this.auth.initialize();
+        if (!this.auth.available) throw new Error('Account unavailable');
+        if (previous !== this.auth.account.id) { window.location.reload(); return; }
+      }
       this.merge(await firstValueFrom(this.http.get<StudyState>('/api/study-profile').pipe(timeout(10000))));
       this.connected = true;
       this.dirty = true;
@@ -138,12 +145,31 @@ export class StudySyncService {
   private cache(): void {
     if (!this.canCache) return;
     try {
-      localStorage.setItem(this.key, JSON.stringify({version: 1, cards: this.state.value.kanji}));
-      localStorage.setItem(this.profileKey, JSON.stringify(this.state.value.profile));
-      localStorage.setItem(this.vocabularyKey, JSON.stringify({version: 1, cards: this.state.value.vocabulary}));
-      localStorage.setItem(this.forgeKey, JSON.stringify(this.state.value.forge));
+      localStorage.setItem(this.auth.cacheKey(this.key), JSON.stringify({version: 1, cards: this.state.value.kanji}));
+      localStorage.setItem(this.auth.cacheKey(this.profileKey), JSON.stringify(this.state.value.profile));
+      localStorage.setItem(this.auth.cacheKey(this.vocabularyKey), JSON.stringify({version: 1, cards: this.state.value.vocabulary}));
+      localStorage.setItem(this.auth.cacheKey(this.forgeKey), JSON.stringify(this.state.value.forge));
     }
     catch { this.warning = 'Browser backup could not be saved. Export progress or wait for a successful database save.'; }
+  }
+
+  async prepareAccountChange(requireSaved = false): Promise<void> {
+    if (this.auth.changing) throw new Error('An account change is already in progress.');
+    this.auth.changing = true;
+    const deadline = Date.now() + 12000;
+    while (this.saving && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+    if (this.saving) throw new Error('A save is still running. Wait and retry.');
+    if (requireSaved) {
+      if (!this.connected || !this.ready) throw new Error('Connect and save your learning path before creating an account.');
+      await this.flush();
+      if (this.dirty || !this.connected) throw new Error('Save your current progress before creating an account.');
+    }
+    this.connected = false;
+  }
+
+  cancelAccountChange(): void {
+    this.auth.changing = false;
+    void this.retry();
   }
 
   private async flush(): Promise<void> {

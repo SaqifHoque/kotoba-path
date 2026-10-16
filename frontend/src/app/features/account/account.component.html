@@ -1,0 +1,31 @@
+<button type="button" class="account-toggle" (click)="open=!open" [attr.aria-expanded]="open" aria-controls="account-panel">{{auth.account.username || 'Save across devices'}}</button>
+<section id="account-panel" *ngIf="open" aria-labelledby="account-heading">
+  <h2 id="account-heading">Your learning account</h2>
+  <ng-container *ngIf="savedKey; else accountForm">
+    <p>Save this recovery key in a safe place. It can reset your password and is shown only once.</p>
+    <label for="new-recovery-key">Recovery key</label><textarea id="new-recovery-key" readonly [value]="savedKey" rows="3" spellcheck="false"></textarea>
+    <button type="button" (click)="finish()">I saved my key — continue</button>
+  </ng-container>
+  <ng-template #accountForm>
+    <ng-container *ngIf="auth.account.username; else guestForm">
+      <p>Signed in as <strong>{{auth.account.username}}</strong>. Your lessons, vocabulary, and Forge progress belong to this account.</p>
+      <p>Signing out returns to guest study in this browser. Your account progress stays saved.</p>
+      <button type="button" [disabled]="busy" (click)="submit('logout')">Sign out</button>
+    </ng-container>
+    <ng-template #guestForm>
+      <nav aria-label="Account options"><button type="button" [disabled]="busy" (click)="mode='login'">Sign in</button><button type="button" [disabled]="busy" (click)="mode='register'">Create account</button><button type="button" [disabled]="busy" (click)="mode='recover'">Recover account</button></nav>
+      <p *ngIf="mode==='register'">Keep your current browser progress and continue on another device. No email address is needed.</p>
+      <p *ngIf="mode==='login'">Sign in to load your account’s progress. Guest progress stays separate in this browser.</p>
+      <p *ngIf="mode==='recover'">Use your saved recovery key to set a new password. This signs out your other devices and replaces the key.</p>
+      <form (ngSubmit)="submit()">
+        <label for="account-username">Username</label><input id="account-username" name="username" [(ngModel)]="username" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_]{3,40}" autocomplete="username" autocapitalize="none" spellcheck="false" [disabled]="busy">
+        <small>3–40 letters, numbers, or underscores. Usernames ignore capitalization.</small>
+        <label *ngIf="mode==='recover'" for="account-recovery">Saved recovery key</label><input *ngIf="mode==='recover'" id="account-recovery" name="recovery" [(ngModel)]="recoveryKey" required minlength="43" maxlength="43" autocomplete="off" spellcheck="false" [disabled]="busy">
+        <label for="account-password">{{mode==='recover'?'New password':'Password'}}</label><input id="account-password" name="password" type="password" [(ngModel)]="password" required [minlength]="mode==='login'?1:15" maxlength="128" [attr.autocomplete]="mode==='login'?'current-password':'new-password'" [disabled]="busy">
+        <small *ngIf="mode!=='login'">Use 15–128 characters. Save the recovery key shown after continuing.</small>
+        <button type="submit" [disabled]="busy">{{busy?'Saving…':mode==='register'?'Create account & keep progress':mode==='recover'?'Reset password':'Sign in'}}</button>
+      </form>
+    </ng-template>
+  </ng-template>
+  <p *ngIf="error" role="alert">{{error}}</p>
+</section>
