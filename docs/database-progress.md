@@ -2,7 +2,7 @@
 
 The learning path now saves kanji review snapshots through `GET` and `PUT /api/study-profile`.
 
-Each browser receives a random profile identifier in an HttpOnly, SameSite=Strict cookie. It is scoped to the study-profile API, never appears in a URL, and lasts one year. This is browser-profile persistence, not login or account-based cross-device sync. Export a backup before moving browsers or clearing cookies.
+Each browser receives a random profile identifier in an HttpOnly, SameSite=Strict cookie. It is scoped to the study-profile API, never appears in a URL, and lasts one year. Guest study uses browser-profile persistence. Optional [learning accounts](accounts.md) claim the guest profile and support cross-device sign-in. Export a backup before moving browsers or clearing cookies if you continue as a guest.
 
 The `study_profile` table stores a revision and validated JSON review state. A write includes the revision that was read. A stale write receives `409 Conflict`; the frontend fetches the newest snapshot, merges card states, and retries up to twice. The merge keeps the higher attempt count; when attempts tie, it keeps the later due date. This handles independent reviews and avoids adding attempts when a backup is restored repeatedly.
 
