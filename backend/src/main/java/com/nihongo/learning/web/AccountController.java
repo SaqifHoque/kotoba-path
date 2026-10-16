@@ -30,7 +30,7 @@ public class AccountController {
         return result;
     }
 
-    public static class Credentials { public String username; public String password; }
+    public static class Credentials { public String username; public String password; public String recoveryKey; }
 
     @PostMapping(path="/study-profile/register", consumes="application/json")
     public Map<String, String> register(@RequestBody Credentials body, HttpServletRequest request, HttpServletResponse response) {
@@ -41,6 +41,10 @@ public class AccountController {
     @PostMapping(path="/account/login", consumes="application/json")
     public Map<String, String> login(@RequestBody Credentials body, HttpServletRequest request, HttpServletResponse response) {
         protect(request, response, true); return accounts.login(body.username, body.password, request, response);
+    }
+    @PostMapping(path="/account/recover", consumes="application/json")
+    public Map<String, String> recover(@RequestBody Credentials body, HttpServletRequest request, HttpServletResponse response) {
+        protect(request, response, true); return accounts.recover(body.username, body.recoveryKey, body.password, request, response);
     }
     @PostMapping("/account/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {

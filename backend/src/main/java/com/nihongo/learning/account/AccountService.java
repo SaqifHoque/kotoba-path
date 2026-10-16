@@ -77,6 +77,20 @@ public class AccountService {
         return result(id, username, null);
     }
 
+    @Transactional
+    public Map<String, String> recover(String username, String recovery, String password, HttpServletRequest request, HttpServletResponse response) {
+        username = username(username); validatePassword(password);
+        if (recovery == null || !recovery.matches("[A-Za-z0-9_-]{43}")) throw invalidCredentials();
+        List<Map<String, Object>> rows = jdbc.queryForList("select id,recovery_hash from learner_account where username=? for update", username);
+        if (rows.isEmpty() || !java.security.MessageDigest.isEqual(AccountSecrets.digest(recovery).getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                ((String) rows.get(0).get("recovery_hash")).getBytes(java.nio.charset.StandardCharsets.UTF_8))) throw invalidCredentials();
+        String id = (String) rows.get(0).get("id"), replacement = AccountSecrets.token();
+        jdbc.update("update learner_account set password_hash=?,recovery_hash=? where id=?", AccountSecrets.hashPassword(password), AccountSecrets.digest(replacement), id);
+        jdbc.update("delete from account_session where account_id=?", id);
+        startSession(id, request, response); clearGuest(response, request);
+        return result(id, username, replacement);
+    }
+
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         String token = cookie(request, "kotoba_session");
         if (token != null) jdbc.update("delete from account_session where token_hash=?", AccountSecrets.digest(token));

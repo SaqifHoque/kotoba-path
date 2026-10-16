@@ -77,6 +77,21 @@ class AccountControllerTest {
         assertFalse(jdbc.queryForObject("select recovery_hash from learner_account where id=?", String.class, owner).equals(account.path("recoveryKey").asText()));
     }
 
+    @Test void recoveryRotatesKeyAndPasswordAndRevokesEveryOldSession() throws Exception {
+        MvcResult registered = register("recovery_user", guest());
+        JsonNode account = json.readTree(registered.getResponse().getContentAsString());
+        Cookie old = registered.getResponse().getCookie("kotoba_session");
+        Cookie second = mvc.perform(auth("/api/account/login", "recovery_user", PASSWORD)).andReturn().getResponse().getCookie("kotoba_session");
+        ObjectNode request = json.createObjectNode().put("username", "recovery_user").put("password", "replacement password 456").put("recoveryKey", account.path("recoveryKey").asText());
+        MvcResult recovered = mvc.perform(post("/api/account/recover").header("X-Kotoba-Request", "1").contentType("application/json").content(request.toString())).andExpect(status().isOk()).andReturn();
+        assertNotEquals(account.path("recoveryKey").asText(), json.readTree(recovered.getResponse().getContentAsString()).path("recoveryKey").asText());
+        mvc.perform(get("/api/study-profile").cookie(old)).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/study-profile").cookie(second)).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/account/recover").header("X-Kotoba-Request", "1").contentType("application/json").content(request.toString())).andExpect(status().isUnauthorized());
+        mvc.perform(auth("/api/account/login", "recovery_user", PASSWORD)).andExpect(status().isUnauthorized());
+        mvc.perform(auth("/api/account/login", "recovery_user", "replacement password 456")).andExpect(status().isOk());
+    }
+
     @Test void rejectsStaleTabsCrossSiteRequestsAndExpiredSessions() throws Exception {
         MvcResult registered = register("tab_user", guest());
         Cookie session = registered.getResponse().getCookie("kotoba_session");
