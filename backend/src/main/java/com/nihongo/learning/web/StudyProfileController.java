@@ -18,16 +18,19 @@ import java.util.*;
 public class StudyProfileController {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
+    private final com.nihongo.learning.account.AccountService accounts;
 
-    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json) {
+    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json, com.nihongo.learning.account.AccountService accounts) {
         this.jdbc = jdbc;
         this.json = json;
+        this.accounts = accounts;
     }
 
     @GetMapping
     public JsonNode get(@CookieValue(value="kotoba_profile", required=false) String id,
                         HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.setHeader("Cache-Control", "no-store");
+        id = accounts.studyProfile(request, id);
         List<Map<String,Object>> rows = validId(id)
             ? jdbc.queryForList("select revision,state_json from study_profile where id=?", id)
             : Collections.emptyList();
@@ -47,13 +50,18 @@ public class StudyProfileController {
         return state;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     @PutMapping(consumes="application/json")
     public Map<String,Long> save(@CookieValue(value="kotoba_profile", required=false) String id,
                                 @RequestBody JsonNode body, HttpServletRequest request) throws Exception {
+        id = accounts.studyProfile(request, id);
         if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         if ("cross-site".equals(request.getHeader("Sec-Fetch-Site"))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+        jdbc.queryForList("select id from study_profile where id=? for update", id);
+        // Recheck after the row lock: registration may have claimed a guest while this save waited.
+        if (!id.equals(accounts.studyProfile(request, id))) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         validate(body);
         long revision = body.path("revision").longValue();
         ObjectNode state = json.createObjectNode();
