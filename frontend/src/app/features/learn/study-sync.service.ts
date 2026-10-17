@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AccountService } from '../account/account.service';
+import { ReviewAttempt, ReviewOutbox } from './review-history';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, timeout } from 'rxjs';
 import { KanjiCard, ReviewProgress, parseProgress } from './kanji-engine';
@@ -29,6 +30,8 @@ export class StudySyncService {
   private dirty = false;
   private connected = false;
   private version = 0;
+  private outbox?: ReviewOutbox;
+  get pendingHistory(): number { return this.outbox?.batch(Number.MAX_SAFE_INTEGER).length ?? 0; }
 
   constructor(private readonly http: HttpClient, private readonly auth: AccountService) {}
 
@@ -38,6 +41,10 @@ export class StudySyncService {
     this.cards = cards;
     this.words = buildVocabulary(cards).map(word => ({character: word.id}));
     this.forgeSubjects = buildForge(cards);
+    let storage: Storage | null = null;
+    try { storage = localStorage; } catch { /* Keep unsynced attempts in memory if storage is blocked. */ }
+    this.outbox = new ReviewOutbox(storage, this.auth.cacheKey('kotoba-review-event-v1:'));
+    this.outbox.batch();
     try {
       this.state.next({revision: 0, profile: this.parseProfile(localStorage.getItem(this.auth.cacheKey(this.profileKey))),
         kanji: parseProgress(localStorage.getItem(this.auth.cacheKey(this.key)), cards),
@@ -51,7 +58,8 @@ export class StudySyncService {
     void this.retry();
   }
 
-  update(kanji: ReviewProgress): void {
+  update(kanji: ReviewProgress, attempt?: ReviewAttempt): void {
+    this.capture(attempt);
     this.version++;
     this.state.next({...this.state.value, kanji});
     this.dirty = true;
@@ -67,7 +75,8 @@ export class StudySyncService {
     void this.flush();
   }
 
-  updateVocabulary(vocabulary: ReviewProgress): void {
+  updateVocabulary(vocabulary: ReviewProgress, attempt?: ReviewAttempt): void {
+    this.capture(attempt);
     this.version++;
     this.state.next({...this.state.value, vocabulary});
     this.dirty = true;
@@ -75,12 +84,20 @@ export class StudySyncService {
     void this.flush();
   }
 
-  updateForge(forge: ForgeState): void {
+  updateForge(forge: ForgeState, attempt?: ReviewAttempt): void {
+    this.capture(attempt);
     this.version++;
     this.state.next({...this.state.value, forge});
     this.dirty = true;
     this.cache();
     void this.flush();
+  }
+
+  private capture(attempt?: ReviewAttempt): void {
+    if (!attempt) return;
+    if (!this.outbox) throw new Error('Study history has not initialized');
+    this.outbox.add({...attempt, id: crypto.randomUUID()});
+    if (this.outbox.warning) this.warning = this.outbox.warning;
   }
 
   restore(kanji: ReviewProgress): void {
@@ -143,6 +160,7 @@ export class StudySyncService {
   }
 
   private cache(): void {
+    if (this.outbox?.warning) this.warning = this.outbox.warning;
     if (!this.canCache) return;
     try {
       localStorage.setItem(this.auth.cacheKey(this.key), JSON.stringify({version: 1, cards: this.state.value.kanji}));
@@ -177,13 +195,17 @@ export class StudySyncService {
     this.saving = true;
     let conflicts = 0;
     try {
-      while (this.dirty) {
+      while (this.dirty || this.pendingHistory) {
+        const events = this.outbox?.batch() ?? [];
         this.dirty = false;
         const version = this.version;
         this.status = 'Saving to database…';
         try {
-          const response = await firstValueFrom(this.http.put<{revision: number}>('/api/study-profile', this.state.value).pipe(timeout(10000)));
+          const response = await firstValueFrom(this.http.put<{revision: number; acknowledgedEvents?: string[]}>('/api/study-profile', {...this.state.value, reviewEvents: events}).pipe(timeout(10000)));
           this.state.next({...this.state.value, revision: response.revision});
+          const acknowledged = response.acknowledgedEvents ?? [];
+          if (events.some(event => !acknowledged.includes(event.id))) throw new Error('History save was not acknowledged');
+          this.outbox?.acknowledge(events.map(event => event.id));
           if (version !== this.version) this.dirty = true;
         } catch (error: unknown) {
           if ((error as {status?: number}).status === 409 && conflicts++ < 2) {

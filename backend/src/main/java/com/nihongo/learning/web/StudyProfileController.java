@@ -18,12 +18,14 @@ import java.util.*;
 public class StudyProfileController {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
+    private final com.nihongo.learning.application.ReviewHistory history;
     private final com.nihongo.learning.account.AccountService accounts;
 
-    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json, com.nihongo.learning.account.AccountService accounts) {
+    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json, com.nihongo.learning.account.AccountService accounts, com.nihongo.learning.application.ReviewHistory history) {
         this.jdbc = jdbc;
         this.json = json;
         this.accounts = accounts;
+        this.history = history;
     }
 
     @GetMapping
@@ -52,7 +54,7 @@ public class StudyProfileController {
 
     @org.springframework.transaction.annotation.Transactional
     @PutMapping(consumes="application/json")
-    public Map<String,Long> save(@CookieValue(value="kotoba_profile", required=false) String id,
+    public Map<String,Object> save(@CookieValue(value="kotoba_profile", required=false) String id,
                                 @RequestBody JsonNode body, HttpServletRequest request) throws Exception {
         id = accounts.studyProfile(request, id);
         if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -90,7 +92,20 @@ public class StudyProfileController {
         int changed = jdbc.update("update study_profile set state_json=?,revision=revision+1 where id=? and revision=?",
             state.toString(), id, revision);
         if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Reload and merge before saving.");
-        return Collections.singletonMap("revision", revision + 1);
+        List<String> acknowledged = history.append(id, body.get("reviewEvents"));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("revision", revision + 1); result.put("acknowledgedEvents", acknowledged);
+        return result;
+    }
+
+    @GetMapping("/reviews")
+    public Map<String, Object> reviews(@CookieValue(value="kotoba_profile", required=false) String id,
+            @RequestParam(required=false) Long before, @RequestParam(defaultValue="50") int limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setHeader("Cache-Control", "no-store");
+        id = accounts.studyProfile(request, id);
+        if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Open your learning path first.");
+        return history.page(id, before, limit);
     }
 
     private boolean validId(String id) {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { StudySyncService } from './study-sync.service';
+import { recallAttempt, ReviewAttempt } from './review-history';
 import { PracticeStudioComponent } from './practice-studio.component';
 import { BANDS, Band, Proficiency, assumedKanji, estimatedBand, placementSuggestion, recommendedCards, targetBand } from './proficiency';
 import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, parseProgress, Rating, ReviewProgress, schedule, unlocked } from './kanji-engine';
@@ -101,8 +102,9 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
   changeMode(mode: 'path' | 'review' | 'studio'): void { this.mode = mode; this.session = false; this.queue = []; this.message = ''; }
   rateMixed(event: {card: KanjiCard; rating: Rating}): void {
     this.now = Date.now();
-    this.progress = {...this.progress, [event.card.character]: schedule(this.progress[event.card.character], event.rating, this.now)};
-    this.save();
+    const previous = this.progress[event.card.character];
+    this.progress = {...this.progress, [event.card.character]: schedule(previous, event.rating, this.now)};
+    this.save(recallAttempt('kanji', event.card.character, event.card.character, 'both', event.rating, previous, this.now));
   }
   start(level: KanjiLevel): void {
     if (this.locked(level)) return;
@@ -122,8 +124,9 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
     if (!card || !this.revealed) return;
     this.now = Date.now();
     if (!this.practice) {
-      this.progress = {...this.progress, [card.character]: schedule(this.progress[card.character], rating, this.now)};
-      this.save();
+      const previous = this.progress[card.character];
+      this.progress = {...this.progress, [card.character]: schedule(previous, rating, this.now)};
+      this.save(recallAttempt('kanji', card.character, card.character, 'both', rating, previous, this.now));
     }
     this.queue = this.queue.slice(1);
     if (rating === 'again' && this.mode === 'path') this.queue.push(card);
@@ -140,8 +143,8 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
     const minutes = Math.round((next.due - this.now) / 60000);
     return minutes < 60 ? `${minutes} min` : `${Math.round(minutes / 1440)} day(s)`;
   }
-  private save(): void {
-    this.sync.update(this.progress);
+  private save(attempt?: ReviewAttempt): void {
+    this.sync.update(this.progress, attempt);
   }
   exportProgress(): void {
     const url = URL.createObjectURL(new Blob([JSON.stringify({version: 1, cards: this.progress})], {type: 'application/json'}));

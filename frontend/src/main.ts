@@ -6,7 +6,7 @@ import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, { providers: [
   provideHttpClient(withInterceptors([(request, next) => {
-    if (request.url === '/api/study-profile') request = request.clone({setHeaders: {'X-Kotoba-Owner': inject(AccountService).account.id}});
+    if (request.url.split('?')[0] === '/api/study-profile' || request.url.startsWith('/api/study-profile/')) request = request.clone({setHeaders: {'X-Kotoba-Owner': inject(AccountService).account.id}});
     return next(request);
   }])),
   {provide: APP_INITIALIZER, multi: true, deps: [AccountService], useFactory: (account: AccountService) => () => account.initialize()}
