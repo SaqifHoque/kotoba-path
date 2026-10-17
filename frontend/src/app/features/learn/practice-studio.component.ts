@@ -6,6 +6,7 @@ import { KanjiCard, Rating, ReviewProgress, parseProgress, schedule } from './ka
 import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, readingMatches, wordQueue } from './practice-engine';
 import { Band, BANDS, estimatedBand } from './proficiency';
 import { StudySyncService } from './study-sync.service';
+import { recallAttempt, ReviewAttempt } from './review-history';
 
 @Component({selector: 'app-practice-studio', standalone: true, imports: [CommonModule, FormsModule],
   templateUrl: './practice-studio.component.html', styleUrls: ['./practice-studio.component.scss']})
@@ -65,13 +66,17 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
   rate(rating: Rating): void {
     const e=this.exercise; if(!e||!this.checked||(e.kind==='reading'&&!this.correct&&rating!=='again'))return;
     if(e.kind==='kanji')this.kanjiRated.emit({card:e.card,rating});
-    else {this.progress={...this.progress,[e.word.id]:schedule(this.progress[e.word.id],rating,Date.now())};this.save();}
+    else {
+      const previous = this.progress[e.word.id], now = Date.now();
+      this.progress={...this.progress,[e.word.id]:schedule(previous,rating,now)};
+      this.save(recallAttempt('vocabulary',e.word.id,e.word.text,e.kind,rating,previous,now));
+    }
     this.queue=this.queue.slice(1);this.resetAnswer();
     if(!this.queue.length)this.message='Session complete. Missed items return in 10 minutes; Hard tomorrow; Good follows your review schedule.';
   }
   private resetAnswer(): void {this.answer='';this.checked=false;this.correct=false;}
   private parse(raw: string|null): ReviewProgress {return parseProgress(raw,this.words.map(w=>({character:w.id})));}
-  private save(): void {this.sync.updateVocabulary(this.progress);}
+  private save(attempt?: ReviewAttempt): void {this.sync.updateVocabulary(this.progress, attempt);}
   export(): void {
     const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,cards:this.progress})],{type:'application/json'}));
     const a=document.createElement('a');a.href=url;a.download='kotoba-vocabulary-progress.json';a.click();

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { KanjiCard } from '../learn/kanji-engine';
+import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
 import { Subject, Skill, Question, ForgeState, STAGES, accepts, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, mergeForge, parseForge, review, skills, weakSubjects } from './forge-engine';
 
@@ -46,7 +47,7 @@ export class ForgeComponent implements OnInit, OnDestroy {
   countStage(from:number,to:number):number{return Object.values(this.state.records).filter(r=>mastery(r)>=from&&mastery(r)<=to).length;}
   subjectName(id:string):string{return this.subjects.find(s=>s.id===id)?.text||id;}
   blockedBy(s:Subject):string{return s.level>this.state.unlockedLevel?`Reach Forge level ${s.level}`:s.prerequisites.filter(id=>mastery(this.state.records[id])<5).map(id=>this.subjectName(id)+' → Guru').join(', ');}
-  private persist(next:ForgeState):void{this.state=next;this.sync.updateForge(next);}
+  private persist(next:ForgeState,attempt?:ReviewAttempt):void{this.state=next;this.sync.updateForge(next,attempt);}
   setLimit(value:string):void{const limit=Number(value);if([5,10,20].includes(limit))this.persist({...this.state,dailyLimit:limit,settingsAt:Date.now()});}
   startLessons():void{
     this.now=Date.now();const lessons=this.lessons.slice(0,Math.min(5,this.allowance));
@@ -65,11 +66,14 @@ export class ForgeComponent implements OnInit, OnDestroy {
     const q=this.current;if(!q||!this.checked)return;
     if(this.mode==='lesson'&&!this.correct){this.answer='';this.checked=false;return;}
     this.now=Date.now();
-    if(this.mode==='review')this.persist(review(q.subject,q.skill,this.correct,this.subjects,this.state,this.now));
+    if(this.mode==='review'){
+      const next=review(q.subject,q.skill,this.correct,this.subjects,this.state,this.now);
+      if(next!==this.state)this.persist(next,{mode:'forge',subject:q.subject.id,label:q.subject.text,skill:q.skill,kind:'scheduled',outcome:this.correct?'correct':'incorrect',occurredAt:this.now});
+    }
     const finishedSubject=this.queue[1]?.subject.id!==q.subject.id;
     if(this.mode==='lesson'&&finishedSubject){
       const next=learn(q.subject,this.subjects,this.state,this.now);
-      if(next!==this.state)this.persist({...next,records:{...next.records,[q.subject.id]:{...next.records[q.subject.id],note:this.note.trim().slice(0,1000),noteAt:this.now}}});
+      if(next!==this.state)this.persist({...next,records:{...next.records,[q.subject.id]:{...next.records[q.subject.id],note:this.note.trim().slice(0,1000),noteAt:this.now}}},{mode:'forge',subject:q.subject.id,label:q.subject.text,skill:q.subject.readings.length?'both':'meaning',kind:'learning',outcome:'correct',occurredAt:this.now});
       else this.message='The lesson limit or prerequisites changed. This item was not introduced; return later.';
     }
     this.queue=this.queue.slice(1);this.reset(finishedSubject);this.study=this.mode==='lesson'&&finishedSubject;
