@@ -1,0 +1,14 @@
+<header class="history-heading"><div><span>Your learning record</span><h1>Review history</h1><p>Completed learning and scheduled review attempts, saved across devices.</p></div><button type="button" [disabled]="loading" (click)="load()">Refresh history</button></header>
+<p class="history-status" role="status">{{sync.status}} <button type="button" (click)="sync.retry()">Retry sync</button></p>
+<p *ngIf="sync.pendingHistory" role="status">{{sync.pendingHistory}} attempt(s) waiting to sync. They appear here after the database confirms the save. Keep your browser backup until then.</p>
+<p *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
+<section *ngIf="loaded" class="history-stats" aria-label="Recorded recall"><div><strong>{{total | number}}</strong><span>Recorded attempts</span></div><div><strong>{{scheduled | number}}</strong><span>Scheduled attempts</span></div><div><strong>{{scheduled ? recall+'%' : '—'}}</strong><span>Scheduled recall</span></div></section>
+<p class="history-note">History starts with attempts recorded by this version. Earlier progress and restored backups do not create past attempts. Extra practice is excluded. Good, Hard, and Correct count as recalled; learning checks are excluded from scheduled recall. These are recorded answers, not a prediction of retention.</p>
+<p *ngIf="error" role="alert">{{error}} <button type="button" (click)="load()">Retry history</button></p>
+<p *ngIf="loading" role="status">Loading history…</p>
+<p *ngIf="loaded && !total && !loading" class="history-empty">Your next completed learning or review attempt starts this history.</p>
+<ol class="attempts" aria-label="Saved attempts">
+  <li *ngFor="let event of events; trackBy:track"><b lang="ja">{{event.label}}</b><div><strong>{{outcome(event.outcome)}}</strong><span>{{event.mode==='forge'?'Kanji Forge':event.mode==='kanji'?'Kanji path':'Vocabulary'}} · {{event.kind==='scheduled'?'Scheduled review':'Learning'}} · {{event.skill==='both'?'Meaning & reading':event.skill}}</span><time [attr.datetime]="event.occurredAt | date:'yyyy-MM-ddTHH:mm:ssZZZZZ'">{{event.occurredAt | date:'medium'}}</time></div></li>
+</ol>
+<p *ngIf="events.length" class="history-note">Newest received attempts first. Dates use this device’s timezone and the answering device’s clock; offline answers can arrive later.</p>
+<button *ngIf="cursor" type="button" [disabled]="loading" (click)="load(true)">Load older attempts</button>
