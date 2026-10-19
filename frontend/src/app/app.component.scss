@@ -3,3 +3,5 @@
 .primary-nav{display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-top:2rem}.primary-nav button{border:1px solid #45534e;background:transparent;color:#9ca7a1;padding:.6rem .3rem;display:grid;place-items:center;gap:.2rem;cursor:pointer}.primary-nav button.active{background:#35433e;color:white;border-color:#66736d}.primary-nav b{font:500 1.25rem var(--jp)}.primary-nav span{font-size:.56rem}.primary-nav+nav{margin-top:1.5rem}
 @media(prefers-reduced-motion:reduce){aside{transition:none}}
 .forge-nav{grid-template-columns:1fr;margin-top:.35rem}
+
+.home-nav{margin-top:1.5rem}.home-nav+.primary-nav{margin-top:.35rem}.catalog-state{padding:2rem 0}

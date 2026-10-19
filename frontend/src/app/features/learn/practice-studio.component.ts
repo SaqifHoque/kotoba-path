@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { KanjiCard, Rating, ReviewProgress, parseProgress, schedule } from './kanji-engine';
-import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, readingMatches, wordQueue } from './practice-engine';
-import { Band, BANDS, estimatedBand } from './proficiency';
+import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, readingMatches, targetedVocabulary, wordQueue } from './practice-engine';
+import { Band } from './proficiency';
 import { StudySyncService } from './study-sync.service';
 import { recallAttempt, ReviewAttempt } from './review-history';
 
@@ -15,34 +15,25 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
   @Input() kanji: ReviewProgress = {};
   @Input() assumed: string[] = [];
   @Input() target: Band = 'N5';
+  @Input() autoStart = false;
   @Output() kanjiRated = new EventEmitter<{card: KanjiCard; rating: Rating}>();
   words: Word[] = []; progress: ReviewProgress = {}; queue: Exercise[] = [];
   mode: 'vocabulary' | 'mixed' = 'vocabulary';
   answer = ''; checked = false; correct = false; message = ''; warning = '';
   private key = 'kotoba-vocabulary-reviews-v1';
   private subscription?: Subscription;
-  private ranks = new Map<string, number>();
   constructor(public sync: StudySyncService) {}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['cards']) {
       this.words = buildVocabulary(this.cards);
-      this.ranks = new Map(this.cards.map(c=>[c.character,BANDS.indexOf(estimatedBand(c))]));
     }
     if (changes['cards'] || changes['target']) {
-      const target = BANDS.indexOf(this.target);
-      this.words.sort((a,b)=>this.distance(a,target)-this.distance(b,target));
       this.queue = []; this.resetAnswer();
     }
     if (!this.subscription) this.subscription = this.sync.state.subscribe(state=>this.progress=state.vocabulary);
+    if (this.autoStart && this.sync.ready && (changes['cards'] || changes['autoStart'])) this.start();
   }
-  private distance(word: Word, target: number): number {
-    const rank = Math.max(0,...word.prerequisites.map(k=>this.ranks.get(k) ?? 4));
-    return rank >= target ? rank-target : 10+target-rank;
-  }
-  get studyWords(): Word[] {
-    const target = BANDS.indexOf(this.target);
-    return this.words.filter(w=>this.progress[w.id] || Math.max(0,...w.prerequisites.map(k=>this.ranks.get(k) ?? 4)) >= target);
-  }
+  get studyWords(): Word[] { return targetedVocabulary(this.cards,this.words,this.progress,this.target); }
   get available(): Word[] { return availableWords(this.studyWords,this.kanji,this.assumed); }
   get pending(): Word[] { return wordQueue(this.available,this.progress,Date.now()); }
   get introduced(): number { return this.words.filter(w=>this.progress[w.id]?.learned).length; }

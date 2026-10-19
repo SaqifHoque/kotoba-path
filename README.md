@@ -13,6 +13,7 @@ Progress is sequential: the API unlocks the next lesson after the current one is
 
 ## Features
 
+- a daily study home with guided setup, due-first suggestions, and direct session shortcuts; see [Today](docs/study-home.md);
 - optional username/password accounts with recovery keys and cross-device progress; see [learning accounts](docs/accounts.md);
 - append-only kanji, vocabulary, and Forge [review history](docs/review-history.md), with offline queuing and duplicate-safe sync;
 - gradual radical → kanji → vocabulary → sentence → passage learning path;
