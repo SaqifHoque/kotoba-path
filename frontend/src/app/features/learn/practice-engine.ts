@@ -1,11 +1,20 @@
 import { KanjiCard, ReviewProgress, dueCards } from './kanji-engine';
 import { WORD_CONTEXTS } from './word-contexts';
+import { Band, BANDS, estimatedBand } from './proficiency';
 
 export interface Word {
   id: string; text: string; reading: string; meaning: string;
   prerequisites: string[]; context?: [string, string];
 }
 export type Exercise = { kind: 'kanji'; card: KanjiCard } | { kind: 'reading' | 'meaning'; word: Word };
+
+export function targetedVocabulary(cards: KanjiCard[], words: Word[], progress: ReviewProgress, band: Band): Word[] {
+  const target = BANDS.indexOf(band);
+  const ranks = new Map(cards.map(c => [c.character, BANDS.indexOf(estimatedBand(c))]));
+  const rank = (word: Word) => Math.max(0, ...word.prerequisites.map(k => ranks.get(k) ?? 4));
+  const distance = (word: Word) => rank(word) >= target ? rank(word) - target : 10 + target - rank(word);
+  return words.filter(w => progress[w.id] || rank(w) >= target).sort((a, b) => distance(a) - distance(b));
+}
 
 export function buildVocabulary(cards: KanjiCard[]): Word[] {
   const words = new Map<string, Word>();
