@@ -1,30 +1,38 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { StudyCatalogService } from '../../core/services/study-catalog.service';
+import { StudyLaunch } from '../home/study-home';
 import { Subscription } from 'rxjs';
-import { KanjiCard } from '../learn/kanji-engine';
 import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
 import { Subject, Skill, Question, ForgeState, STAGES, accepts, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, mergeForge, parseForge, review, skills, weakSubjects } from './forge-engine';
 
 @Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
-export class ForgeComponent implements OnInit, OnDestroy {
+export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() launch:StudyLaunch|null=null; @Output() launched=new EventEmitter<number>(); private lastLaunch=0;
   subjects:Subject[]=[]; state:ForgeState=emptyForge(); loading=true; error=''; message=''; now=Date.now();
   mode:'dashboard'|'lesson'|'review'|'practice'='dashboard'; queue:Question[]=[]; study=false; checked=false; correct=false; answer=''; note='';
   stageNames=STAGES; selectedKind:'all'|'radical'|'kanji'|'vocabulary'='all'; page=1;
   private subscription?:Subscription; private loadingSubscription?:Subscription; private timer?:ReturnType<typeof setInterval>;
   private destroyed=false;
-  constructor(private http:HttpClient,public sync:StudySyncService){}
+  constructor(private catalog:StudyCatalogService,public sync:StudySyncService){}
   ngOnInit():void{this.load();this.timer=setInterval(()=>this.now=Date.now(),10000);}
   load():void{
     this.loading=true;this.error='';
     this.loadingSubscription?.unsubscribe();
-    this.loadingSubscription=this.http.get<KanjiCard[]>('assets/kanji-curriculum.json').subscribe({next:async cards=>{
-      await this.sync.initialize(cards);if(this.destroyed)return;this.subjects=this.sync.forgeSubjects;
+    this.loadingSubscription=this.catalog.load().subscribe({next:()=>{
+      if(this.destroyed)return;this.subjects=this.sync.forgeSubjects;
       this.subscription?.unsubscribe();this.subscription=this.sync.state.subscribe(s=>{this.state=s.forge;});
-      this.page=this.state.unlockedLevel;this.loading=false;
+      this.page=this.state.unlockedLevel;this.loading=false;this.applyLaunch();
     },error:()=>{this.error='Kanji Forge could not load its lessons. Please retry.';this.loading=false;}});
+  }
+  ngOnChanges():void{this.applyLaunch();}
+  private applyLaunch():void{
+    if(!this.launch||this.lastLaunch===this.launch.id||this.loading||!this.sync.ready||!this.launch.action.startsWith('forge-'))return;
+    this.lastLaunch=this.launch.id;
+    if(this.launch.action==='forge-reviews')this.startReviews();else this.startLessons();
+    const id=this.launch.id;queueMicrotask(()=>this.launched.emit(id));
   }
   get current():Question|undefined{return this.queue[0];}
   get due():Question[]{return dueQuestions(this.subjects,this.state,this.now);}

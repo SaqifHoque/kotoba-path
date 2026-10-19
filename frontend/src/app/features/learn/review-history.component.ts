@@ -17,7 +17,7 @@ export class ReviewHistoryComponent implements OnInit {
     if (this.loading || (older && !this.cursor)) return;
     this.loading = true; this.error = '';
     try {
-      // The learning path initializes the profile cookie even when its view is hidden.
+      // The shared app catalog initializes the profile independently of the active view.
       const deadline = Date.now() + 11000;
       while (!this.sync.ready && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
       let params = new HttpParams().set('limit', 50);

@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { StudyCatalogService } from '../../core/services/study-catalog.service';
+import { StudyLaunch } from '../home/study-home';
 import { Subscription } from 'rxjs';
 import { StudySyncService } from './study-sync.service';
 import { recallAttempt, ReviewAttempt } from './review-history';
@@ -11,7 +12,10 @@ import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, parseProgress,
 
 @Component({selector: 'app-kanji-path', standalone: true, imports: [CommonModule, FormsModule, PracticeStudioComponent],
   templateUrl: './kanji-path.component.html', styleUrls: ['./kanji-path.component.scss']})
-export class KanjiPathComponent implements OnInit, OnDestroy {
+export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() launch: StudyLaunch | null = null;
+  @Output() launched = new EventEmitter<number>();
+  private lastLaunch = 0;
   bands = BANDS; profile: Proficiency | null = null;
   selectedLevel: Band | 'unsure' = 'unsure'; familiarity: 'studying' | 'comfortable' = 'studying';
   showMap = false; placement: KanjiCard[] = []; placementIndex = 0; placementCorrect = 0; placementRevealed = false;
@@ -22,16 +26,15 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
   revealed = false; practice = false; sessionTitle = ''; message = ''; answered = 0;
   private syncSubscription?: Subscription;
   private timer?: ReturnType<typeof setInterval>;
-  constructor(private readonly http: HttpClient, public readonly sync: StudySyncService) {}
+  constructor(private readonly catalog: StudyCatalogService, public readonly sync: StudySyncService) {}
   ngOnInit(): void { this.load(); this.timer = setInterval(() => this.now = Date.now(), 10000); }
   ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); this.syncSubscription?.unsubscribe(); }
   load(): void {
     this.loading = true; this.error = '';
-    this.http.get<KanjiCard[]>('assets/kanji-curriculum.json').subscribe({
+    this.catalog.load().subscribe({
       next: cards => {
         try { this.levels = buildLevels(cards); this.cards = cards; }
         catch { this.error = 'The kanji curriculum could not be read. Please retry.'; this.loading = false; return; }
-        this.sync.initialize(cards);
         this.syncSubscription?.unsubscribe();
         this.syncSubscription = this.sync.state.subscribe(state => {
           this.progress = state.kanji;
@@ -40,10 +43,19 @@ export class KanjiPathComponent implements OnInit, OnDestroy {
           }
           this.profile = state.profile;
         });
-        this.page = Math.floor((this.nextLevel - 1) / 10); this.loading = false;
+        this.page = Math.floor((this.nextLevel - 1) / 10); this.loading = false; this.applyLaunch();
       },
       error: () => { this.loading = false; this.error = 'Could not load the kanji catalog. Check your connection and retry.'; }
     });
+  }
+  ngOnChanges(): void { this.applyLaunch(); }
+  private applyLaunch(): void {
+    if (!this.launch || this.launch.id === this.lastLaunch || !this.cards.length || !this.sync.ready || this.launch.action.startsWith('forge-')) return;
+    this.lastLaunch = this.launch.id;
+    if (this.launch.action === 'kanji-lessons') this.startRecommended();
+    else if (this.launch.action === 'kanji-reviews') { this.changeMode('review'); this.startReview(); }
+    else this.changeMode('studio');
+    const id = this.launch.id; queueMicrotask(() => this.launched.emit(id));
   }
   get completed(): number { return this.levels.filter(l => this.done(l)).length; }
   get target(): Band { return targetBand(this.profile); }
