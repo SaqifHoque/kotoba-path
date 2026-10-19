@@ -41,7 +41,7 @@ export class AccountService {
     try { localStorage.setItem(this.marker, crypto.randomUUID()); } catch { /* Server owner binding still protects other tabs. */ }
     if (action === 'register') {
       // The database profile has been claimed. Remove guest caches only after success.
-      for (const key of ['kotoba-kanji-reviews-v1', 'kotoba-proficiency-v1', 'kotoba-vocabulary-reviews-v1', 'kotoba-forge-v1']) {
+      for (const key of ['kotoba-kanji-reviews-v1', 'kotoba-proficiency-v1', 'kotoba-vocabulary-reviews-v1', 'kotoba-forge-v1', 'kotoba-study-home-v1']) {
         try {
           const value = localStorage.getItem(key);
           if (value && account) localStorage.setItem(`kotoba-account-${account.id}:${key}`, value);
