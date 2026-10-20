@@ -18,7 +18,16 @@
   <section *ngIf="mode!=='dashboard'&&current as q" class="session" aria-label="Forge session"><header><span>{{mode==='lesson'?'New lesson':mode==='review'?'Scheduled review':'Extra practice'}} · {{queue.length}} checks remaining</span><button (click)="leave()">Leave session</button></header><span class="kind">{{q.subject.kind}} · {{q.skill}}</span><img class="subject-image" *ngIf="q.subject.image;else sessionGlyph" [src]="'assets/radicals/'+q.subject.image" alt="Radical shape"><ng-template #sessionGlyph><div class="glyph" lang="ja">{{q.subject.text}}</div></ng-template>
     <div *ngIf="study"><h2>{{q.subject.meaning}}</h2><p lang="ja">{{q.subject.readings.join(' / ')}}</p><p>{{q.subject.hint}}</p><p>Kanji reading checks use the listed reading; vocabulary checks use the whole word’s reading.</p><button class="primary" (click)="study=false">Check recall</button></div>
     <form *ngIf="!study&&!checked" (ngSubmit)="check()"><label for="forge-answer">{{q.skill==='meaning'?'Meaning in English':'Reading in kana'}}</label><input id="forge-answer" name="forgeAnswer" [(ngModel)]="answer" [attr.lang]="q.skill==='reading'?'ja':'en'" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="submit" [disabled]="!answer.trim()">Check answer</button><button type="button" (click)="answer='';check()">I don’t know</button></form>
+    <p *ngIf="feedback" role="status">{{feedback}}</p>
     <div *ngIf="checked" class="feedback" aria-live="polite"><h2>{{correct?'Correct. Keep forging.':'Let’s strengthen this one.'}}</h2><p>Accepted {{q.skill}}: <b>{{accepted}}</b></p><p>{{q.subject.hint}}</p><div class="contrasts" *ngIf="comparisons.length"><h3>Look closely</h3><p *ngFor="let other of comparisons"><b lang="ja">{{other.text}}</b> · {{other.meaning}} · {{other.readings.join(' / ')}}</p></div><label for="forge-note">Your mnemonic (optional)</label><textarea id="forge-note" maxlength="1000" [(ngModel)]="note"></textarea><button *ngIf="state.records[q.subject.id]" (click)="saveNote()">Save mnemonic</button><button class="primary" (click)="continue()">{{mode==='lesson'&&!correct?'Try again':'Continue'}}</button></div>
+    <details *ngIf="q.skill==='meaning'&&(study||checked)">
+      <summary>Personal meaning synonyms</summary>
+      <p>Add up to eight English synonyms, one per line (80 characters each). These apply to future Forge meaning checks. Save an empty list to remove them.</p>
+      <label for="forge-synonyms">Your accepted meanings</label>
+      <textarea id="forge-synonyms" [(ngModel)]="synonymDraft" rows="3"></textarea>
+      <p *ngIf="synonymError" role="alert">{{synonymError}}</p>
+      <button (click)="saveSynonyms()">Save meaning synonyms</button>
+    </details>
   </section>
   <footer><p>Kanji Forge saves separately in your database profile and browser backup.</p><button (click)="export()">Export Forge backup</button><label for="forge-restore">Restore Forge backup</label><input id="forge-restore" type="file" accept="application/json" (change)="restore($event)"></footer>
 </ng-container>
