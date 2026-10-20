@@ -124,3 +124,5 @@ The encyclopedia can be expanded through the importer without coupling source-da
 ## License and attribution
 
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [datasets/README.md](datasets/README.md) before redistributing the included datasets or derived database content.
+
+Forge and vocabulary now provide clearer answer feedback, with synced personal Forge meaning synonyms. See [answer checking](docs/answer-checking.md).
