@@ -1,9 +1,10 @@
+import { checkReading } from './answer-checker';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { KanjiCard, Rating, ReviewProgress, parseProgress, schedule } from './kanji-engine';
-import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, readingMatches, targetedVocabulary, wordQueue } from './practice-engine';
+import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, targetedVocabulary, wordQueue } from './practice-engine';
 import { Band } from './proficiency';
 import { StudySyncService } from './study-sync.service';
 import { recallAttempt, ReviewAttempt } from './review-history';
@@ -19,7 +20,7 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
   @Output() kanjiRated = new EventEmitter<{card: KanjiCard; rating: Rating}>();
   words: Word[] = []; progress: ReviewProgress = {}; queue: Exercise[] = [];
   mode: 'vocabulary' | 'mixed' = 'vocabulary';
-  answer = ''; checked = false; correct = false; message = ''; warning = '';
+  feedback = ''; answer = ''; checked = false; correct = false; message = ''; warning = '';
   private key = 'kotoba-vocabulary-reviews-v1';
   private subscription?: Subscription;
   constructor(public sync: StudySyncService) {}
@@ -52,7 +53,12 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
   }
   check(): void {
     const e=this.exercise; if(!e||this.checked)return;
-    this.correct=e.kind==='reading'&&readingMatches(this.answer,e.word.reading); this.checked=true;
+    if(e.kind==='reading') {
+      const result=checkReading(this.answer,[e.word.reading]);
+      this.feedback=result.message;
+      this.correct=result.status==='correct';
+      this.checked=result.status!=='retry';
+    } else this.checked=true;
   }
   rate(rating: Rating): void {
     const e=this.exercise; if(!e||!this.checked||(e.kind==='reading'&&!this.correct&&rating!=='again'))return;
@@ -65,7 +71,7 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
     this.queue=this.queue.slice(1);this.resetAnswer();
     if(!this.queue.length)this.message='Session complete. Missed items return in 10 minutes; Hard tomorrow; Good follows your review schedule.';
   }
-  private resetAnswer(): void {this.answer='';this.checked=false;this.correct=false;}
+  private resetAnswer(): void {this.feedback='';this.answer='';this.checked=false;this.correct=false;}
   private parse(raw: string|null): ReviewProgress {return parseProgress(raw,this.words.map(w=>({character:w.id})));}
   private save(attempt?: ReviewAttempt): void {this.sync.updateVocabulary(this.progress, attempt);}
   export(): void {
