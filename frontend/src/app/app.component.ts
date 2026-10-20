@@ -1,3 +1,4 @@
+import { DEMO_MODE } from './demo-mode';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -16,6 +17,7 @@ import { ForgeComponent } from './features/forge/forge.component';
   imports: [StudyHomeComponent, ReviewHistoryComponent, AccountComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
+  readonly demoMode = DEMO_MODE;
   menuOpen = false; view: StudyView = 'home'; pathVisited = false;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
   readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history'};
