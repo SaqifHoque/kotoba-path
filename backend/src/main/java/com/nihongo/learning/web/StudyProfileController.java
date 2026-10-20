@@ -1,5 +1,6 @@
 package com.nihongo.learning.web;
 
+import com.nihongo.learning.application.MeaningSynonymPolicy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -82,7 +83,13 @@ public class StudyProfileController {
             JsonNode savedVocabulary = previous.isEmpty() ? null : json.readTree(previous.get(0)).get("vocabulary");
             state.set("vocabulary", savedVocabulary == null ? json.createObjectNode() : savedVocabulary);
         }
-        if (body.has("forge")) state.set("forge", body.get("forge"));
+        if (body.has("forge")) {
+            ObjectNode forge = (ObjectNode) body.get("forge").deepCopy();
+            List<String> previous = jdbc.query("select state_json from study_profile where id=?", (rs, row) -> rs.getString(1), id);
+            JsonNode saved = previous.isEmpty() ? json.createObjectNode() : json.readTree(previous.get(0)).path("forge").path("meaningSynonyms");
+            forge.set("meaningSynonyms", MeaningSynonymPolicy.merge(json, saved, forge.get("meaningSynonyms")));
+            state.set("forge", forge);
+        }
         else {
             // Older clients must not erase this independent module's progress.
             List<String> previous = jdbc.query("select state_json from study_profile where id=?", (rs, row) -> rs.getString(1), id);
@@ -171,6 +178,7 @@ public class StudyProfileController {
 
     private void validateForge(JsonNode forge) {
         require(forge.isObject() && forge.path("version").asInt() == 1);
+        if (forge.has("meaningSynonyms")) MeaningSynonymPolicy.validate(forge.get("meaningSynonyms"));
         require(forge.path("unlockedLevel").isInt() && forge.path("unlockedLevel").asInt() >= 1 && forge.path("unlockedLevel").asInt() <= 103);
         require(forge.path("dailyLimit").isInt() && Arrays.asList(5, 10, 20).contains(forge.path("dailyLimit").asInt()));
         validTime(forge.path("settingsAt"));
