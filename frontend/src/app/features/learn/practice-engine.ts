@@ -1,4 +1,5 @@
 import { KanjiCard, ReviewProgress, dueCards } from './kanji-engine';
+import { normalizeReading, readingAlternatives } from './answer-checker';
 import { WORD_CONTEXTS } from './word-contexts';
 import { Band, BANDS, estimatedBand } from './proficiency';
 
@@ -50,6 +51,6 @@ export function mixedQueue(cards: KanjiCard[], kanji: ReviewProgress, words: Wor
   return result;
 }
 export function readingMatches(answer: string, reading: string): boolean {
-  const normalize = (s: string) => s.normalize('NFKC').trim().replace(/\s/g, '').replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
-  return reading.split(/[/／、]/).some(r => normalize(r) === normalize(answer) && normalize(answer) !== '');
+  const normalized = normalizeReading(answer);
+  return !!normalized && readingAlternatives([reading]).some(value => normalizeReading(value) === normalized);
 }

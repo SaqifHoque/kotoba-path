@@ -18,7 +18,7 @@ Daily new-item limits are 5, 10, or 20, counted by the browser's local calendar 
 
 The dashboard shows stage counts, scheduled-review accuracy, next review time, milestone progress, and recall XP (five per introduced subject and ten per correct scheduled answer). First Spark, Ten Tempered, and First Flame badges reward introduction, Guru-level retention, and the first Burned item.
 
-The trouble-item workshop selects tracks with at least three mistakes and less than 80% accuracy. A curated visual comparison workshop covers common groups such as 日/目/白, 土/士, 未/末, and 人/入. Explanations appear after answering. Personal mnemonic notes are limited to 1,000 characters and saved with the subject. Source meanings are matched against normalized comma/semicolon/slash alternatives; kana checks accept equivalent katakana and listed variants. This is strict answer checking, not semantic AI grading.
+The trouble-item workshop selects tracks with at least three mistakes and less than 80% accuracy. A curated visual comparison workshop covers common groups such as 日/目/白, 土/士, 未/末, and 人/入. Explanations appear after answering. Personal mnemonic notes are limited to 1,000 characters and saved with the subject. Source meanings are matched against normalized alternatives outside annotations, a small curated alias list, and personal meaning synonyms. Kana checks accept equivalent katakana and listed variants; wrong-field input prompts an unscored retry. See [answer checking](answer-checking.md) for matching rules and synced synonym preferences.
 
 ## Persistence and compatibility
 

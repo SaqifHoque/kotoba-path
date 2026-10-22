@@ -20,6 +20,7 @@
         <button type="button" (click)="answer=''; check()">I don’t know</button>
       </form>
       <button *ngIf="e.kind!=='reading' && !checked" (click)="check()">Reveal answer</button>
+      <p *ngIf="feedback" role="status">{{feedback}}</p>
       <div *ngIf="checked">
         <p *ngIf="e.kind==='reading'">{{correct ? 'Correct reading!' : 'Study the reading, then choose Again.'}}</p>
         <p class="solution" lang="ja">{{solution}}</p>

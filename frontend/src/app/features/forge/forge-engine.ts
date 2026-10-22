@@ -1,18 +1,20 @@
 import { KanjiCard, buildLevels } from '../learn/kanji-engine';
-import { buildVocabulary, readingMatches } from '../learn/practice-engine';
+import { buildVocabulary } from '../learn/practice-engine';
+import { checkAnswer } from '../learn/answer-checker';
+import { MeaningSynonyms, mergeMeaningSynonyms, parseMeaningSynonyms } from '../learn/meaning-synonyms';
 
 export type Skill = 'meaning' | 'reading';
 export interface Subject {
   id: string; kind: 'radical' | 'kanji' | 'vocabulary'; text: string; meaning: string;
-  readings: string[]; prerequisites: string[]; level: number; image?: string; hint: string;
+  readings: string[]; otherReadings?: string[]; prerequisites: string[]; level: number; image?: string; hint: string;
 }
 export interface Track { stage: number; due: number | null; reviews: number; correct: number; misses: number; updatedAt: number; }
 export interface ForgeRecord { meaning: Track; reading?: Track; lessonAt: number; note: string; noteAt: number; }
-export interface ForgeState { version: 1; records: Record<string, ForgeRecord>; unlockedLevel: number; dailyLimit: number; settingsAt: number; }
+export interface ForgeState { version: 1; records: Record<string, ForgeRecord>; unlockedLevel: number; dailyLimit: number; settingsAt: number; meaningSynonyms?: MeaningSynonyms; }
 export interface Question { subject: Subject; skill: Skill; }
 export const STAGES = ['Locked','Apprentice I','Apprentice II','Apprentice III','Apprentice IV','Guru I','Guru II','Master','Enlightened','Burned'];
 export const WAITS = [0,4*3600000,8*3600000,86400000,2*86400000,7*86400000,14*86400000,30*86400000,120*86400000];
-export const emptyForge = (): ForgeState => ({version:1,records:{},unlockedLevel:1,dailyLimit:10,settingsAt:0});
+export const emptyForge = (): ForgeState => ({version:1,records:{},unlockedLevel:1,dailyLimit:10,settingsAt:0,meaningSynonyms:{}});
 const RADICAL = (s: string) => `r:${s.normalize('NFKC')}`;
 const STORIES: Record<string,string> = {
   '一':'One horizontal line: picture one path running straight across the page.',
@@ -35,7 +37,7 @@ export function buildForge(cards: KanjiCard[]): Subject[] {
       readings:[],prerequisites:[],level,image:card.radicalImage,
       hint:`Find this shape in ${cards.filter(c=>RADICAL(c.radical)===radical).slice(0,5).map(c=>c.character).join(' · ')}. Attach the label “${card.radicalMeaning}” to its outline. This is the catalog’s primary radical, not a complete decomposition.`});
     const readings = (card.onyomi || card.kunyomi).split(/[、,\/／]/).map(s=>s.trim()).filter(Boolean);
-    subjects.push({id:`k:${card.character}`,kind:'kanji',text:card.character,meaning:card.meaning,readings,prerequisites:[radical],level,
+    subjects.push({id:`k:${card.character}`,kind:'kanji',text:card.character,meaning:card.meaning,readings,otherReadings:card.onyomi?card.kunyomi.split(/[、,\/／]/).map(s=>s.trim()).filter(Boolean):[],prerequisites:[radical],level,
       hint:STORIES[card.character] || `Memory link: find the “${card.radicalMeaning}” radical in ${card.character}. Invent a scene joining that shape to “${card.meaning}”, then say ${readings[0] || ''}. This is a mnemonic prompt, not an etymology.`});
   }
   for (const word of buildVocabulary(cards)) {
@@ -83,10 +85,8 @@ export function review(subject: Subject, skill: Skill, correct: boolean, subject
   }
   return updated;
 }
-export function accepts(subject: Subject, skill: Skill, answer: string): boolean {
-  if(skill==='reading')return subject.readings.some(r=>readingMatches(answer,r));
-  const normalize=(s:string)=>s.normalize('NFKC').toLowerCase().replace(/\[[^\]]*\]|\([^)]*\)/g,'').replace(/^to\s+/,'').replace(/[^a-z0-9 ]/g,' ').trim().replace(/\s+/g,' ');
-  const input=normalize(answer);return !!input && subject.meaning.split(/[,;/]/).some(m=>normalize(m)===input);
+export function accepts(subject: Subject, skill: Skill, answer: string, personal: readonly string[] = []): boolean {
+  return checkAnswer(subject, skill, answer, personal).status === 'correct';
 }
 export function weakSubjects(subjects: Subject[], state: ForgeState): Subject[] {
   return subjects.filter(s=>skills(s).some(skill=>{const t=state.records[s.id]?.[skill];return t && t.misses>=3 && t.correct/Math.max(1,t.reviews)<.8;}));
@@ -112,7 +112,7 @@ export function parseForge(value: unknown, subjects: Subject[]): ForgeState {
     }
     records[subject.id]=r;
   }
-  return {...s,records};
+  return {...s,records,meaningSynonyms:parseMeaningSynonyms(s.meaningSynonyms,new Set(subjects.map(subject=>subject.id)))};
 }
 export function mergeForge(a: ForgeState,b: ForgeState): ForgeState {
   const records={...a.records};
@@ -122,5 +122,5 @@ export function mergeForge(a: ForgeState,b: ForgeState): ForgeState {
     const notes=r.noteAt>old.noteAt?r:old;
     records[id]={meaning:newest(old.meaning,r.meaning)!,...(old.reading||r.reading?{reading:newest(old.reading,r.reading)}:{}),lessonAt:Math.min(old.lessonAt,r.lessonAt),note:notes.note,noteAt:notes.noteAt};
   }
-  return {...(b.settingsAt>a.settingsAt?b:a),records,unlockedLevel:Math.max(a.unlockedLevel,b.unlockedLevel)};
+  return {...(b.settingsAt>a.settingsAt?b:a),records,unlockedLevel:Math.max(a.unlockedLevel,b.unlockedLevel),meaningSynonyms:mergeMeaningSynonyms(a.meaningSynonyms,b.meaningSynonyms)};
 }

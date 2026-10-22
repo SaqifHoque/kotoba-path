@@ -1,3 +1,5 @@
+import { acceptedMeanings, checkAnswer } from '../learn/answer-checker';
+import { setMeaningSynonyms } from '../learn/meaning-synonyms';
 import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,13 +8,14 @@ import { StudyLaunch } from '../home/study-home';
 import { Subscription } from 'rxjs';
 import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
-import { Subject, Skill, Question, ForgeState, STAGES, accepts, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, mergeForge, parseForge, review, skills, weakSubjects } from './forge-engine';
+import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, mergeForge, parseForge, review, skills, weakSubjects } from './forge-engine';
 
 @Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
 export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() launch:StudyLaunch|null=null; @Output() launched=new EventEmitter<number>(); private lastLaunch=0;
   subjects:Subject[]=[]; state:ForgeState=emptyForge(); loading=true; error=''; message=''; now=Date.now();
   mode:'dashboard'|'lesson'|'review'|'practice'='dashboard'; queue:Question[]=[]; study=false; checked=false; correct=false; answer=''; note='';
+  feedback=''; synonymDraft=''; synonymError='';
   stageNames=STAGES; selectedKind:'all'|'radical'|'kanji'|'vocabulary'='all'; page=1;
   private subscription?:Subscription; private loadingSubscription?:Subscription; private timer?:ReturnType<typeof setInterval>;
   private destroyed=false;
@@ -49,7 +52,7 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
   get needed():number{return Math.ceil(this.levelKanji.length*.9);}
   get library():Subject[]{return this.subjects.filter(s=>s.level===this.page&&(this.selectedKind==='all'||s.kind===this.selectedKind));}
   get comparisons():Subject[]{return this.current?contrasts(this.current.subject,this.subjects):[];}
-  get accepted():string{const q=this.current;return !q?'':q.skill==='meaning'?q.subject.meaning:q.subject.readings.join(' / ');}
+  get accepted():string{const q=this.current;return !q?'':q.skill==='meaning'?acceptedMeanings(q.subject,this.state.meaningSynonyms?.[q.subject.id]?.values).join(' / '):q.subject.readings.join(' / ');}
   mastery(s:Subject):number{return mastery(this.state.records[s.id]);}
   status(s:Subject):string{return this.state.records[s.id]?STAGES[this.mastery(s)]:canLearn(s,this.state)?'Ready for lesson':'Locked';}
   countStage(from:number,to:number):number{return Object.values(this.state.records).filter(r=>mastery(r)>=from&&mastery(r)<=to).length;}
@@ -69,10 +72,17 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
   }
   practiceConfusions():void{this.practice(this.subjects.filter(s=>s.kind==='kanji'&&contrasts(s,this.subjects).length>0));}
   get hasConfusions():boolean{return this.subjects.some(s=>s.kind==='kanji'&&this.state.records[s.id]&&contrasts(s,this.subjects).length>0);}
-  check():void{if(!this.current||this.checked)return;this.correct=accepts(this.current.subject,this.current.skill,this.answer);this.checked=true;}
+  check():void {
+    const q=this.current;
+    if(!q||this.checked)return;
+    const result=checkAnswer(q.subject,q.skill,this.answer,this.state.meaningSynonyms?.[q.subject.id]?.values);
+    this.feedback=result.message;
+    this.correct=result.status==='correct';
+    this.checked=result.status!=='retry';
+  }
   continue():void{
     const q=this.current;if(!q||!this.checked)return;
-    if(this.mode==='lesson'&&!this.correct){this.answer='';this.checked=false;return;}
+    if(this.mode==='lesson'&&!this.correct){this.answer='';this.checked=false;this.feedback='';return;}
     this.now=Date.now();
     if(this.mode==='review'){
       const next=review(q.subject,q.skill,this.correct,this.subjects,this.state,this.now);
@@ -87,7 +97,21 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
     this.queue=this.queue.slice(1);this.reset(finishedSubject);this.study=this.mode==='lesson'&&finishedSubject;
     if(!this.queue.length){this.message=this.mode==='practice'?'Practice complete. Mastery, XP, and review dates are unchanged.':this.message||'Session complete. Your scheduled reviews build lasting mastery.';this.mode='dashboard';}
   }
-  private reset(resetNote=true):void{this.answer='';this.checked=false;this.correct=false;if(resetNote&&this.current)this.note=this.state.records[this.current.subject.id]?.note||'';}
+  saveSynonyms():void {
+    const q=this.current;
+    if(!q)return;
+    try {
+      const values=this.synonymDraft.trim()?this.synonymDraft.split(/\r?\n/):[];
+      const meaningSynonyms=setMeaningSynonyms(this.state.meaningSynonyms,q.subject.id,values,Date.now());
+      this.persist({...this.state,meaningSynonyms});
+      this.synonymDraft=meaningSynonyms[q.subject.id].values.join('\n');
+      this.synonymError='';
+      this.message='Meaning synonyms saved for future checks.';
+    } catch(error) {
+      this.synonymError=error instanceof Error?error.message:'Could not save synonyms.';
+    }
+  }
+  private reset(resetNote=true):void{this.feedback='';this.synonymError='';this.synonymDraft=this.current?this.state.meaningSynonyms?.[this.current.subject.id]?.values.join('\n')||'':'';this.answer='';this.checked=false;this.correct=false;if(resetNote&&this.current)this.note=this.state.records[this.current.subject.id]?.note||'';}
   leave():void{this.mode='dashboard';this.queue=[];this.message='Completed reviews are saved. Unfinished lesson checks do not introduce an item.';}
   saveNote():void{const q=this.current;if(!q||!this.state.records[q.subject.id])return;this.persist({...this.state,records:{...this.state.records,[q.subject.id]:{...this.state.records[q.subject.id],note:this.note.trim().slice(0,1000),noteAt:Date.now()}}});this.message='Mnemonic saved.';}
   export():void{const url=URL.createObjectURL(new Blob([JSON.stringify(this.state)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kanji-forge-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

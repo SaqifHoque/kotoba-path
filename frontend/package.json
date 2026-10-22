@@ -15,8 +15,9 @@
     "test:forge": "sh tools/test-forge.sh",
     "test:history": "sh tools/test-history.sh",
     "test:home": "sh tools/test-home.sh",
-    "test:engines": "npm run test:curriculum && npm run test:kanji && npm run test:sync && npm run test:proficiency && npm run test:practice && npm run test:forge && npm run test:history && npm run test:home",
-    "build:demo": "node tools/build-demo.mjs"
+    "test:engines": "npm run test:curriculum && npm run test:kanji && npm run test:sync && npm run test:proficiency && npm run test:practice && npm run test:forge && npm run test:history && npm run test:home && npm run test:answers",
+    "build:demo": "node tools/build-demo.mjs",
+    "test:answers": "sh tools/test-answers.sh"
   },
   "dependencies": {
     "@angular/animations": "^17.3.12",
