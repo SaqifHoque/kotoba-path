@@ -5,17 +5,19 @@
     <div class="primary-nav"><button [class.active]="view==='learn'" (click)="navigate('learn')"><b>道</b><span>Learning & review</span></button><button [class.active]="view==='catalog'" (click)="navigate('catalog')"><b>典</b><span>Encyclopedia</span></button></div>
     <div class="primary-nav forge-nav"><button [class.active]="view==='forge'" (click)="navigate('forge')"><b>鍛</b><span>Kanji Forge</span></button></div>
     <div class="primary-nav forge-nav"><button [class.active]="view==='history'" (click)="navigate('history')"><b>記</b><span>Review history</span></button></div>
-    <app-account></app-account>
+    <app-account *ngIf="!demoMode"></app-account>
     <div class="sidebar-foot"><span>今日の言葉</span><strong>一歩一歩</strong><small>One step at a time</small></div>
   </aside>
   <main>
+    <p *ngIf="demoMode" role="status" style="padding:12px 24px;background:#eef4ec;color:#263b2b">Public demo · Learning, reviews, and Kanji Forge work in this browser. Progress stays on this device. Accounts, cloud sync, and the encyclopedia require the self-hosted server. <a href="https://github.com/SaqifHoque/kotoba-path">Source and setup</a></p>
     <header class="topbar"><button class="menu" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
     <ng-container *ngIf="cards.length && !account.changing">
       <app-study-home *ngIf="view==='home'" [cards]="cards" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
-      <app-encyclopedia *ngIf="view==='catalog'"></app-encyclopedia>
+      <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
+      <app-encyclopedia *ngIf="!demoMode && view==='catalog'"></app-encyclopedia>
       <app-forge *ngIf="view==='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
       <app-review-history *ngIf="view==='history'"></app-review-history>
     </ng-container>

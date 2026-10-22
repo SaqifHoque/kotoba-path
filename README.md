@@ -1,5 +1,22 @@
 # Kotoba Path — Japanese Kanji & Reading Tutor
 
+## Live demo
+
+**[Open the interactive demo](https://kotoba-path.vercel.app/)** — no installation or sign-in required.
+
+Try the learning path, reviews, Kanji Forge, and review history. Progress is saved on this browser. The demo does not provide accounts, cloud synchronization, or the Java-backed encyclopedia and text reader. Self-host the complete stack for those features.
+
+### Build the public demo
+
+```sh
+cd frontend
+npm ci
+npm run build:demo
+```
+
+Static output: `frontend/dist/nihongo-trail/browser/`. Deploy that directory to a static host. Demo deployments are snapshots and must be rebuilt and redeployed after source changes.
+
+
 > Learn Japanese kanji from radicals and visual components, then progress naturally to vocabulary, sentences, and passages. Built with Angular, Java Spring Boot, PostgreSQL, and Docker.
 
 Kotoba Path is a gradual, reading-first Japanese learning web app. It explains how kanji are assembled from radicals and real visual components before asking the learner to use them in context. The included beginner path moves through:
