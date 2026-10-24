@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleCha
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { KanjiCard, Rating, ReviewProgress, parseProgress, schedule } from './kanji-engine';
+import { KanjiCard, Rating, ReviewProgress, schedule } from './kanji-engine';
 import { Exercise, Word, availableWords, buildVocabulary, mixedQueue, targetedVocabulary, wordQueue } from './practice-engine';
 import { Band } from './proficiency';
 import { StudySyncService } from './study-sync.service';
@@ -72,23 +72,6 @@ export class PracticeStudioComponent implements OnChanges, OnDestroy {
     if(!this.queue.length)this.message='Session complete. Missed items return in 10 minutes; Hard tomorrow; Good follows your review schedule.';
   }
   private resetAnswer(): void {this.feedback='';this.answer='';this.checked=false;this.correct=false;}
-  private parse(raw: string|null): ReviewProgress {return parseProgress(raw,this.words.map(w=>({character:w.id})));}
   private save(attempt?: ReviewAttempt): void {this.sync.updateVocabulary(this.progress, attempt);}
-  export(): void {
-    const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,cards:this.progress})],{type:'application/json'}));
-    const a=document.createElement('a');a.href=url;a.download='kotoba-vocabulary-progress.json';a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }
-  async restore(event: Event): Promise<void> {
-    const input=event.target as HTMLInputElement,file=input.files?.[0];if(!file)return;
-    try {
-      if(file.size>2000000)throw new Error('Too large');
-      const data=this.parse(await file.text());
-      this.progress={...this.progress};
-      for(const [id,value] of Object.entries(data))if(!this.progress[id]||value.attempts>this.progress[id].attempts)this.progress[id]=value;
-      this.save();this.queue=[];this.message='Vocabulary backup restored.';
-    }catch{this.message='Invalid vocabulary backup. Your progress has not changed.';}
-    input.value='';
-  }
   ngOnDestroy(): void {this.subscription?.unsubscribe();}
 }

@@ -8,7 +8,7 @@ import { StudyLaunch } from '../home/study-home';
 import { Subscription } from 'rxjs';
 import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
-import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, mergeForge, parseForge, review, skills, weakSubjects } from './forge-engine';
+import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, review, skills, weakSubjects } from './forge-engine';
 
 @Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
 export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
@@ -106,15 +106,13 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
       this.persist({...this.state,meaningSynonyms});
       this.synonymDraft=meaningSynonyms[q.subject.id].values.join('\n');
       this.synonymError='';
-      this.message='Meaning synonyms saved for future checks.';
+      this.message='Meaning synonyms updated for future checks.';
     } catch(error) {
       this.synonymError=error instanceof Error?error.message:'Could not save synonyms.';
     }
   }
   private reset(resetNote=true):void{this.feedback='';this.synonymError='';this.synonymDraft=this.current?this.state.meaningSynonyms?.[this.current.subject.id]?.values.join('\n')||'':'';this.answer='';this.checked=false;this.correct=false;if(resetNote&&this.current)this.note=this.state.records[this.current.subject.id]?.note||'';}
-  leave():void{this.mode='dashboard';this.queue=[];this.message='Completed reviews are saved. Unfinished lesson checks do not introduce an item.';}
-  saveNote():void{const q=this.current;if(!q||!this.state.records[q.subject.id])return;this.persist({...this.state,records:{...this.state.records,[q.subject.id]:{...this.state.records[q.subject.id],note:this.note.trim().slice(0,1000),noteAt:Date.now()}}});this.message='Mnemonic saved.';}
-  export():void{const url=URL.createObjectURL(new Blob([JSON.stringify(this.state)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kanji-forge-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-  async restore(event:Event):Promise<void>{const input=event.target as HTMLInputElement,file=input.files?.[0];if(!file)return;try{if(file.size>8000000)throw new Error('Too large');this.persist(mergeForge(this.state,parseForge(JSON.parse(await file.text()),this.subjects)));this.mode='dashboard';this.queue=[];this.message='Forge backup merged. Existing progress is preserved.';}catch{this.message='Invalid Forge backup. Your progress was not changed.';}input.value='';}
+  leave():void{this.mode='dashboard';this.queue=[];this.message='Unfinished lesson checks do not introduce an item. Check the saving message above for completed reviews.';}
+  saveNote():void{const q=this.current;if(!q||!this.state.records[q.subject.id])return;this.persist({...this.state,records:{...this.state.records,[q.subject.id]:{...this.state.records[q.subject.id],note:this.note.trim().slice(0,1000),noteAt:Date.now()}}});this.message='Mnemonic updated. Check the saving message above.';}
   ngOnDestroy():void{this.destroyed=true;this.subscription?.unsubscribe();this.loadingSubscription?.unsubscribe();if(this.timer)clearInterval(this.timer);}
 }

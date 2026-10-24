@@ -8,7 +8,7 @@ import { StudySyncService } from './study-sync.service';
 import { recallAttempt, ReviewAttempt } from './review-history';
 import { PracticeStudioComponent } from './practice-studio.component';
 import { BANDS, Band, Proficiency, assumedKanji, estimatedBand, placementSuggestion, recommendedCards, targetBand } from './proficiency';
-import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, parseProgress, Rating, ReviewProgress, schedule, unlocked } from './kanji-engine';
+import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, Rating, ReviewProgress, schedule, unlocked } from './kanji-engine';
 
 @Component({selector: 'app-kanji-path', standalone: true, imports: [CommonModule, FormsModule, PracticeStudioComponent],
   templateUrl: './kanji-path.component.html', styleUrls: ['./kanji-path.component.scss']})
@@ -157,21 +157,5 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
   }
   private save(attempt?: ReviewAttempt): void {
     this.sync.update(this.progress, attempt);
-  }
-  exportProgress(): void {
-    const url = URL.createObjectURL(new Blob([JSON.stringify({version: 1, cards: this.progress})], {type: 'application/json'}));
-    const a = document.createElement('a'); a.href = url; a.download = 'kotoba-kanji-progress.json'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  async importProgress(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement, file = input.files?.[0];
-    if (!file) return;
-    try {
-      if (file.size > 2000000) throw new Error('Too large');
-      const restored = parseProgress(await file.text(), this.cards);
-      this.sync.restore(restored); this.session = false; this.queue = [];
-      this.message = 'Progress backup restored.';
-    } catch { this.message = 'This backup could not be read. Your progress has not changed.'; }
-    input.value = '';
   }
 }

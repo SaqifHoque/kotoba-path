@@ -1,0 +1,14 @@
+<header><span class="eyebrow">Your progress, kept safe</span><h1>Settings</h1><p>Manage your learning account and progress files here. Lessons save automatically.</p></header>
+<section aria-labelledby="account-title">
+  <h2 id="account-title">Account &amp; devices</h2>
+  <p *ngIf="demo">This public demo saves progress on this device. Accounts and cross-device saving are available in the self-hosted app.</p>
+  <app-account *ngIf="!demo" [expanded]="true"></app-account>
+</section>
+<section aria-labelledby="data-title">
+  <h2 id="data-title">Data &amp; privacy</h2>
+  <p>Download one progress file for your kanji, vocabulary, Forge progress, starting point, mnemonic notes, and personal meaning synonyms.</p>
+  <p class="note">This file does not include your password, recovery key, or review history. Your account’s saved history stays with the account.</p>
+  <p *ngIf="sync.pendingHistory" class="note">Recent attempts waiting to sync remain in this browser and are not included in this progress file. Keep this browser’s data until they have synced.</p>
+  <button type="button" [disabled]="!sync.ready||account.changing" (click)="download()">Download learning data</button>
+  <p *ngIf="message" role="status">{{message}}</p>
+</section>
