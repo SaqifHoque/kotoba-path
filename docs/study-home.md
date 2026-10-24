@@ -36,3 +36,7 @@ Launch requests are consumed once, so unrelated state updates do not restart a s
 ## Validation
 
 Run `npm run test:engines` and `npm run build` in `frontend`. `npm run test:home` covers due priorities, ties, cross-mode reviews, eligibility, distinct count units, Burned exclusion, daily reset, workload guards, immutable planning, preference validation, and returning-user detection. The existing engine suites continue to run through CI. No backend schema, endpoint, or dependency changes are required.
+
+## Review forecast
+
+Today also shows [upcoming review workload](review-forecast.md) for the next 24 hours or seven local calendar days. Due-now work stays separate from newly due rows, and kanji, words, and Forge questions keep separate counts. The forecast reads existing schedules and updates after completed reviews.

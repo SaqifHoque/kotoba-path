@@ -1,0 +1,26 @@
+<section class="forecast" aria-labelledby="forecast-title" *ngIf="forecast as f">
+  <header><div><span class="eyebrow">Make room for recall</span><h2 id="forecast-title">Review forecast</h2></div>
+    <div class="range" role="group" aria-label="Forecast range">
+      <button type="button" [attr.aria-pressed]="range==='hours'" (click)="range='hours'">Next 24 hours</button>
+      <button type="button" [attr.aria-pressed]="range==='days'" (click)="range='days'">Next 7 days</button>
+    </div>
+  </header>
+  <p class="explanation">Based on your saved schedules across both routines. Forge meaning and reading count as separate questions. New lessons and your next answers will change this forecast.</p>
+  <p *ngIf="!f.scheduled" class="empty">Your forecast starts after you learn an item. New lessons will add review dates.</p>
+  <ng-container *ngIf="f.scheduled">
+    <table>
+      <caption>{{range==='hours'?'Newly due reviews in four-hour windows':'Newly due reviews today and the following six local calendar days'}}</caption>
+      <thead><tr><th scope="col">{{range==='hours'?'Time':'Day'}}</th><th scope="col">Kanji</th><th scope="col">Words</th><th scope="col">Forge<br>questions</th></tr></thead>
+      <tbody>
+        <tr class="due-now"><th scope="row">Due now<small>Includes overdue</small></th><td>{{f.dueNow.kanji | number}}</td><td>{{f.dueNow.vocabulary | number}}</td><td>{{f.dueNow.forge | number}}</td></tr>
+        <tr *ngFor="let row of rows">
+          <th scope="row"><ng-container *ngIf="range==='hours'; else dayLabel">{{row.start | date:'EEE, MMM d'}}<small>{{row.start | date:'shortTime'}} – {{row.end | date:'shortTime'}}</small></ng-container><ng-template #dayLabel>{{row.start | date:'EEE, MMM d'}}</ng-template></th>
+          <td>{{row.counts.kanji | number}}</td><td>{{row.counts.vocabulary | number}}</td><td>{{row.counts.forge | number}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!hasUpcoming" class="empty">No additional reviews are scheduled in this window.</p>
+    <p *ngIf="f.nextAt" class="next-date">Next scheduled review: <b>{{f.nextAt | date:'medium'}}</b>.</p>
+    <p class="footnote">Future rows show reviews becoming due in that window. Work already due stays in “Due now.” Dates use this device’s time zone; counts refresh while Today is open.</p>
+  </ng-container>
+</section>

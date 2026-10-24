@@ -143,3 +143,5 @@ The encyclopedia can be expanded through the importer without coupling source-da
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [datasets/README.md](datasets/README.md) before redistributing the included datasets or derived database content.
 
 Forge and vocabulary now provide clearer answer feedback, with synced personal Forge meaning synonyms. See [answer checking](docs/answer-checking.md).
+
+Plan your study time with Today’s [review forecast](docs/review-forecast.md): upcoming kanji, vocabulary, and Forge questions over 24 hours or seven days.

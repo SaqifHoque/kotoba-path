@@ -1,3 +1,5 @@
+import { ReviewForecast, reviewForecast } from './review-forecast';
+import { ReviewForecastComponent } from './review-forecast.component';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,13 +11,13 @@ import { Word, buildVocabulary } from '../learn/practice-engine';
 import { StudySyncService } from '../learn/study-sync.service';
 import { DailyPlan, HomePreference, StudyAction, StudyMode, StudyView, dailyPlan, hasStudyProgress, parseHomePreference, preferredMode } from './study-home';
 
-@Component({selector: 'app-study-home', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-study-home', standalone: true, imports: [CommonModule, FormsModule, ReviewForecastComponent],
   templateUrl: './study-home.component.html', styleUrls: ['./study-home.component.scss']})
 export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() cards: KanjiCard[] = [];
   @Output() start = new EventEmitter<StudyAction>();
   @Output() open = new EventEmitter<StudyView>();
-  now = Date.now(); plan?: DailyPlan; bands = BANDS;
+  now = Date.now(); plan?: DailyPlan; forecast: ReviewForecast | null = null; bands = BANDS;
   editing = false; draftMode: StudyMode = 'path'; draftLevel: Band | 'unsure' = 'unsure';
   familiarity: 'studying' | 'comfortable' = 'studying'; settingsNote = '';
   private preference: HomePreference | null = null;
@@ -33,7 +35,10 @@ export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
   get target(): Band { return targetBand(this.sync.state.value.profile); }
   get setupVisible(): boolean { return this.editing || (this.sync.ready && !this.preference && !hasStudyProgress(this.sync.state.value)); }
   private refresh(): void {
-    if (this.cards.length) this.plan = dailyPlan(this.cards, this.words, this.sync.forgeSubjects, this.sync.state.value, this.mode, this.now);
+    if (this.cards.length) {
+      this.plan = dailyPlan(this.cards, this.words, this.sync.forgeSubjects, this.sync.state.value, this.mode, this.now);
+      this.forecast = reviewForecast(this.cards, this.words, this.sync.forgeSubjects, this.sync.state.value, this.now);
+    }
   }
   changeSetup(): void {
     this.draftMode = this.mode;
