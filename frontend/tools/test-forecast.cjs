@@ -1,0 +1,56 @@
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const {reviewForecast} = require(process.argv[2]);
+const {dailyPlan} = require(path.join(path.dirname(process.argv[2]),'study-home.js'));
+const {emptyForge,buildForge} = require(path.join(path.dirname(process.argv[2]),'../forge/forge-engine.js'));
+const {buildVocabulary} = require(path.join(path.dirname(process.argv[2]),'../learn/practice-engine.js'));
+const cards = require('../src/assets/kanji-curriculum.json');
+const words = buildVocabulary(cards), subjects = buildForge(cards), hour = 3600000;
+const now = new Date(2026,9,24,10,0,0).getTime();
+const empty = () => ({profile:null,kanji:{},vocabulary:{},forge:emptyForge()});
+const progress = due => ({learned:true,stage:1,due,attempts:1});
+const track = (due,stage=1) => ({stage,due,reviews:0,correct:0,misses:0,updatedAt:now-100});
+const totals = rows => rows.reduce((a,b)=>({kanji:a.kanji+b.counts.kanji,vocabulary:a.vocabulary+b.counts.vocabulary,forge:a.forge+b.counts.forge}),{kanji:0,vocabulary:0,forge:0});
+let state = empty();
+let result = reviewForecast(cards,words,subjects,state,now);
+assert.equal(result.scheduled,false);assert.equal(result.nextAt,undefined);assert.equal(result.hours.length,6);assert.equal(result.days.length,7);
+state.kanji['一']=progress(now);state.kanji['二']=progress(now-1);state.kanji['三']=progress(now+1);
+state.kanji['四']=progress(now+4*hour);state.kanji['五']=progress(now+24*hour);state.kanji['六']=progress(now+1000*hour);
+state.kanji['unknown']=progress(now+1);
+const radical=subjects.find(s=>s.kind==='radical'), kanji=subjects.find(s=>s.kind==='kanji');
+state.forge.records[radical.id]={meaning:track(now),lessonAt:now-1000,note:'',noteAt:0};
+state.forge.records[kanji.id]={meaning:track(now+1),reading:track(now+1),lessonAt:now-1000,note:'',noteAt:0};
+const word=words.find(w=>w.text==='一番');state.kanji['番']=progress(now+2000*hour);state.vocabulary[word.id]=progress(now+2*hour);
+const before=JSON.stringify(state);result=reviewForecast(cards,words,subjects,state,now);
+assert.deepEqual(result.dueNow,{kanji:2,vocabulary:0,forge:1});
+assert.deepEqual(result.hours[0].counts,{kanji:1,vocabulary:1,forge:2});
+assert.equal(result.hours[1].counts.kanji,1,'an exact boundary belongs to the next bucket');
+assert.equal(totals(result.hours).kanji,2,'24-hour endpoint is exclusive');
+assert.equal(totals(result.days).kanji,3,'week includes tomorrow but not distant schedules');
+assert.equal(result.nextAt,now+1);assert.equal(JSON.stringify(state),before,'forecast is read-only');
+const plan=dailyPlan(cards,words,subjects,state,'path',now);
+assert.deepEqual(result.dueNow,{kanji:plan.kanjiDue,vocabulary:plan.wordsDue,forge:plan.forgeQuestions},'due-now counts agree with study queues');
+const advanced=reviewForecast(cards,words,subjects,state,now+4*hour);
+assert.deepEqual(advanced.dueNow,{kanji:4,vocabulary:1,forge:3},'time passing moves items into due now without rescheduling');
+state.forge.records[kanji.id].meaning=track(now+1,9);state.forge.records[kanji.id].reading=track(null,9);
+assert.equal(totals(reviewForecast(cards,words,subjects,state,now).hours).forge,0,'Burned tracks are excluded even with a stale numeric due date');
+state.kanji['番'].learned=false;
+assert.equal(totals(reviewForecast(cards,words,subjects,state,now).hours).vocabulary,0,'ineligible words stay out of the forecast');
+state=empty();state.profile={level:'N3',familiarity:'comfortable',updatedAt:now};
+state.vocabulary[word.id]=progress(now+hour);
+assert.equal(totals(reviewForecast(cards,words,subjects,state,now).hours).vocabulary,1,'assumed prerequisites unlock saved words');
+state=empty();state.kanji['一']=progress(now+1000*hour);
+result=reviewForecast(cards,words,subjects,state,now);
+assert.equal(result.scheduled,true);assert.equal(result.nextAt,now+1000*hour);assert.equal(totals(result.days).kanji,0,'next review is retained beyond the visible horizon');
+// Cover local midnight, exact seven-day boundary, and 23/25-hour calendar days.
+for (const date of [new Date(2026,2,7,12),new Date(2026,9,31,12),new Date(2026,9,24,23,59,59)]) {
+ const at=date.getTime();let f=reviewForecast(cards,words,subjects,empty(),at);
+ for(let i=0;i<7;i++){assert.equal(new Date(f.days[i].start).getHours(),0);if(i<6)assert.equal(f.days[i].end,f.days[i+1].start);}
+ const boundary=f.days[0].end,last=f.days[6].end;
+ state=empty();state.kanji['一']=progress(boundary);state.kanji['二']=progress(last);
+ f=reviewForecast(cards,words,subjects,state,at);
+ assert.equal(f.days[0].counts.kanji,0);assert.equal(f.days[1].counts.kanji,1);assert.equal(totals(f.days).kanji,1);
+ if(process.env.TZ==='America/New_York'&&date.getMonth()===2)assert.equal(f.days[1].end-f.days[1].start,23*hour);
+ if(process.env.TZ==='America/New_York'&&date.getMonth()===9&&date.getDate()===31)assert.equal(f.days[1].end-f.days[1].start,25*hour);
+}
+console.log(`PASS (${process.env.TZ}): forecast boundaries, queue parity, eligibility, separate units, Burned exclusion, midnight/DST, horizon, and immutable progress.`);
