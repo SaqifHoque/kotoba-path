@@ -14,13 +14,13 @@
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
+    <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="pathVisited=false;launch=null"></app-settings>
     <ng-container *ngIf="cards.length && !account.changing">
       <app-study-home *ngIf="view==='home'" [cards]="cards" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
       <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
       <app-encyclopedia *ngIf="!demoMode && view==='catalog'"></app-encyclopedia>
       <app-forge *ngIf="view==='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
-      <app-settings *ngIf="view==='settings'" [cards]="cards"></app-settings>
       <app-review-history *ngIf="view==='history'"></app-review-history>
     </ng-container>
     <p class="footer-note">ことばの道 · One step at a time</p>
