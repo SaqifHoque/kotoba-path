@@ -2,7 +2,6 @@
 <p *ngIf="error" role="alert">{{error}} <button (click)="load()">Retry</button></p>
 <ng-container *ngIf="!loading&&!error">
   <header class="hero"><div><span class="eyebrow">鍛 · Build recall that lasts</span><h1>Kanji <em>Forge</em></h1><p>Shape → meaning → reading. Earn your next unlock through recall.</p></div><div class="rank"><b>{{state.unlockedLevel}}</b><span>Forge level</span></div></header>
-  <div class="status" role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></div>
   <p *ngIf="message" role="status" class="notice">{{message}}</p>
   <ng-container *ngIf="mode==='dashboard'">
     <section class="stats" aria-label="Mastery stages"><div><b>{{countStage(1,4)}}</b><span>Apprentice</span></div><div><b>{{countStage(5,6)}}</b><span>Guru</span></div><div><b>{{countStage(7,7)}}</b><span>Master</span></div><div><b>{{countStage(8,8)}}</b><span>Enlightened</span></div><div><b>{{countStage(9,9)}}</b><span>Burned</span></div></section>

@@ -1,7 +1,4 @@
 <header class="home-heading"><div><span class="eyebrow">{{now | date:'EEEE, MMMM d'}}</span><h1>A little Japanese,<br><em>every day.</em></h1><p>{{account.account.username ? 'Welcome back, '+account.account.username+'.' : 'Welcome to Kotoba Path.'}} Start with what is ready for you.</p></div><span class="home-mark" lang="ja" aria-hidden="true">日</span></header>
-<p class="sync-line" role="status">{{sync.status}} <button type="button" (click)="sync.retry()">Retry sync</button></p>
-<p *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
-<p *ngIf="sync.pendingHistory" role="status">{{sync.pendingHistory}} attempt(s) waiting to sync. Keep this browser’s backup until the save is confirmed.</p>
 <ng-container *ngIf="sync.ready && plan as p; else restoring">
   <section *ngIf="setupVisible" class="setup" aria-labelledby="setup-title">
     <span class="eyebrow">Your starting point</span><h2 id="setup-title">Choose your main study routine</h2><p>You can use both routines. They keep separate schedules; changing this choice preserves your work.</p>

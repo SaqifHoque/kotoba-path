@@ -13,6 +13,7 @@
     <header class="topbar"><button class="menu" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
+    <app-save-status *ngIf="cards.length"></app-save-status>
     <ng-container *ngIf="cards.length && !account.changing">
       <app-study-home *ngIf="view==='home'" [cards]="cards" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>

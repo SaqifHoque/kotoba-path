@@ -1,3 +1,4 @@
+import { SaveStatusComponent } from './features/settings/save-status.component';
 import { DEMO_MODE } from './demo-mode';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
@@ -14,7 +15,7 @@ import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.comp
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [StudyHomeComponent, ReviewHistoryComponent, AccountComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [SaveStatusComponent, StudyHomeComponent, ReviewHistoryComponent, AccountComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;

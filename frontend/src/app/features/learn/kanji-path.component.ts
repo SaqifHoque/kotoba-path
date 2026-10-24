@@ -146,7 +146,7 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.queue.length) {
       this.session = false;
       this.message = this.practice ? 'Practice complete. Your review dates are unchanged.' :
-        this.sync.warning ? 'Session complete. Export a backup to keep this progress.' : 'Session complete. Check sync status above and return for your scheduled reviews.';
+        this.sync.warning ? 'Session complete. Check the saving message above before leaving.' : 'Session complete. Your next reviews will appear when they are ready.';
     }
   }
   interval(rating: Rating): string {

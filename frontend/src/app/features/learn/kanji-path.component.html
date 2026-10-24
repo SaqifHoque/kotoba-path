@@ -18,7 +18,7 @@
     <button (click)="startPlacement()" [disabled]="!sync.ready">Optional 5-kanji self-check</button>
     <p>{{assumed.length}} easier kanji assumed familiar, not mastered. Review dates and completed lessons are preserved when your starting point changes.</p>
     <p *ngIf="profile?.placement as result">Last self-check: {{result.correct}} / {{result.total}} recognized. Suggested starting point: {{result.suggested}}. This is not a JLPT assessment. <button (click)="applySuggestion()">Use suggestion</button></p>
-    <p role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></p>
+    
   </section>
   <p class="notice" *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
   <section *ngIf="placement.length" class="study" aria-label="Proficiency self-check">
