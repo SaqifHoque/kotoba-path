@@ -145,3 +145,5 @@ See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [datasets/README.md](da
 Forge and vocabulary now provide clearer answer feedback, with synced personal Forge meaning synonyms. See [answer checking](docs/answer-checking.md).
 
 Plan your study time with Today’s [review forecast](docs/review-forecast.md): upcoming kanji, vocabulary, and Forge questions over 24 hours or seven days.
+
+Learning progress saves automatically. Use Settings for account access and [progress downloads/imports](docs/saving-and-imports.md), with a preview before applying a file.

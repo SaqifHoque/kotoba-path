@@ -1,6 +1,6 @@
 # Kanji Forge
 
-Open **Kanji Forge** in the sidebar. This optional mode has its own curriculum state, lesson limit, meaning/reading tracks, mnemonic notes, and backup. It does not alter the existing learning path, proficiency selection, or its review history. There is no audio or handwriting.
+Open **Kanji Forge** in the sidebar. This optional mode has its own curriculum state, lesson limit, meaning/reading tracks, mnemonic notes, and progress files in Settings. It does not alter the existing learning path, proficiency selection, or its review history. There is no audio or handwriting.
 
 ## Progression
 
@@ -24,7 +24,7 @@ The trouble-item workshop selects tracks with at least three mistakes and less t
 
 Forge is stored as a separate `forge` object in the existing database profile JSON and cached under `kotoba-forge-v1`. It includes independently versioned review tracks, unlocked level, settings, notes, and timestamps. Conflict merges preserve the more-reviewed track and newer notes/settings. Review counts are snapshots, not a full review-event log.
 
-Older clients that omit Forge in a profile update cannot erase saved Forge data. Existing profile rows need no schema change. JSON backup import validates records and merges without resetting other modes. Guest profiles use the existing browser cookie. Optional [learning accounts](accounts.md) preserve Forge progress across devices.
+Older clients that omit Forge in a profile update cannot erase saved Forge data. Existing profile rows need no schema change. Settings imports validate records, preview changes, and merge without resetting other modes. See [saving and imports](saving-and-imports.md). Guest profiles use the existing browser cookie. Optional [learning accounts](accounts.md) preserve Forge progress across devices.
 
 ## Sources and scope
 
