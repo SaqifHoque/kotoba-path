@@ -1,3 +1,4 @@
+import { ProgressImport, mergeBackup } from '../settings/progress-backup';
 import { DEMO_MODE } from '../../demo-mode';
 import { saveStatus } from '../settings/save-status';
 import { Injectable } from '@angular/core';
@@ -108,10 +109,14 @@ export class StudySyncService {
     if (this.outbox.warning) this.warning = this.outbox.warning;
   }
 
-  restore(kanji: ReviewProgress): void {
-    this.canCache = true;
-    this.warning = '';
-    this.update(mergeReviews(this.state.value.kanji, kanji));
+  importProgress(incoming: ProgressImport): void {
+    if (!this.ready || this.auth.changing) throw new Error('Wait for progress to finish loading before importing.');
+    const merged = mergeBackup(this.state.value,incoming);
+    this.version++;
+    this.state.next({...this.state.value,...merged});
+    this.dirty = true;
+    this.cache();
+    void this.flush();
   }
 
   async retry(): Promise<void> {

@@ -1,3 +1,4 @@
+import { createBackup } from './progress-backup';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccountComponent } from '../account/account.component';
@@ -14,8 +15,7 @@ export class SettingsComponent {
   message = '';
   constructor(public readonly sync: StudySyncService, public readonly account: AccountService) {}
   download(): void {
-    const {profile,kanji,vocabulary,forge} = this.sync.state.value;
-    const backup = {format:'kotoba-path-progress',version:1,exportedAt:Date.now(),progress:{profile,kanji,vocabulary,forge}};
+    const backup = createBackup(this.sync.state.value,Date.now());
     const url = URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'}));
     const a = document.createElement('a');
     a.href=url; a.download='kotoba-learning-progress.json'; a.click();
