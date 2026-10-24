@@ -1,0 +1,21 @@
+:host { display: block; margin-top: 1.5rem; }
+.forecast { border: 1px solid var(--line); padding: clamp(1rem, 3vw, 1.5rem); background: #fff9; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.eyebrow { text-transform: uppercase; letter-spacing: .13em; font-size: .65rem; font-weight: 700; color: var(--rust); }
+h2 { font: 600 1.4rem var(--jp); margin: .5rem 0; }
+p { line-height: 1.65; font-size: .85rem; color: var(--muted); }
+.range { display: flex; flex-wrap: wrap; gap: .4rem; }
+button { border: 1px solid var(--line); background: white; color: var(--ink); padding: .6rem .7rem; cursor: pointer; font: inherit; font-size: .8rem; }
+button[aria-pressed=true] { color: white; background: var(--ink); border-color: var(--ink); }
+button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .85rem; font-variant-numeric: tabular-nums; }
+caption { text-align: left; color: var(--muted); padding: .6rem 0; font-size: .8rem; line-height: 1.5; }
+th, td { padding: .8rem .4rem; border-bottom: 1px solid var(--line); text-align: right; overflow-wrap: anywhere; }
+th:first-child { text-align: left; width: 40%; }
+thead th { font-size: .75rem; color: var(--muted); }
+tbody th { font-weight: 500; }
+small { display: block; margin-top: .3rem; font-size: .72rem; color: var(--muted); line-height: 1.5; }
+.due-now { background: #eceee6; font-weight: 700; }
+.empty { padding: .7rem 0; }
+.footnote, .next-date { font-size: .75rem; margin-bottom: 0; }
+@media (max-width: 520px) { th, td { padding: .7rem .25rem; } table { font-size: .8rem; } th:first-child { width: 36%; } }
