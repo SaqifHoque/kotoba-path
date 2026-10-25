@@ -1,5 +1,5 @@
-<button type="button" class="account-toggle" (click)="open=!open" [attr.aria-expanded]="open" aria-controls="account-panel">{{auth.account.username || 'Save across devices'}}</button>
-<section id="account-panel" *ngIf="open" aria-labelledby="account-heading">
+<button *ngIf="!expanded" type="button" class="account-toggle" (click)="open=!open" [attr.aria-expanded]="open" aria-controls="account-panel">{{auth.account.username || 'Save across devices'}}</button>
+<section [class.inline]="expanded" id="account-panel" *ngIf="open||expanded" aria-labelledby="account-heading">
   <h2 id="account-heading">Your learning account</h2>
   <ng-container *ngIf="savedKey; else accountForm">
     <p>Save this recovery key in a safe place. It can reset your password and is shown only once.</p>

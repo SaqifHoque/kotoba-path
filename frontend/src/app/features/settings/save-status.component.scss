@@ -1,0 +1,8 @@
+:host { display:block; }
+.save-state { display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;border-block:1px solid var(--line);padding:.8rem 0;margin-top:1rem;font-size:.8rem; }
+.save-state div { flex:1;min-width:180px; }
+strong, span { display:block; } span { margin-top:.3rem;color:var(--muted);line-height:1.5; }
+p { flex-basis:100%;margin:0;line-height:1.6; }
+button { border:1px solid var(--line);padding:.6rem;background:white;color:var(--ink);font:inherit;cursor:pointer; }
+button:focus-visible { outline:3px solid var(--gold);outline-offset:2px; }
+.attention { border-color:var(--rust); }

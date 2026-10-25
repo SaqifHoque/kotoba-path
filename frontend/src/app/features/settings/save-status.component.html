@@ -1,0 +1,7 @@
+<section class="save-state" aria-label="Progress saving" *ngIf="sync.saveStatus as state" [class.attention]="state.attention">
+  <div role="status"><strong>{{state.message}}</strong><span>{{state.detail}}</span></div>
+  <button type="button" *ngIf="state.retry" (click)="sync.retry()" [disabled]="state.busy">Retry saving</button>
+  <button type="button" (click)="settings.emit()">Saving settings</button>
+  <p *ngIf="sync.pendingHistory&&!demo">{{sync.pendingHistory}} recent attempt(s) waiting to sync. Keep this browser’s data until the save is confirmed.</p>
+  <p *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
+</section>

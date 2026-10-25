@@ -1,0 +1,40 @@
+<header><span class="eyebrow">Your progress, kept safe</span><h1>Settings</h1><p>Manage your learning account and progress files here. Lessons save automatically.</p></header>
+<section aria-labelledby="account-title">
+  <h2 id="account-title">Account &amp; devices</h2>
+  <p *ngIf="demo">This public demo saves progress on this device. Accounts and cross-device saving are available in the self-hosted app.</p>
+  <app-account *ngIf="!demo" [expanded]="true"></app-account>
+</section>
+<section aria-labelledby="data-title">
+  <h2 id="data-title">Data &amp; privacy</h2>
+  <p>Download one progress file for your kanji, vocabulary, Forge progress, starting point, mnemonic notes, and personal meaning synonyms.</p>
+  <p class="note">This file does not include your password, recovery key, or review history. Your account’s saved history stays with the account.</p>
+  <p *ngIf="sync.pendingHistory" class="note">Recent attempts waiting to sync remain in this browser and are not included in this progress file. Keep this browser’s data until they have synced.</p>
+  <button type="button" [disabled]="!sync.ready||account.changing" (click)="download()">Download learning data</button>
+  <div class="import-file">
+    <label for="progress-file">Import previous progress</label>
+    <input id="progress-file" type="file" accept="application/json,.json" [disabled]="!sync.ready||account.changing||reading" (change)="chooseFile($event)">
+    <p class="note">Choose a Kotoba Path progress file. Older kanji, vocabulary, and Forge files are supported. You will review a preview before anything is applied.</p>
+  </div>
+  <p *ngIf="reading" role="status">Reading your progress file…</p>
+  <div *ngIf="olderFile" class="legacy-file">
+    <label for="legacy-kind">What does this older file contain?</label>
+    <select id="legacy-kind" [(ngModel)]="legacy" (ngModelChange)="preview=null;summary=null;error=''">
+      <option value="">Choose a progress type</option><option value="kanji">Kanji progress</option><option value="vocabulary">Vocabulary progress</option>
+    </select>
+    <button type="button" [disabled]="!legacy||account.changing" (click)="previewFile()">Preview older file</button>
+  </div>
+  <section *ngIf="preview&&summary as s" class="import-preview" aria-labelledby="preview-title">
+    <h3 id="preview-title">Review your import</h3><p>{{filename}}</p>
+    <p>Import into {{account.account.username ? account.account.username+'’s account' : 'your current guest progress'}}.</p>
+    <table><caption>Changes to learning progress</caption><thead><tr><th scope="col">Area</th><th scope="col">Add</th><th scope="col">Update</th><th scope="col">Keep</th></tr></thead><tbody>
+      <tr *ngFor="let row of s.rows"><th scope="row">{{row.label}}</th><td>{{row.added}}</td><td>{{row.updated}}</td><td>{{row.unchanged}}</td></tr>
+    </tbody></table>
+    <p>Starting point: {{s.profileChanged?'update from file':'keep current'}}. Forge level and lesson settings: {{s.forgeSettingsChanged?'merge from file':'keep current'}}.</p>
+    <p *ngIf="preview.skipped" class="note">{{preview.skipped}} record(s) or preferences are not in this catalog and will be skipped.</p>
+    <p class="note">Counts describe items in this file; other existing items are kept. Existing progress is preserved when it has newer review attempts. Personal notes and meaning preferences use their saved update times. Importing does not create review-history entries.</p>
+    <div class="import-actions"><button type="button" class="primary" [disabled]="!sync.ready||account.changing||reading" (click)="confirmImport()">Import and merge progress</button><button type="button" (click)="cancelImport()">Cancel import</button></div>
+  </section>
+  <button *ngIf="filename&&!preview" type="button" (click)="cancelImport()">Cancel import</button>
+  <p *ngIf="error" role="alert">{{error}}</p>
+  <p *ngIf="message" role="status">{{message}}</p>
+</section>

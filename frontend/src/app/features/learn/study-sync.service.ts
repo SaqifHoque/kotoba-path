@@ -1,3 +1,6 @@
+import { ProgressImport, mergeBackup } from '../settings/progress-backup';
+import { DEMO_MODE } from '../../demo-mode';
+import { saveStatus } from '../settings/save-status';
 import { Injectable } from '@angular/core';
 import { AccountService } from '../account/account.service';
 import { ReviewAttempt, ReviewOutbox } from './review-history';
@@ -15,7 +18,13 @@ interface StudyState { revision: number; profile: Proficiency | null; kanji: Rev
 export class StudySyncService {
   readonly state = new BehaviorSubject<StudyState>({revision: 0, profile: null, kanji: {}, vocabulary: {}, forge: emptyForge()});
   forgeSubjects: Subject[] = [];
-  status = 'Connecting to database…';
+  private phase: 'connecting' | 'saving' | 'idle' = 'connecting';
+  private localSaved = false;
+  get saveStatus() {
+    return saveStatus({ready:this.ready,phase:this.phase,connected:this.connected,dirty:this.dirty,localSaved:this.localSaved,
+      pendingHistory:this.pendingHistory,historyWarning:!!this.outbox?.warning,signedIn:!!this.auth.account.username,demo:DEMO_MODE,changing:this.auth.changing});
+  }
+  get status(): string { return this.saveStatus.message; }
   warning = '';
   ready = false;
   private readonly key = 'kotoba-kanji-reviews-v1';
@@ -53,7 +62,7 @@ export class StudySyncService {
     }
     catch {
       this.canCache = false;
-      this.warning = 'Browser progress could not be read. The existing backup is preserved; export a backup to keep new progress.';
+      this.warning = 'Saved device progress could not be read. The original copy is preserved. Keep this tab open and download learning data from Settings.';
     }
     void this.retry();
   }
@@ -100,16 +109,21 @@ export class StudySyncService {
     if (this.outbox.warning) this.warning = this.outbox.warning;
   }
 
-  restore(kanji: ReviewProgress): void {
-    this.canCache = true;
-    this.warning = '';
-    this.update(mergeReviews(this.state.value.kanji, kanji));
+  importProgress(incoming: ProgressImport): void {
+    if (!this.ready || this.auth.changing) throw new Error('Wait for progress to finish loading before importing.');
+    const merged = mergeBackup(this.state.value,incoming);
+    this.version++;
+    this.state.next({...this.state.value,...merged});
+    this.dirty = true;
+    this.cache();
+    void this.flush();
   }
 
   async retry(): Promise<void> {
     if (this.saving || !this.initialized) return;
+    if (DEMO_MODE) { this.cache(); this.ready = true; this.phase = 'idle'; return; }
     this.saving = true;
-    this.status = 'Connecting to database…';
+    this.phase = 'connecting';
     try {
       if (!this.auth.available) {
         const previous = this.auth.account.id;
@@ -122,8 +136,8 @@ export class StudySyncService {
       this.dirty = true;
     } catch {
       this.connected = false;
-      this.status = 'Database unavailable. Keep your browser backup and retry to sync.';
-    } finally { this.saving = false; this.ready = true; }
+      this.cache();
+    } finally { this.saving = false; this.ready = true; this.phase = 'idle'; }
     if (this.connected) await this.flush();
   }
 
@@ -161,14 +175,16 @@ export class StudySyncService {
 
   private cache(): void {
     if (this.outbox?.warning) this.warning = this.outbox.warning;
-    if (!this.canCache) return;
+    if (!this.canCache) { this.localSaved = false; return; }
     try {
       localStorage.setItem(this.auth.cacheKey(this.key), JSON.stringify({version: 1, cards: this.state.value.kanji}));
       localStorage.setItem(this.auth.cacheKey(this.profileKey), JSON.stringify(this.state.value.profile));
       localStorage.setItem(this.auth.cacheKey(this.vocabularyKey), JSON.stringify({version: 1, cards: this.state.value.vocabulary}));
       localStorage.setItem(this.auth.cacheKey(this.forgeKey), JSON.stringify(this.state.value.forge));
+      this.localSaved = true;
+      if (this.warning.startsWith('A complete device copy could not be saved.')) this.warning = this.outbox?.warning || '';
     }
-    catch { this.warning = 'Browser backup could not be saved. Export progress or wait for a successful database save.'; }
+    catch { this.localSaved = false; this.warning = 'A complete device copy could not be saved. Keep this tab open and download learning data from Settings, or wait for an account save.'; }
   }
 
   async prepareAccountChange(requireSaved = false): Promise<void> {
@@ -199,9 +215,10 @@ export class StudySyncService {
         const events = this.outbox?.batch() ?? [];
         this.dirty = false;
         const version = this.version;
-        this.status = 'Saving to database…';
+        this.phase = 'saving';
         try {
           const response = await firstValueFrom(this.http.put<{revision: number; acknowledgedEvents?: string[]}>('/api/study-profile', {...this.state.value, reviewEvents: events}).pipe(timeout(10000)));
+          if (!Number.isSafeInteger(response.revision) || response.revision < 0) throw new Error('Save response was invalid');
           this.state.next({...this.state.value, revision: response.revision});
           const acknowledged = response.acknowledgedEvents ?? [];
           if (events.some(event => !acknowledged.includes(event.id))) throw new Error('History save was not acknowledged');
@@ -214,11 +231,11 @@ export class StudySyncService {
           } else throw error;
         }
       }
-      this.status = 'Saved to database';
+      this.phase = 'idle';
     } catch {
       this.dirty = true;
       this.connected = false;
-      this.status = 'Database sync failed. Keep your browser backup and retry to sync.';
-    } finally { this.saving = false; }
+      this.phase = 'idle';
+    } finally { this.saving = false; this.phase = 'idle'; }
   }
 }

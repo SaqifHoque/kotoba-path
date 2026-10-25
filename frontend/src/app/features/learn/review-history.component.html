@@ -1,7 +1,4 @@
 <header class="history-heading"><div><span>Your learning record</span><h1>Review history</h1><p>Completed learning and scheduled review attempts, saved across devices.</p></div><button type="button" [disabled]="loading" (click)="load()">Refresh history</button></header>
-<p class="history-status" role="status">{{sync.status}} <button type="button" (click)="sync.retry()">Retry sync</button></p>
-<p *ngIf="sync.pendingHistory" role="status">{{sync.pendingHistory}} attempt(s) waiting to sync. They appear here after the database confirms the save. Keep your browser backup until then.</p>
-<p *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
 <section *ngIf="loaded" class="history-stats" aria-label="Recorded recall"><div><strong>{{total | number}}</strong><span>Recorded attempts</span></div><div><strong>{{scheduled | number}}</strong><span>Scheduled attempts</span></div><div><strong>{{scheduled ? recall+'%' : '—'}}</strong><span>Scheduled recall</span></div></section>
 <p class="history-note">History starts with attempts recorded by this version. Earlier progress and restored backups do not create past attempts. Extra practice is excluded. Good, Hard, and Correct count as recalled; learning checks are excluded from scheduled recall. These are recorded answers, not a prediction of retention.</p>
 <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="load()">Retry history</button></p>

@@ -1,3 +1,5 @@
+import { SettingsComponent } from './features/settings/settings.component';
+import { SaveStatusComponent } from './features/settings/save-status.component';
 import { DEMO_MODE } from './demo-mode';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
@@ -7,21 +9,20 @@ import { KanjiCard } from './features/learn/kanji-engine';
 import { StudyHomeComponent } from './features/home/study-home.component';
 import { StudyAction, StudyLaunch, StudyView, actionView } from './features/home/study-home';
 import { ReviewHistoryComponent } from './features/learn/review-history.component';
-import { AccountComponent } from './features/account/account.component';
 import { AccountService } from './features/account/account.service';
 import { KanjiPathComponent } from './features/learn/kanji-path.component';
 import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.component';
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [StudyHomeComponent, ReviewHistoryComponent, AccountComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
   menuOpen = false; view: StudyView = 'home'; pathVisited = false;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
-  readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history'};
-  readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts'};
+  readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Settings'};
+  readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy'};
   private nextLaunch = 0; private subscription?: Subscription;
   constructor(public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.loadCatalog(); }

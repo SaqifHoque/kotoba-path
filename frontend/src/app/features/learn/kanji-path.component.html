@@ -18,9 +18,8 @@
     <button (click)="startPlacement()" [disabled]="!sync.ready">Optional 5-kanji self-check</button>
     <p>{{assumed.length}} easier kanji assumed familiar, not mastered. Review dates and completed lessons are preserved when your starting point changes.</p>
     <p *ngIf="profile?.placement as result">Last self-check: {{result.correct}} / {{result.total}} recognized. Suggested starting point: {{result.suggested}}. This is not a JLPT assessment. <button (click)="applySuggestion()">Use suggestion</button></p>
-    <p role="status">{{sync.status}} <button (click)="sync.retry()">Retry sync</button></p>
+    
   </section>
-  <p class="notice" *ngIf="sync.warning" role="alert">{{sync.warning}}</p>
   <section *ngIf="placement.length" class="study" aria-label="Proficiency self-check">
     <p>{{placementBand}} self-check · {{placementIndex+1}} / 5. Recall a meaning and a reading.</p>
     <div class="glyph" lang="ja">{{placement[placementIndex].character}}</div>
@@ -74,5 +73,5 @@
       <footer class="pagination"><button [disabled]="page===0" (click)="page=page-1">← Previous</button><span>{{page+1}} / {{pageCount}}</span><button [disabled]="page+1===pageCount" (click)="page=page+1">Next →</button></footer>
     </section>
   </ng-container>
-  <footer class="storage"><p>Progress is cached in this browser and syncs to your database profile. Sign in to continue across devices, or export a backup before clearing browser data. Review history shows attempts after they sync.</p><button (click)="exportProgress()">Export progress</button><label>Restore backup<input type="file" accept="application/json" (change)="importProgress($event)"></label><p>Kanji & examples: Kanji Alive. Ordered by school grade, then stroke count; these levels are not JLPT grades.</p></footer>
+  <footer class="storage"><p>Kanji &amp; examples: Kanji Alive. Levels follow school grade and stroke count; they are not JLPT grades.</p></footer>
 </ng-container>
