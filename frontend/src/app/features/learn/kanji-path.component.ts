@@ -16,6 +16,7 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
   @Input() launch: StudyLaunch | null = null;
   @Output() launched = new EventEmitter<number>();
   private lastLaunch = 0;
+  studioLaunch=0; studioReviewsOnly=false;
   bands = BANDS; profile: Proficiency | null = null;
   selectedLevel: Band | 'unsure' = 'unsure'; familiarity: 'studying' | 'comfortable' = 'studying';
   showMap = false; placement: KanjiCard[] = []; placementIndex = 0; placementCorrect = 0; placementRevealed = false;
@@ -54,7 +55,7 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
     this.lastLaunch = this.launch.id;
     if (this.launch.action === 'kanji-lessons') this.startRecommended();
     else if (this.launch.action === 'kanji-reviews') { this.changeMode('review'); this.startReview(); }
-    else this.changeMode('studio');
+    else {this.changeMode('studio');this.studioReviewsOnly=this.launch.action==='vocabulary-reviews';this.studioLaunch=this.launch.id;}
     const id = this.launch.id; queueMicrotask(() => this.launched.emit(id));
   }
   get completed(): number { return this.levels.filter(l => this.done(l)).length; }
@@ -111,7 +112,7 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
   count(level: KanjiLevel): number { return level.cards.filter(c => this.progress[c.character]?.learned).length; }
   trackLevel(_: number, level: KanjiLevel): number { return level.number; }
   goCurrent(): void { this.page = Math.floor((this.nextLevel - 1) / 10); }
-  changeMode(mode: 'path' | 'review' | 'studio'): void { this.mode = mode; this.session = false; this.queue = []; this.message = ''; }
+  changeMode(mode: 'path' | 'review' | 'studio'): void { this.studioLaunch=0;this.studioReviewsOnly=false;this.mode = mode; this.session = false; this.queue = []; this.message = ''; }
   rateMixed(event: {card: KanjiCard; rating: Rating}): void {
     this.now = Date.now();
     const previous = this.progress[event.card.character];
