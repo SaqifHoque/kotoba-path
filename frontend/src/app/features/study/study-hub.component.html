@@ -1,0 +1,35 @@
+<header><span class="eyebrow">{{section==='learning'?'Build understanding':section==='reviews'?'Make it stick':'Follow your curiosity'}}</span><h1>{{section==='learning'?'Learn':section==='reviews'?'Review':'Library'}}</h1><p>{{section==='learning'?'A clear lesson to begin, with your current milestones in one place.':section==='reviews'?'Recall what you have learned, at the right time.':'Browse Japanese and revisit the learning tools you already use.'}}</p></header>
+<ng-container *ngIf="sync.ready&&plan as p; else loading">
+  <ng-container *ngIf="section==='learning'">
+    <section class="recommended" aria-labelledby="lesson-title">
+      <span class="eyebrow">Your next lesson</span>
+      <ng-container *ngIf="lesson as next; else paused"><h2 id="lesson-title">{{next.label}}</h2><p>{{next.detail}}</p><button type="button" class="primary" (click)="start.emit(next.action)">Start lesson →</button></ng-container>
+      <ng-template #paused><h2 id="lesson-title">Let your new knowledge settle.</h2><p>{{mode==='forge'?p.forgePause:'You have introduced the available reading-path items.'}}</p><p *ngIf="p.nextReviewAt">Next review: {{p.nextReviewAt|date:'medium'}}.</p><button type="button" (click)="open.emit('reviews')">Check reviews →</button></ng-template>
+      <p class="note">Current lesson preference: {{mode==='forge'?'typed recall':'reading path'}}. <button type="button" class="text-button" (click)="open.emit('home')">Adjust starting point on Today</button></p>
+    </section>
+    <p *ngIf="p.kanjiDue||p.wordsDue||p.forgeQuestions" class="review-note">You also have reviews ready. <button type="button" class="text-button" (click)="open.emit('reviews')">See your review queues</button></p>
+    <section class="milestones" aria-labelledby="milestones-title"><h2 id="milestones-title">Your current milestones</h2><div class="cards">
+      <article *ngFor="let milestone of milestones"><h3>{{milestone.title}}</h3><strong>{{milestone.completed}} / {{milestone.total}}</strong><progress *ngIf="milestone.total" [value]="milestone.completed" [max]="milestone.total" [attr.aria-label]="milestone.title"></progress><p>{{milestone.detail}}</p></article>
+    </div><p class="note">The current courses keep their own progress. Your earlier work stays recorded when you explore either course.</p></section>
+    <details><summary>Other study options</summary><div class="cards">
+      <article><h3>Typed recall · Kanji Forge</h3><p>Study components, kanji, and words from level 1. Type meanings and readings.</p><button type="button" (click)="choose('forge')" [attr.aria-pressed]="mode==='forge'">Prefer typed lessons</button><button type="button" (click)="open.emit('forge')">Open typed course</button></article>
+      <article><h3>Reading path</h3><p>Start near your proficiency, self-assess kanji recall, and practise whole-word readings.</p><button type="button" (click)="choose('path')" [attr.aria-pressed]="mode==='path'">Prefer reading path</button><button type="button" (click)="open.emit('learn')">Open reading path</button></article>
+    </div></details><p *ngIf="notice" role="status">{{notice}}</p>
+  </ng-container>
+  <ng-container *ngIf="section==='reviews'">
+    <section class="recommended" aria-labelledby="review-title"><span class="eyebrow">Your next review</span><ng-container *ngIf="review as next; else caughtUp"><h2 id="review-title">{{next.label}}</h2><p>{{next.detail}}</p><button type="button" class="primary" (click)="start.emit(next.action)">Start review session →</button></ng-container><ng-template #caughtUp><h2 id="review-title">You’re caught up for now.</h2><p *ngIf="p.nextReviewAt">Next review: {{p.nextReviewAt|date:'medium'}}.</p><p *ngIf="!p.nextReviewAt">Your first completed lessons will add reviews here.</p><button type="button" (click)="open.emit('learning')">Explore lessons →</button></ng-template></section>
+    <section aria-labelledby="queues-title"><h2 id="queues-title">Choose a review queue</h2><div class="cards review-queues">
+      <article><h3>Kanji recall</h3><strong>{{p.kanjiDue}} <small>kanji due</small></strong><p>Recall meaning and reading in a batch of up to 20 cards.</p><button type="button" [disabled]="!p.kanjiDue" (click)="start.emit('kanji-reviews')">Review kanji</button></article>
+      <article><h3>Vocabulary</h3><strong>{{p.wordsDue}} <small>words due</small></strong><p>Type whole-word readings. This queue contains due words only.</p><button type="button" [disabled]="!p.wordsDue" (click)="start.emit('vocabulary-reviews')">Review words</button></article>
+      <article><h3>Meaning &amp; reading</h3><strong>{{p.forgeQuestions}} <small>questions due</small></strong><p>{{p.forgeSubjects}} typed-course subjects. Meaning and reading count separately.</p><button type="button" [disabled]="!p.forgeQuestions" (click)="start.emit('forge-reviews')">Review typed answers</button></article>
+    </div></section><button type="button" (click)="open.emit('history')">View review history →</button>
+  </ng-container>
+  <ng-container *ngIf="section==='library'">
+    <div class="cards">
+      <article><h2>Kanji, radicals &amp; words</h2><p>Browse the existing typed-course catalog, mnemonic notes, and extra practice.</p><button type="button" (click)="open.emit('forge')">Browse typed course</button></article>
+      <article><h2>Reading path map</h2><p>Explore your existing levels, proficiency tools, and vocabulary practice.</p><button type="button" (click)="open.emit('learn')">Browse reading path</button></article>
+      <article><h2>Reading encyclopedia</h2><p>Look up Japanese text and explore the visual reference.</p><button type="button" [disabled]="demo" (click)="open.emit('catalog')">Open encyclopedia</button><p *ngIf="demo" class="note">The encyclopedia is available in the self-hosted app.</p></article>
+    </div>
+  </ng-container>
+</ng-container>
+<ng-template #loading><p role="status">Restoring your learning progress…</p></ng-template>

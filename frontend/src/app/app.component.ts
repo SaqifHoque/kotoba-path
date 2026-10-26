@@ -1,3 +1,5 @@
+import { StudyHubComponent } from './features/study/study-hub.component';
+import { StudySection, sectionFor, isReviewAction } from './features/study/study-overview';
 import { SettingsComponent } from './features/settings/settings.component';
 import { SaveStatusComponent } from './features/settings/save-status.component';
 import { DEMO_MODE } from './demo-mode';
@@ -15,11 +17,11 @@ import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.comp
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
-  menuOpen = false; view: StudyView = 'home'; pathVisited = false;
+  menuOpen = false; view: StudyView = 'home'; section: StudySection = 'home'; pathVisited = false;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
   readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
   readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
@@ -32,11 +34,11 @@ export class AppComponent implements OnInit, OnDestroy {
       error: () => {this.loading = false; this.error = 'Your study catalog could not be loaded. Check your connection and retry.';}});
   }
   navigate(view: StudyView): void {
-    this.view = view; this.menuOpen = false; this.launch = null;
+    this.view = view; this.section = sectionFor(view); this.menuOpen = false; this.launch = null;
     if (view === 'learn') this.pathVisited = true;
   }
   start(action: StudyAction): void {
-    this.view = actionView(action); this.menuOpen = false;
+    this.view = actionView(action); this.section = isReviewAction(action)?'reviews':'learning'; this.menuOpen = false;
     if (this.view === 'learn') this.pathVisited = true;
     this.launch = {id: ++this.nextLaunch, action};
   }
