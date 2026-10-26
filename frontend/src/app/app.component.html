@@ -1,5 +1,5 @@
 <div class="shell">
-  <aside id="main-navigation" [class.open]="menuOpen">
+  <aside id="main-navigation" [class.open]="menuOpen" [attr.inert]="compactNavigation&&!menuOpen?'':null" [attr.aria-hidden]="compactNavigation&&!menuOpen?'true':null">
     <a class="brand" href="#" aria-label="Kotoba Path home" (click)="$event.preventDefault();navigate('home')"><span>言</span><div><strong>Kotoba Path</strong><small>日本語を一歩ずつ</small></div></a>
     <nav class="study-navigation" aria-label="Main navigation">
       <button type="button" [class.active]="section==='home'" [attr.aria-current]="section==='home'?'page':null" (click)="navigate('home')"><b aria-hidden="true">日</b><span>Today</span></button>
@@ -10,9 +10,10 @@
     </nav>
     <div class="sidebar-foot"><span>今日の言葉</span><strong>一歩一歩</strong><small>One step at a time</small></div>
   </aside>
-  <main>
+  <button *ngIf="compactNavigation&&menuOpen" type="button" class="navigation-shade" aria-label="Close navigation" (click)="closeNavigation()"></button>
+  <main #mainContent tabindex="-1">
     <p *ngIf="demoMode" role="status" style="padding:12px 24px;background:#eef4ec;color:#263b2b">Public demo · Learning, reviews, and Kanji Forge work in this browser. Progress stays on this device. Accounts, cloud sync, and the encyclopedia require the self-hosted server. <a href="https://github.com/SaqifHoque/kotoba-path">Source and setup</a></p>
-    <header class="topbar"><button class="menu" aria-label="Toggle navigation" aria-controls="main-navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
+    <header class="topbar"><button #menuToggle type="button" class="menu" aria-label="Toggle navigation" aria-controls="main-navigation" [attr.aria-expanded]="menuOpen" (click)="toggleNavigation()">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
