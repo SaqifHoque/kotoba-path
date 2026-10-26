@@ -21,8 +21,8 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
   menuOpen = false; view: StudyView = 'home'; pathVisited = false;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
-  readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Settings'};
-  readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy'};
+  readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
+  readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
   private nextLaunch = 0; private subscription?: Subscription;
   constructor(public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.loadCatalog(); }

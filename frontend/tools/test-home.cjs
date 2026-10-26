@@ -18,7 +18,7 @@ state.kanji['一']=progress(now+day);state.kanji['番']=progress(now+day);
 plan=dailyPlan(cards,words,subjects,state,'path',now);assert(plan.newWords>0);assert.equal(plan.next.action,'vocabulary');
 const word=words.find(w=>w.text==='一番');assert(word);
 state.vocabulary[word.id]=progress(now-100);state.kanji['一']=progress(now-50);
-plan=dailyPlan(cards,words,subjects,state,'path',now);assert.equal(plan.next.action,'vocabulary');assert.equal(plan.wordsDue,1);assert.equal(plan.kanjiDue,1);
+plan=dailyPlan(cards,words,subjects,state,'path',now);assert.equal(plan.next.action,'vocabulary-reviews');assert.equal(plan.wordsDue,1);assert.equal(plan.kanjiDue,1);
 const radical=subjects.find(s=>s.kind==='radical');state.forge.records[radical.id]=record(radical,now-200);
 plan=dailyPlan(cards,words,subjects,state,'path',now);assert.equal(plan.next.action,'forge-reviews','due work in another mode beats new work');assert.equal(plan.forgeQuestions,1);assert.equal(plan.forgeSubjects,1);
 state.forge.records[radical.id].meaning.due=now-50;delete state.vocabulary[word.id];

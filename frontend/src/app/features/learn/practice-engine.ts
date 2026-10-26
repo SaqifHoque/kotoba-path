@@ -36,8 +36,11 @@ export function availableWords(words: Word[], progress: ReviewProgress, assumed:
   const familiar = new Set(assumed);
   return words.filter(w => w.prerequisites.every(k => progress[k]?.learned || (!progress[k] && familiar.has(k))));
 }
+export function dueWords(words: Word[], progress: ReviewProgress, now: number): Word[] {
+  return words.filter(w=>progress[w.id]?.due<=now).sort((a,b)=>progress[a.id].due-progress[b.id].due);
+}
 export function wordQueue(words: Word[], progress: ReviewProgress, now: number): Word[] {
-  const due = words.filter(w => progress[w.id]?.due <= now).sort((a, b) => progress[a.id].due - progress[b.id].due);
+  const due = dueWords(words,progress,now);
   return [...due, ...words.filter(w => !progress[w.id])];
 }
 export function mixedQueue(cards: KanjiCard[], kanji: ReviewProgress, words: Word[], vocabulary: ReviewProgress, now: number, assumed: string[] = []): Exercise[] {
