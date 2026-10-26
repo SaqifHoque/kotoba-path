@@ -16,14 +16,14 @@
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
-    <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="pathVisited=false;launch=null"></app-settings>
+    <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="resetSessions()"></app-settings>
     <ng-container *ngIf="cards.length && !account.changing">
-      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" (start)="start($event)" (open)="navigate($event)"></app-study-hub>
-      <app-study-home *ngIf="view==='home'" [cards]="cards" (start)="start($event)" (open)="navigate($event)"></app-study-home>
-      <app-kanji-path *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
+      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-hub>
+      <app-study-home *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
+      <app-kanji-path class="study-screen" *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
       <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
       <app-encyclopedia *ngIf="!demoMode && view==='catalog'"></app-encyclopedia>
-      <app-forge *ngIf="view==='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
+      <app-forge class="study-screen" *ngIf="forgeVisited" [hidden]="view!=='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
       <app-review-history *ngIf="view==='history'"></app-review-history>
     </ng-container>
     <p class="footer-note">ことばの道 · One step at a time</p>

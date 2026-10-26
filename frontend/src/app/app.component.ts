@@ -1,9 +1,9 @@
 import { StudyHubComponent } from './features/study/study-hub.component';
-import { StudySection, sectionFor, isReviewAction } from './features/study/study-overview';
+import { OpenSession, StudySection, sectionFor, isReviewAction } from './features/study/study-overview';
 import { SettingsComponent } from './features/settings/settings.component';
 import { SaveStatusComponent } from './features/settings/save-status.component';
 import { DEMO_MODE } from './demo-mode';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { StudyCatalogService } from './core/services/study-catalog.service';
@@ -21,7 +21,10 @@ import { ForgeComponent } from './features/forge/forge.component';
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
-  menuOpen = false; view: StudyView = 'home'; section: StudySection = 'home'; pathVisited = false;
+  menuOpen = false; view: StudyView = 'home'; section: StudySection = 'home'; pathVisited = false; forgeVisited = false;
+  @ViewChild(KanjiPathComponent) private path?: KanjiPathComponent;
+  @ViewChild(ForgeComponent) private forge?: ForgeComponent;
+  private lastSessionView: 'learn'|'forge'|null = null;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
   readonly titles: Record<StudyView, string> = {home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
   readonly subtitles: Record<StudyView, string> = {home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
@@ -36,12 +39,21 @@ export class AppComponent implements OnInit, OnDestroy {
   navigate(view: StudyView): void {
     this.view = view; this.section = sectionFor(view); this.menuOpen = false; this.launch = null;
     if (view === 'learn') this.pathVisited = true;
+    if (view === 'forge') this.forgeVisited = true;
   }
   start(action: StudyAction): void {
     this.view = actionView(action); this.section = isReviewAction(action)?'reviews':'learning'; this.menuOpen = false;
     if (this.view === 'learn') this.pathVisited = true;
+    if (this.view === 'forge') this.forgeVisited = true;
+    this.lastSessionView=this.view as 'learn'|'forge';
     this.launch = {id: ++this.nextLaunch, action};
   }
+  get openSessions(): OpenSession[] { return [this.path?.openSession,this.forge?.openSession].filter((s):s is OpenSession=>!!s); }
+  get currentSession(): OpenSession | null { return this.openSessions.find(s=>s.view===this.lastSessionView)??this.openSessions[0]??null; }
+  resume(session: OpenSession): void {
+    this.navigate(session.view);this.section=session.review?'reviews':'learning';this.lastSessionView=session.view;
+  }
+  resetSessions(): void { this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
   launched(id: number): void { if (this.launch?.id === id) this.launch = null; }
   ngOnDestroy(): void { this.subscription?.unsubscribe(); }
 }

@@ -1,5 +1,5 @@
 import { StudyRoutineService } from '../study/study-routine.service';
-import { isReviewAction } from '../study/study-overview';
+import { OpenSession, isReviewAction } from '../study/study-overview';
 import { ReviewForecast, reviewForecast } from './review-forecast';
 import { ReviewForecastComponent } from './review-forecast.component';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
@@ -16,6 +16,8 @@ import { DailyPlan, StudyAction, StudyMode, StudyView, dailyPlan, hasStudyProgre
 @Component({selector: 'app-study-home', standalone: true, imports: [CommonModule, FormsModule, ReviewForecastComponent],
   templateUrl: './study-home.component.html', styleUrls: ['./study-home.component.scss']})
 export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() currentSession: OpenSession | null = null;
+  @Output() resume = new EventEmitter<OpenSession>();
   @Input() cards: KanjiCard[] = [];
   @Output() start = new EventEmitter<StudyAction>();
   @Output() open = new EventEmitter<StudyView>();

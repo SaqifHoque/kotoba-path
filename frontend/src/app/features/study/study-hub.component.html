@@ -1,5 +1,6 @@
 <header><span class="eyebrow">{{section==='learning'?'Build understanding':section==='reviews'?'Make it stick':'Follow your curiosity'}}</span><h1>{{section==='learning'?'Learn':section==='reviews'?'Review':'Library'}}</h1><p>{{section==='learning'?'A clear lesson to begin, with your current milestones in one place.':section==='reviews'?'Recall what you have learned, at the right time.':'Browse Japanese and revisit the learning tools you already use.'}}</p></header>
 <ng-container *ngIf="sync.ready&&plan as p; else loading">
+  <section class="open-sessions" *ngIf="sessions.length&&section!=='library'" aria-label="Your open sessions"><h2>Pick up where you left off</h2><button type="button" *ngFor="let session of sessions" (click)="resume.emit(session)">Continue {{session.label}} · {{session.remaining}} steps</button></section>
   <ng-container *ngIf="section==='learning'">
     <section class="recommended" aria-labelledby="lesson-title">
       <span class="eyebrow">Your next lesson</span>

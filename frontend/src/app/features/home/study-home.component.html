@@ -12,8 +12,11 @@
   <p *ngIf="settingsNote" role="status">{{settingsNote}}</p>
   <section *ngIf="!setupVisible" class="next-step" aria-labelledby="next-title">
     <span class="eyebrow">Your next step</span>
+    <ng-container *ngIf="currentSession as session; else nextAction"><h2 id="next-title">Continue your {{session.label}}</h2><p>{{session.remaining}} steps remaining. Your current answers stay here while you browse this tab.</p><button class="primary" type="button" (click)="resume.emit(session)">Continue session →</button></ng-container>
+    <ng-template #nextAction>
     <ng-container *ngIf="p.next as next; else caughtUp"><h2 id="next-title">{{next.label}}</h2><p>{{next.detail}}</p><p *ngIf="firstVisit" class="note">Start with a few components and build toward kanji and words. You can adjust your starting point whenever you like.</p><button class="primary" type="button" (click)="start.emit(next.action)">{{isReview(next.action)?'Start review session':'Start lesson'}} →</button></ng-container>
     <ng-template #caughtUp><h2 id="next-title">You’re caught up for now.</h2><p *ngIf="p.nextReviewAt">Next review: {{p.nextReviewAt|date:'medium'}}.</p><p *ngIf="!p.nextReviewAt">Explore your learning tools and Japanese reference material in Library.</p><button class="primary" type="button" (click)="open.emit('library')">Explore Library →</button></ng-template>
+    </ng-template>
     <p class="routine-note">Reviews from both courses are considered. New lessons follow your {{mode==='forge'?'typed-recall':'reading-path'}} preference. <button type="button" class="text-button" (click)="changeSetup()">Adjust starting point</button></p>
   </section>
   <section class="study-summary" aria-label="Today at a glance"><h2>Today at a glance</h2><div class="summary-counts"><p><strong>{{p.kanjiDue|number}}</strong><span>kanji due</span></p><p><strong>{{p.wordsDue|number}}</strong><span>words due</span></p><p><strong>{{p.forgeQuestions|number}}</strong><span>typed questions due</span></p></div><p class="note">Typed-course meanings and readings are separate questions.</p><button type="button" (click)="open.emit('reviews')">See reviews →</button><button type="button" (click)="open.emit('learning')">See learning milestones →</button></section>

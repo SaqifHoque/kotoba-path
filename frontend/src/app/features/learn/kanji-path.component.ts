@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { OpenSession } from '../study/study-overview';
+import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudyCatalogService } from '../../core/services/study-catalog.service';
@@ -15,6 +16,7 @@ import { buildLevels, dueCards, KanjiCard, KanjiLevel, levelDone, Rating, Review
 export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
   @Input() launch: StudyLaunch | null = null;
   @Output() launched = new EventEmitter<number>();
+  @ViewChild(PracticeStudioComponent) private studio?: PracticeStudioComponent;
   private lastLaunch = 0;
   studioLaunch=0; studioReviewsOnly=false;
   bands = BANDS; profile: Proficiency | null = null;
@@ -57,6 +59,10 @@ export class KanjiPathComponent implements OnInit, OnChanges, OnDestroy {
     else if (this.launch.action === 'kanji-reviews') { this.changeMode('review'); this.startReview(); }
     else {this.changeMode('studio');this.studioReviewsOnly=this.launch.action==='vocabulary-reviews';this.studioLaunch=this.launch.id;}
     const id = this.launch.id; queueMicrotask(() => this.launched.emit(id));
+  }
+  get openSession(): OpenSession | null {
+    if(this.mode==='studio'&&this.studio?.exercise)return {view:'learn',label:this.studio.reviewsOnly?'vocabulary review':'vocabulary practice',remaining:this.studio.queue.length,review:this.studio.reviewsOnly};
+    return this.session&&this.queue.length?{view:'learn',label:this.practice?'kanji practice':this.mode==='review'?'kanji review':'kanji lesson',remaining:this.queue.length,review:this.mode==='review'&&!this.practice}:null;
   }
   get completed(): number { return this.levels.filter(l => this.done(l)).length; }
   get target(): Band { return targetBand(this.profile); }
