@@ -1,6 +1,8 @@
+import { StudyRoutineService } from '../study/study-routine.service';
+import { isReviewAction } from '../study/study-overview';
 import { ReviewForecast, reviewForecast } from './review-forecast';
 import { ReviewForecastComponent } from './review-forecast.component';
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -9,7 +11,7 @@ import { KanjiCard } from '../learn/kanji-engine';
 import { Band, BANDS, targetBand } from '../learn/proficiency';
 import { Word, buildVocabulary } from '../learn/practice-engine';
 import { StudySyncService } from '../learn/study-sync.service';
-import { DailyPlan, HomePreference, StudyAction, StudyMode, StudyView, dailyPlan, hasStudyProgress, parseHomePreference, preferredMode } from './study-home';
+import { DailyPlan, StudyAction, StudyMode, StudyView, dailyPlan, hasStudyProgress } from './study-home';
 
 @Component({selector: 'app-study-home', standalone: true, imports: [CommonModule, FormsModule, ReviewForecastComponent],
   templateUrl: './study-home.component.html', styleUrls: ['./study-home.component.scss']})
@@ -18,22 +20,22 @@ export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Output() start = new EventEmitter<StudyAction>();
   @Output() open = new EventEmitter<StudyView>();
   now = Date.now(); plan?: DailyPlan; forecast: ReviewForecast | null = null; bands = BANDS;
-  editing = false; draftMode: StudyMode = 'path'; draftLevel: Band | 'unsure' = 'unsure';
+  editing = false; draftMode: StudyMode = 'forge'; draftLevel: Band | 'unsure' = 'unsure';
   familiarity: 'studying' | 'comfortable' = 'studying'; settingsNote = '';
-  private preference: HomePreference | null = null;
   private words: Word[] = [];
   private subscription?: Subscription; private timer?: ReturnType<typeof setInterval>;
-  constructor(public readonly sync: StudySyncService, public readonly account: AccountService) {}
+  constructor(public readonly sync: StudySyncService, public readonly account: AccountService, public readonly routine: StudyRoutineService) {}
   ngOnInit(): void {
-    try { this.preference = parseHomePreference(localStorage.getItem(this.account.cacheKey('kotoba-study-home-v1'))); }
-    catch { this.settingsNote = 'Your study setup could not be read. Choose a routine again; your progress is preserved.'; }
+    this.settingsNote=this.routine.notice;
     this.subscription = this.sync.state.subscribe(() => this.refresh());
     this.timer = setInterval(() => { this.now = Date.now(); this.refresh(); }, 10000);
   }
-  ngOnChanges(): void { this.words = buildVocabulary(this.cards); this.refresh(); }
-  get mode(): StudyMode { return preferredMode(this.sync.state.value, this.preference); }
+  ngOnChanges(changes: SimpleChanges): void { if(changes['cards']){this.words=buildVocabulary(this.cards);this.refresh();} }
+  get mode(): StudyMode { return this.routine.mode(this.sync.state.value); }
   get target(): Band { return targetBand(this.sync.state.value.profile); }
-  get setupVisible(): boolean { return this.editing || (this.sync.ready && !this.preference && !hasStudyProgress(this.sync.state.value)); }
+  get setupVisible(): boolean { return this.editing; }
+  get firstVisit(): boolean { return !hasStudyProgress(this.sync.state.value); }
+  isReview = isReviewAction;
   private refresh(): void {
     if (this.cards.length) {
       this.plan = dailyPlan(this.cards, this.words, this.sync.forgeSubjects, this.sync.state.value, this.mode, this.now);
@@ -48,11 +50,9 @@ export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
   }
   saveSetup(): void {
     if (!this.sync.ready || !['path', 'forge'].includes(this.draftMode) || ![...BANDS, 'unsure'].includes(this.draftLevel)) return;
-    this.preference = {version: 1, mode: this.draftMode};
-    try {
-      localStorage.setItem(this.account.cacheKey('kotoba-study-home-v1'), JSON.stringify(this.preference));
-      this.settingsNote = 'Study routine saved for this browser. Completed work and review dates are preserved.';
-    } catch { this.settingsNote = 'This routine is selected for this visit. Browser settings could not be saved; your study progress is preserved.'; }
+    this.settingsNote=this.routine.choose(this.draftMode)
+      ? 'Study preference saved for this browser. Completed work and review dates are preserved.'
+      : 'Preference selected for this visit. Your learning progress is preserved.';
     if (this.draftMode === 'path') this.sync.updateProfile({...this.sync.state.value.profile, level: this.draftLevel, familiarity: this.familiarity, updatedAt: Date.now()});
     this.editing = false; this.refresh();
   }

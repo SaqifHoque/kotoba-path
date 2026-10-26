@@ -47,10 +47,10 @@ export function dailyPlan(cards: KanjiCard[], words: Word[], subjects: Subject[]
   const choices: {action: StudyAction; label: string; detail: string; due: number}[] = [];
   if (kanji.length) choices.push({action: 'kanji-reviews', label: `Review kanji · ${kanji.length} due`, detail: 'Recall meaning and reading in a batch of up to 20 kanji.', due: state.kanji[kanji[0].character].due});
   if (vocabulary.length) choices.push({action: 'vocabulary-reviews', label: `Review vocabulary · ${vocabulary.length} due`, detail: 'Review whole-word readings in a batch of up to 10 words.', due: state.vocabulary[vocabulary[0].id].due});
-  if (forge.length) choices.push({action: 'forge-reviews', label: `Review Forge · ${forge.length} questions`, detail: 'Review meaning and reading tracks in a batch of up to 40 questions.', due: state.forge.records[forge[0].subject.id][forge[0].skill]!.due!});
+  if (forge.length) choices.push({action: 'forge-reviews', label: `Review meanings and readings · ${forge.length} questions`, detail: 'Review meaning and reading tracks in a batch of up to 40 questions.', due: state.forge.records[forge[0].subject.id][forge[0].skill]!.due!});
   choices.sort((a, b) => a.due - b.due || Number(actionView(a.action) !== (mode === 'forge' ? 'forge' : 'learn')) - Number(actionView(b.action) !== (mode === 'forge' ? 'forge' : 'learn')));
   let next: DailyPlan['next'] = choices[0] ?? null;
-  if (!next && mode === 'forge' && forgeLessons) next = {action: 'forge-lessons', label: 'Start Forge lessons', detail: 'Introduce up to five eligible items within your daily limit.'};
+  if (!next && mode === 'forge' && forgeLessons) next = {action: 'forge-lessons', label: 'Learn new items', detail: 'Study up to five components, kanji, or words with typed recall.'};
   if (!next && mode === 'path' && newWords) next = {action: 'vocabulary', label: 'Learn unlocked vocabulary', detail: 'Put familiar kanji to work through whole-word reading.'};
   if (!next && mode === 'path' && newKanji) next = {action: 'kanji-lessons', label: 'Learn your next kanji', detail: `Start up to ten recommended kanji near ${targetBand(state.profile)}.`};
   const dates = [...cards.map(c => state.kanji[c.character]?.due), ...available.map(w => state.vocabulary[w.id]?.due),
