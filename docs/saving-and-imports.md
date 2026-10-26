@@ -1,6 +1,6 @@
 # Saving and importing progress
 
-All learning screens share one progress-saving indicator. Lessons no longer display export/restore controls. Open **Settings → Data & privacy** to download or import progress; account creation, sign-in, recovery, and sign-out are in **Settings → Account & devices**.
+All learning screens share one progress-saving indicator. Lessons no longer display export/restore controls. Open **Profile → Data & privacy** to download or import progress; account creation, sign-in, recovery, and sign-out are in **Profile → Account & devices**.
 
 ## Saving states
 
