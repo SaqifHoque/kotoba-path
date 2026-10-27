@@ -33,3 +33,7 @@ against the source, verify CSV quoting, count all kanji and level sizes, check
 stable ordering, and reject duplicates or catalogs too small for 100 levels.
 Keep the source/order stable for published levels; future progress should use
 kanji characters as identifiers rather than positions.
+
+The application now validates a separate [versioned identity registry](curriculum-foundation.md)
+before loading progress. Published level assignments come from that registry;
+source regeneration does not regenerate or renumber published identities.
