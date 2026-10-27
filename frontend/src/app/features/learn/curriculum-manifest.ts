@@ -39,9 +39,10 @@ export function applyCurriculum(cards: KanjiCard[], input: unknown): KanjiCard[]
     vocabulary.set(key, word.id.slice(2)); wordIds.add(word.id);
   }
   const usedWords = new Set<string>();
-  const result = cards.map(card => {
-    const entry = byCharacter.get(card.character);
-    if (!entry || entry.radicalId !== `r:${card.radical.normalize('NFKC')}`) return fail('missing kanji or changed primary radical');
+  const source = new Map(cards.map(card => [card.character, card]));
+  const result = manifest.kanji.map(entry => {
+    const card = source.get(entry.character);
+    if (!card || entry.radicalId !== `r:${card.radical.normalize('NFKC')}`) return fail('missing kanji or changed primary radical');
     const words: Record<string, string> = {};
     for (const [label] of card.examples) {
       const match = /^(.+?)（(.+)）$/.exec(label);
