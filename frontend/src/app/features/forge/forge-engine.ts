@@ -30,14 +30,15 @@ export function buildForge(cards: KanjiCard[]): Subject[] {
   const subjects: Subject[] = [], radicals = new Map<string,Subject>();
   const levels = new Map<string,number>();
   for (const level of buildLevels(cards)) for (const card of level.cards) levels.set(card.character,level.number);
-  for (const card of cards) {
+  const ordered = buildLevels(cards).flatMap(level => level.cards);
+  for (const card of ordered) {
     const level = levels.get(card.character)!;
-    const radical = RADICAL(card.radical);
+    const radical = card.curriculum?.radicalId ?? RADICAL(card.radical);
     if (!radicals.has(radical)) radicals.set(radical,{id:radical,kind:'radical',text:card.radical.normalize('NFKC'),meaning:card.radicalMeaning,
       readings:[],prerequisites:[],level,image:card.radicalImage,
       hint:`Find this shape in ${cards.filter(c=>RADICAL(c.radical)===radical).slice(0,5).map(c=>c.character).join(' · ')}. Attach the label “${card.radicalMeaning}” to its outline. This is the catalog’s primary radical, not a complete decomposition.`});
     const readings = (card.onyomi || card.kunyomi).split(/[、,\/／]/).map(s=>s.trim()).filter(Boolean);
-    subjects.push({id:`k:${card.character}`,kind:'kanji',text:card.character,meaning:card.meaning,readings,otherReadings:card.onyomi?card.kunyomi.split(/[、,\/／]/).map(s=>s.trim()).filter(Boolean):[],prerequisites:[radical],level,
+    subjects.push({id:card.curriculum?.id ?? `k:${card.character}`,kind:'kanji',text:card.character,meaning:card.meaning,readings,otherReadings:card.onyomi?card.kunyomi.split(/[、,\/／]/).map(s=>s.trim()).filter(Boolean):[],prerequisites:[radical],level,
       hint:STORIES[card.character] || `Memory link: find the “${card.radicalMeaning}” radical in ${card.character}. Invent a scene joining that shape to “${card.meaning}”, then say ${readings[0] || ''}. This is a mnemonic prompt, not an etymology.`});
   }
   for (const word of buildVocabulary(cards)) {
