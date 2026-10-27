@@ -1,3 +1,4 @@
+import { OpenSession } from '../study/study-overview';
 import { acceptedMeanings, checkAnswer } from '../learn/answer-checker';
 import { setMeaningSynonyms } from '../learn/meaning-synonyms';
 import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit } from '@angular/core';
@@ -37,6 +38,7 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
     if(this.launch.action==='forge-reviews')this.startReviews();else this.startLessons();
     const id=this.launch.id;queueMicrotask(()=>this.launched.emit(id));
   }
+  get openSession():OpenSession|null { return this.mode==='dashboard'||!this.queue.length?null:{view:'forge',label:this.mode==='review'?'typed review':this.mode==='lesson'?'typed lesson':'typed practice',remaining:this.queue.length,review:this.mode==='review'}; }
   get current():Question|undefined{return this.queue[0];}
   get due():Question[]{return dueQuestions(this.subjects,this.state,this.now);}
   get allowance():number{return lessonAllowance(this.subjects,this.state,this.now);}

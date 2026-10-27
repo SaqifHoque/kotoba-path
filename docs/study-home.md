@@ -40,3 +40,7 @@ Run `npm run test:engines` and `npm run build` in `frontend`. `npm run test:home
 ## Review forecast
 
 Today also shows [upcoming review workload](review-forecast.md) for the next 24 hours or seven local calendar days. Due-now work stays separate from newly due rows, and kanji, words, and Forge questions keep separate counts. The forecast reads existing schedules and updates after completed reviews.
+
+## Unified study experience
+
+The [unified study navigation](unified-study.md) adds Learn, Review, and Library hubs. Today now offers one main action, including resuming an open session. New learners can start immediately; starting-point setup is optional. Account access and progress files are in Profile.

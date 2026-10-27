@@ -1,16 +1,17 @@
 <section class="studio" aria-label="Vocabulary and reading practice">
   <span class="eyebrow">Put your kanji to work</span>
   <h2>Words & reading</h2>
+  <p *ngIf="reviewsOnly">This session contains due vocabulary only. New words are available through Learn.</p>
   <p>{{available.length}} / {{words.length}} words unlocked · {{introduced}} introduced</p>
   <p>New words prioritize {{target}} difficulty, using learned kanji and assumed foundations. Due reviews come first. Practice whole-word readings and short contexts.</p>
-  <nav aria-label="Practice type">
+  <nav *ngIf="!reviewsOnly" aria-label="Practice type">
     <button (click)="setMode('vocabulary')" [attr.aria-pressed]="mode==='vocabulary'">Vocabulary</button>
     <button (click)="setMode('mixed')" [attr.aria-pressed]="mode==='mixed'">Mixed practice</button>
   </nav>
   <p *ngIf="warning" role="alert">{{warning}}</p><p *ngIf="message" role="status">{{message}}</p>
   <ng-container>
     <p *ngIf="mode==='mixed'">Alternate due kanji recall with vocabulary readings and meanings. Up to 20 exercises, with overdue words first.</p>
-    <button class="primary" *ngIf="!exercise" (click)="start()">{{mode==='mixed' ? 'Start mixed session' : 'Start vocabulary session'}}</button>
+    <button class="primary" *ngIf="!exercise" (click)="start()">{{reviewsOnly?'Start vocabulary review':mode==='mixed' ? 'Start mixed session' : 'Start vocabulary session'}}</button>
     <article *ngIf="exercise as e" aria-live="polite">
       <p>{{queue.length}} remaining · {{e.kind==='reading' ? 'Read this word in kana' : 'Recall the meaning aloud'}}</p>
       <h3 lang="ja">{{prompt}}</h3>

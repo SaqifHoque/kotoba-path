@@ -5,3 +5,9 @@
 .forge-nav{grid-template-columns:1fr;margin-top:.35rem}
 
 .home-nav{margin-top:1.5rem}.home-nav+.primary-nav{margin-top:.35rem}.catalog-state{padding:2rem 0}
+
+.study-navigation{margin-top:2rem;gap:.4rem}.study-navigation button{font:inherit;min-height:48px}.study-navigation b{font:500 1.4rem var(--jp);width:28px;text-align:center}.study-navigation button span{font-size:.9rem}.study-navigation button:focus-visible,.menu:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+.study-screen[hidden]{display:none!important}
+
+.navigation-shade{position:fixed;inset:0;z-index:2;background:#0005;border:0;cursor:pointer}main:focus{outline:none}

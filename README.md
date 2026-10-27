@@ -147,3 +147,5 @@ Forge and vocabulary now provide clearer answer feedback, with synced personal F
 Plan your study time with Today’s [review forecast](docs/review-forecast.md): upcoming kanji, vocabulary, and Forge questions over 24 hours or seven days.
 
 Learning progress saves automatically. Use Settings for account access and [progress downloads/imports](docs/saving-and-imports.md), with a preview before applying a file.
+
+Study navigation is organized around Today, Learn, Review, Library, and Profile. See the [unified study guide](docs/unified-study.md) for session continuity and how existing progress is preserved.

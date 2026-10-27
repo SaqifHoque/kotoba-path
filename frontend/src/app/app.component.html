@@ -1,26 +1,30 @@
 <div class="shell">
-  <aside [class.open]="menuOpen">
+  <aside id="main-navigation" [class.open]="menuOpen" [attr.inert]="compactNavigation&&!menuOpen?'':null" [attr.aria-hidden]="compactNavigation&&!menuOpen?'true':null">
     <a class="brand" href="#" aria-label="Kotoba Path home" (click)="$event.preventDefault();navigate('home')"><span>言</span><div><strong>Kotoba Path</strong><small>日本語を一歩ずつ</small></div></a>
-    <div class="primary-nav forge-nav home-nav"><button [class.active]="view==='home'" (click)="navigate('home')"><b>日</b><span>Today</span></button></div>
-    <div class="primary-nav"><button [class.active]="view==='learn'" (click)="navigate('learn')"><b>道</b><span>Learning & review</span></button><button [class.active]="view==='catalog'" (click)="navigate('catalog')"><b>典</b><span>Encyclopedia</span></button></div>
-    <div class="primary-nav forge-nav"><button [class.active]="view==='forge'" (click)="navigate('forge')"><b>鍛</b><span>Kanji Forge</span></button></div>
-    <div class="primary-nav forge-nav"><button [class.active]="view==='history'" (click)="navigate('history')"><b>記</b><span>Review history</span></button></div>
-    <div class="primary-nav"><button [class.active]="view==='settings'" (click)="navigate('settings')"><b>⚙</b><span>Settings</span></button></div>
+    <nav class="study-navigation" aria-label="Main navigation">
+      <button type="button" [class.active]="section==='home'" [attr.aria-current]="section==='home'?'page':null" (click)="navigate('home')"><b aria-hidden="true">日</b><span>Today</span></button>
+      <button type="button" [class.active]="section==='learning'" [attr.aria-current]="section==='learning'?'page':null" (click)="navigate('learning')"><b aria-hidden="true">学</b><span>Learn</span></button>
+      <button type="button" [class.active]="section==='reviews'" [attr.aria-current]="section==='reviews'?'page':null" (click)="navigate('reviews')"><b aria-hidden="true">復</b><span>Review</span></button>
+      <button type="button" [class.active]="section==='library'" [attr.aria-current]="section==='library'?'page':null" (click)="navigate('library')"><b aria-hidden="true">典</b><span>Library</span></button>
+      <button type="button" [class.active]="section==='settings'" [attr.aria-current]="section==='settings'?'page':null" (click)="navigate('settings')"><b aria-hidden="true">人</b><span>Profile</span></button>
+    </nav>
     <div class="sidebar-foot"><span>今日の言葉</span><strong>一歩一歩</strong><small>One step at a time</small></div>
   </aside>
-  <main>
+  <button *ngIf="compactNavigation&&menuOpen" type="button" class="navigation-shade" aria-label="Close navigation" (click)="closeNavigation()"></button>
+  <main #mainContent tabindex="-1">
     <p *ngIf="demoMode" role="status" style="padding:12px 24px;background:#eef4ec;color:#263b2b">Public demo · Learning, reviews, and Kanji Forge work in this browser. Progress stays on this device. Accounts, cloud sync, and the encyclopedia require the self-hosted server. <a href="https://github.com/SaqifHoque/kotoba-path">Source and setup</a></p>
-    <header class="topbar"><button class="menu" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen" (click)="menuOpen=!menuOpen">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
+    <header class="topbar"><button #menuToggle type="button" class="menu" aria-label="Toggle navigation" aria-controls="main-navigation" [attr.aria-expanded]="menuOpen" (click)="toggleNavigation()">☰</button><div><span>{{titles[view]}}</span><b>{{subtitles[view]}}</b></div></header>
     <p *ngIf="loading" class="catalog-state" role="status">Loading your study catalog…</p>
     <p *ngIf="error" role="alert">{{error}} <button type="button" (click)="loadCatalog()">Retry catalog</button></p>
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
-    <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="pathVisited=false;launch=null"></app-settings>
+    <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="resetSessions()"></app-settings>
     <ng-container *ngIf="cards.length && !account.changing">
-      <app-study-home *ngIf="view==='home'" [cards]="cards" (start)="start($event)" (open)="navigate($event)"></app-study-home>
-      <app-kanji-path *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
+      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-hub>
+      <app-study-home *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
+      <app-kanji-path class="study-screen" *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
       <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
       <app-encyclopedia *ngIf="!demoMode && view==='catalog'"></app-encyclopedia>
-      <app-forge *ngIf="view==='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
+      <app-forge class="study-screen" *ngIf="forgeVisited" [hidden]="view!=='forge'" [launch]="launch" (launched)="launched($event)"></app-forge>
       <app-review-history *ngIf="view==='history'"></app-review-history>
     </ng-container>
     <p class="footer-note">ことばの道 · One step at a time</p>
