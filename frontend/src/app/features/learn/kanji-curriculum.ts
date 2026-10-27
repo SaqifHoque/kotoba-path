@@ -1,4 +1,11 @@
+export interface LearningComponent { subjectId: string; form: string; }
+export interface CardIdentity {
+  id: string; level: number; radicalId: string;
+  vocabulary: Record<string, string>;
+  components: LearningComponent[];
+}
 export interface KanjiCard {
+  curriculum?: CardIdentity;
   radicalImage?: string;
   character: string; meaning: string; onyomi: string; kunyomi: string;
   grade: number; strokes: number; radical: string; radicalMeaning: string; examples: string[][];
