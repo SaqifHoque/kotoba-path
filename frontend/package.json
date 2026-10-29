@@ -15,12 +15,13 @@
     "test:forge": "sh tools/test-forge.sh",
     "test:history": "sh tools/test-history.sh",
     "test:home": "sh tools/test-home.sh",
-    "test:engines": "npm run test:curriculum && npm run test:kanji && npm run test:sync && npm run test:proficiency && npm run test:practice && npm run test:forge && npm run test:history && npm run test:home && npm run test:answers && npm run test:forecast && npm run test:saving && npm run test:overview",
+    "test:engines": "npm run test:curriculum && npm run test:kanji && npm run test:sync && npm run test:proficiency && npm run test:practice && npm run test:forge && npm run test:history && npm run test:home && npm run test:answers && npm run test:forecast && npm run test:saving && npm run test:overview && npm run test:foundation",
     "build:demo": "node tools/build-demo.mjs",
     "test:answers": "sh tools/test-answers.sh",
     "test:forecast": "sh tools/test-forecast.sh",
     "test:saving": "sh tools/test-saving.sh",
-    "test:overview": "sh tools/test-overview.sh"
+    "test:overview": "sh tools/test-overview.sh",
+    "test:foundation": "sh tools/test-foundation.sh"
   },
   "dependencies": {
     "@angular/animations": "^17.3.12",

@@ -24,7 +24,8 @@ export function buildVocabulary(cards: KanjiCard[]): Word[] {
       const match = /^(.+?)（(.+)）$/.exec(label);
       if (!match) return;
       const [, text, reading] = match;
-      const id = `${text}:${reading}`;
+      const key = `${text}:${reading}`;
+      const id = card.curriculum?.vocabulary[key] ?? key;
       if (words.has(id)) return;
       words.set(id, {id, text, reading, meaning, context: WORD_CONTEXTS[text],
         prerequisites: [...new Set(text.match(/\p{Script=Han}/gu) ?? [])]});
