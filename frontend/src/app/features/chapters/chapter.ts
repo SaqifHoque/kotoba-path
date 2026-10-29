@@ -1,4 +1,5 @@
 import { KanjiCard } from '../learn/kanji-curriculum';
+import { buildVocabulary } from '../learn/practice-engine';
 
 export interface ChapterShape {
   id: string;
@@ -64,6 +65,9 @@ export function validateChapter(chapter: StudyChapter, cards: KanjiCard[]): void
     require(/^shape:[a-z0-9-]+$/.test(shape.id) && catalog.has(shape.subjectId), 'shape subject');
     require(text(shape.form) && text(shape.name) && text(shape.memory), 'shape content');
   }
+  const publishedWords = buildVocabulary(cards);
+  const byWordId = new Map(publishedWords.map(word => [`v:${word.id}`, word]));
+  const byWordText = new Map(publishedWords.map(word => [`${word.text}:${word.reading}`, `v:${word.id}`]));
   const introduced = new Set<string>();
   for (const item of chapter.kanji) {
     require(catalog.has(item.subjectId) && text(item.meaning) && text(item.memory) && text(item.reading) && text(item.readingNote), 'kanji content');
@@ -71,6 +75,10 @@ export function validateChapter(chapter: StudyChapter, cards: KanjiCard[]): void
     for (const id of item.shapeIds) {
       const subject = shapes.get(id)!.subjectId;
       require(subject === item.subjectId || introduced.has(subject), 'component must be taught before compound kanji');
+    }
+    const links = item.shapeIds.map(id => shapes.get(id)!);
+    for (const component of catalog.get(item.subjectId)!.curriculum?.components ?? []) {
+      require(links.some(shape => shape.subjectId === component.subjectId && shape.form === component.form), 'published component mismatch');
     }
     introduced.add(item.subjectId);
   }
@@ -80,8 +88,15 @@ export function validateChapter(chapter: StudyChapter, cards: KanjiCard[]): void
     require(texts(word.kanjiIds) && unique(word.kanjiIds) && word.kanjiIds.every(id => kanji.has(id)), 'word prerequisite');
     const characters = [...new Set(word.text.match(/\p{Script=Han}/gu) ?? [])];
     require(characters.length === word.kanjiIds.length && characters.every(character => word.kanjiIds.includes(`k:${character}`)), 'word kanji coverage');
+    const published = byWordId.get(word.id);
+    require(!published || (published.text === word.text && published.reading === word.reading), 'published word identity collision');
+    const publishedId = byWordText.get(`${word.text}:${word.reading}`);
+    require(!publishedId || publishedId === word.id, 'published word identity must be reused');
+    require(/^[\p{Script=Hiragana}\p{Script=Katakana}ー]+$/u.test(word.reading), 'word kana reading');
     const sentence = word.sentence;
     require(text(sentence.text) && text(sentence.reading) && text(sentence.meaning) && text(sentence.note), 'sentence content');
+    require(!/\p{Script=Han}/u.test(sentence.reading), 'sentence kana guide');
+    require(word.kanjiIds.every(id => sentence.text.includes(id.slice(2))), 'sentence must practise its word kanji');
     require((sentence.text.match(/\p{Script=Han}/gu) ?? []).every(character => kanji.has(`k:${character}`)), 'sentence contains untaught kanji');
   }
   require(unique(chapter.words.map(word => `${word.text}:${word.reading}`)), 'duplicate word');
