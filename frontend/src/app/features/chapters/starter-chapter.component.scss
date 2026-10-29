@@ -1,0 +1,23 @@
+:host { display: block; margin: 1.5rem 0; }
+.starter { border: 1px solid var(--line); border-top: 3px solid var(--rust); padding: clamp(1rem, 3vw, 2rem); }
+.eyebrow { color: var(--rust); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+h2 { font: 600 1.6rem var(--jp); margin: .7rem 0; }
+h3 { font: 600 1.3rem var(--jp); margin-top: 2rem; }
+h4 { font-size: 1.05rem; line-height: 1.8; margin: 0; }
+p, li { line-height: 1.7; }
+.note, .reading { color: var(--muted); font-size: .85rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; margin: 1rem 0; }
+article { border: 1px solid var(--line); padding: 1rem; overflow-wrap: anywhere; min-width: 0; scroll-margin-top: 1rem; }
+.glyph { display: block; font: 2.8rem var(--jp); margin-bottom: .6rem; }
+.association { color: var(--rust); }
+ruby { font: 1.9rem var(--jp); ruby-position: over; }
+rt { font-size: .7rem; }
+.reading-control { display: flex; align-items: center; gap: .6rem; line-height: 1.6; cursor: pointer; }
+input { width: 1.2rem; height: 1.2rem; flex-shrink: 0; accent-color: var(--rust); }
+blockquote { border-left: 3px solid var(--rust); margin: 1rem 0; padding-left: .8rem; }
+blockquote p { margin: .5rem 0; }
+.word-links a { display: inline-block; color: var(--rust); margin-right: .6rem; padding: .3rem; }
+summary { cursor: pointer; padding: .6rem 0; font-weight: 600; line-height: 1.6; }
+summary:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.recall { padding-left: 1.5rem; }
+.recall li { border-top: 1px solid var(--line); padding: .5rem 0 1rem; }

@@ -7,9 +7,10 @@ import { StudySyncService } from '../learn/study-sync.service';
 import { DailyPlan, StudyAction, StudyView, dailyPlan } from '../home/study-home';
 import { OpenSession, LearningMilestone, isReviewAction, learningMilestones, nextLesson } from './study-overview';
 import { StudyRoutineService } from './study-routine.service';
+import { StarterChapterComponent } from '../chapters/starter-chapter.component';
 import { DEMO_MODE } from '../../demo-mode';
 
-@Component({selector:'app-study-hub',standalone:true,imports:[CommonModule],
+@Component({selector:'app-study-hub',standalone:true,imports:[CommonModule, StarterChapterComponent],
   templateUrl:'./study-hub.component.html',styleUrls:['./study-hub.component.scss']})
 export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
   @Input() sessions: OpenSession[] = [];
