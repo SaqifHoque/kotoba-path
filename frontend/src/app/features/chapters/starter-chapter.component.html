@@ -1,0 +1,57 @@
+<section class="starter" aria-labelledby="starter-title">
+  <span class="eyebrow">Starter chapter · shapes → kanji → words</span>
+  <h2 id="starter-title">{{chapter.title}}</h2>
+  <p>{{chapter.description}}</p>
+  <ng-container *ngIf="available; else unavailable">
+    <p class="note">5 kanji · 6 words · Read at your own pace. Browsing leaves your review dates and progress unchanged.</p>
+    <details class="chapter-content">
+      <summary>Explore starter chapter</summary>
+      <h3>What you’ll learn</h3>
+      <ul><li *ngFor="let goal of chapter.goals">{{goal}}</li></ul>
+      <h3>1. Notice the shapes</h3>
+      <p>Give each shape a picture you can remember. These are visual memory aids.</p>
+      <div class="grid shapes">
+        <article *ngFor="let shape of chapter.shapes">
+          <h4><span lang="ja" class="glyph">{{shape.form}}</span>{{shape.name}}</h4>
+          <p>{{shape.memory}}</p>
+        </article>
+      </div>
+      <h3>2. Connect shapes to kanji</h3>
+      <p>A kanji can have several readings. Focus on the readings used in the words below.</p>
+      <div class="grid">
+        <article *ngFor="let item of chapter.kanji" [attr.id]="'starter-'+item.subjectId">
+          <h4><span lang="ja" class="glyph">{{character(item.subjectId)}}</span>{{item.meaning}}</h4>
+          <p class="association"><span *ngFor="let id of item.shapeIds; let last=last"><span lang="ja">{{shape(id).form}}</span> ({{shape(id).name}})<span *ngIf="!last"> + </span></span></p>
+          <p>{{item.memory}}</p>
+          <p><strong>Readings in this chapter:</strong> <span lang="ja">{{item.reading}}</span></p>
+          <p>{{item.readingNote}}</p>
+        </article>
+      </div>
+      <h3>3. Use whole words</h3>
+      <label class="reading-control"><input type="checkbox" [checked]="showReadings" (change)="showReadings=!showReadings"> Show word and sentence reading guides</label>
+      <div class="grid">
+        <article *ngFor="let word of chapter.words">
+          <h4><ruby lang="ja">{{word.text}}<rt *ngIf="showReadings">{{word.reading}}</rt></ruby> · {{word.meaning}}</h4>
+          <p class="word-links">Kanji: <a *ngFor="let id of word.kanjiIds" [attr.href]="'#starter-'+id"><span lang="ja">{{character(id)}}</span></a></p>
+          <p>{{word.readingNote}}</p>
+          <blockquote>
+            <p lang="ja">{{word.sentence.text}}</p>
+            <p *ngIf="showReadings" lang="ja" class="reading">{{word.sentence.reading}}</p>
+            <p>{{word.sentence.meaning}}</p>
+          </blockquote>
+          <p class="note">{{word.sentence.note}}</p>
+        </article>
+      </div>
+      <h3>4. Try recalling it</h3>
+      <p>Look away from the cards and say your answer before opening each answer. Take another look at any word you forget.</p>
+      <ol class="recall">
+        <li *ngFor="let item of chapter.recall">
+          <p>{{item.prompt}}</p>
+          <details><summary>Show answer</summary><p><strong>{{item.answer}}</strong></p><p>{{item.explanation}}</p></details>
+        </li>
+      </ol>
+      <p class="note">These prompts are for practice. Continue your usual lessons and scheduled reviews to build lasting recall.</p>
+    </details>
+  </ng-container>
+  <ng-template #unavailable><p role="status">This chapter is unavailable with the current catalog. Your usual lessons and reviews are still available.</p></ng-template>
+</section>
