@@ -79,3 +79,7 @@ The suite is included in `test:engines` and therefore existing frontend CI.
 Browser checks exercise loading both assets, entering typed lessons, downloading
 progress, restoring a legacy record, and malformed/missing manifest retries while
 preserving cached progress. This PR adds no backend endpoints or database schema.
+
+The first authored content built on this foundation is documented in
+[Starter chapter](starter-chapter.md). It is available as a reference from Learn
+and Library; guided lesson enrollment and chapter progression follow separately.
