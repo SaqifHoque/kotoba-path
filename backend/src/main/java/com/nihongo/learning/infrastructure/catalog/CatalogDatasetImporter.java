@@ -21,6 +21,9 @@ public class CatalogDatasetImporter implements ApplicationRunner {
     private final JdbcTemplate jdbc; private final ObjectMapper json;
     public CatalogDatasetImporter(JdbcTemplate jdbc,ObjectMapper json){this.jdbc=jdbc;this.json=json;}
     @Override @Transactional public void run(ApplicationArguments args) throws Exception {
+        // Serialize first import across autoscaled instances on Postgres.
+        if ("PostgreSQL".equals(jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<String>) c -> c.getMetaData().getDatabaseProductName())))
+            jdbc.execute("select pg_advisory_xact_lock(821673291)");
         Integer existing=jdbc.queryForObject("select count(*) from kanji",Integer.class); if(existing!=null&&existing>0)return;
         Map<String,Long> radicalIds=importRadicals();
         Map<String,List<String>> components=readComponents();
