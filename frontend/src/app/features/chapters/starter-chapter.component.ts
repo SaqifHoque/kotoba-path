@@ -1,7 +1,8 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KanjiCard } from '../learn/kanji-curriculum';
 import { validateChapter } from './chapter';
+import { GuidedLessonService } from './guided-lesson.service';
 import { STARTER_CHAPTER } from './starter-chapter';
 
 @Component({
@@ -9,6 +10,8 @@ import { STARTER_CHAPTER } from './starter-chapter';
   templateUrl: './starter-chapter.component.html', styleUrls: ['./starter-chapter.component.scss']
 })
 export class StarterChapterComponent implements OnChanges {
+  @Output() guide = new EventEmitter<void>();
+  constructor(public readonly lesson: GuidedLessonService) {}
   @Input() cards: KanjiCard[] = [];
   readonly chapter = STARTER_CHAPTER;
   showReadings = true;
@@ -21,6 +24,7 @@ export class StarterChapterComponent implements OnChanges {
       validateChapter(this.chapter, this.cards);
       this.characters = new Map(this.cards.map(card => [card.curriculum?.id ?? `k:${card.character}`, card.character]));
       this.available = true;
+      this.lesson.restore();
     } catch { /* Keep the existing courses available if chapter content is incompatible. */ }
   }
   character(id: string): string { return this.characters.get(id) ?? ''; }

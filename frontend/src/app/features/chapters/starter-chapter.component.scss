@@ -21,3 +21,7 @@ summary { cursor: pointer; padding: .6rem 0; font-weight: 600; line-height: 1.6;
 summary:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .recall { padding-left: 1.5rem; }
 .recall li { border-top: 1px solid var(--line); padding: .5rem 0 1rem; }
+
+button { padding: .8rem 1rem; border: 1px solid var(--line); background: var(--ink); color: white; font: inherit; cursor: pointer; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }

@@ -53,8 +53,9 @@ assert.deepEqual(f.parseForge({...before,meaningSynonyms:undefined},[subject]).m
 const catalog=JSON.parse(require('node:fs').readFileSync('src/assets/kanji-curriculum.json','utf8'));
 const cards=Array.isArray(catalog)?catalog:catalog.cards;
 assert.ok(cards, 'catalog cards exist');
+const answerSubjects=new Map(f.buildForge(cards).map(subject=>[subject.id,subject]));
 for(const [id,aliases] of Object.entries(a.MEANING_ALIASES)){
-  const card=cards.find(c=>c.character===id.slice(2)); assert.ok(card,id);
-  for(const alias of aliases)assert.equal(a.checkAnswer({...subject,id,meaning:card.meaning},'meaning',alias).status,'correct');
+  const catalogSubject=answerSubjects.get(id); assert.ok(catalogSubject,id);
+  for(const alias of aliases)assert.equal(a.checkAnswer(catalogSubject,'meaning',alias).status,'correct');
 }
 console.log('Answer checking, retry boundaries, synonym validation and merge tests passed.');
