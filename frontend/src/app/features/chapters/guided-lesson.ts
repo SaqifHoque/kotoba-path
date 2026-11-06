@@ -51,3 +51,16 @@ export function advanceLesson(session: LessonSession, chapter: StudyChapter, sub
   }
   return {session: {...session, cursor: session.cursor + 1}, forge: nextForge, blocked: false};
 }
+
+/** A cursor must never skip an introduction whose progress failed to survive a reload. */
+export function reconcileLesson(session: LessonSession, chapter: StudyChapter, forge: ForgeState): LessonSession {
+  parseLesson(session, chapter);
+  const steps = lessonSteps(chapter);
+  for (let index = 0; index < session.cursor; index++) {
+    const step = steps[index];
+    if (step.kind === 'check' && step.skill === 'reading' && !forge.records[step.subjectId]) {
+      return {...session, cursor: index - 2};
+    }
+  }
+  return session;
+}
