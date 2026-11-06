@@ -1,0 +1,49 @@
+<header><span class="eyebrow">Guided starter chapter</span><h1>{{lesson.chapter.title}}</h1><p>Study a little, then recall it. New subjects join your typed reviews after both checks.</p></header>
+<p *ngIf="lesson.warning" role="status">{{lesson.warning}}</p>
+<ng-container *ngIf="available&&lesson.allowed; else unavailable">
+  <ng-container *ngIf="lesson.session as session">
+    <p class="position">{{lesson.completed?'All lesson steps practised':'Step '+(session.cursor+1)+' of '+lesson.steps.length}}</p>
+    <progress [value]="session.cursor" [max]="lesson.steps.length" aria-label="Lesson steps practised"></progress>
+    <article *ngIf="lesson.completed; else current">
+      <h2 #heading tabindex="-1">You’ve practised this chapter.</h2>
+      <p>New subjects start at Apprentice I, with their first review in four hours. Previously learned subjects keep their review dates and stages.</p>
+      <p>Lasting recall comes from scheduled reviews. This practice does not award mastery.</p>
+      <button type="button" (click)="leave.emit('reviews')">See scheduled reviews</button>
+    </article>
+    <ng-template #current>
+      <article *ngIf="lesson.step as step">
+        <ng-container *ngIf="shape as item">
+          <h2 #heading tabindex="-1"><span class="glyph" lang="ja">{{item.form}}</span>{{item.name}}</h2><p>{{item.memory}}</p>
+          <p class="note">Notice the shape. You’ll connect it to kanji and words next.</p>
+        </ng-container>
+        <ng-container *ngIf="lesson.subject as subject">
+          <h2 #heading tabindex="-1"><span class="glyph" lang="ja">{{subject.text}}</span>{{step.kind==='check'?(step.skill==='meaning'?'Recall the meaning':'Recall the reading'):'Study this '+subject.kind}}</h2>
+          <ng-container *ngIf="step.kind==='study'">
+            <p class="meaning">{{subject.meaning}}</p>
+            <p *ngIf="kanji as item">{{item.memory}}</p>
+            <p *ngIf="kanji as item">{{item.readingNote}}</p>
+            <p *ngIf="word as item">{{item.readingNote}}</p>
+            <p><strong>Reading for typed reviews:</strong> <span lang="ja">{{subject.readings.join(' · ')}}</span></p>
+            <p class="note" *ngIf="subject.kind==='kanji'">Use one of these readings in the next check. Whole words can use other readings.</p>
+            <blockquote *ngIf="word as item"><p lang="ja">{{item.sentence.text}}</p><p lang="ja">{{item.sentence.reading}}</p><p>{{item.sentence.meaning}}</p><p class="note">{{item.sentence.note}}</p></blockquote>
+          </ng-container>
+          <form *ngIf="step.kind==='check'" (ngSubmit)="lesson.check()">
+            <label for="guided-answer">{{step.skill==='meaning'?'Meaning in English':'Reading in hiragana or katakana'}}</label>
+            <input #answer id="guided-answer" name="guided-answer" [(ngModel)]="lesson.draft" [readonly]="!!lesson.feedback" [disabled]="!lesson.allowed" autocomplete="off" autocapitalize="off" spellcheck="false" [attr.lang]="step.skill==='reading'?'ja':null" [attr.aria-describedby]="lesson.feedback?'guided-feedback':null">
+            <button *ngIf="!lesson.feedback" type="submit" [disabled]="!lesson.draft.trim()||!lesson.allowed">Check answer</button>
+          </form>
+          <div *ngIf="lesson.feedback as feedback" id="guided-feedback" role="status" aria-live="polite">
+            <p>{{feedback.result.message}}</p>
+            <p *ngIf="feedback.result.status==='incorrect'">Accepted answers: {{feedback.result.accepted.join(' · ')}}</p>
+            <button *ngIf="feedback.result.status!=='correct'" type="button" (click)="retry()">Try again</button>
+          </div>
+        </ng-container>
+        <button *ngIf="step.kind!=='check'||lesson.feedback?.result?.status==='correct'" type="button" class="primary" [disabled]="moving||!lesson.allowed" (click)="next()">Continue</button>
+      </article>
+      <p *ngIf="lesson.paused" role="alert">New lessons are paused by your daily limit or review workload. Your place is kept. Continue your scheduled reviews, or return when your lesson allowance is available.</p>
+    </ng-template>
+    <button type="button" class="pause" (click)="leave.emit('learning')">Pause &amp; return to Learn</button>
+    <p class="note">Your place is saved on this device when storage is available. Checks here count as learning practice; scheduled reviews stay in Review.</p>
+  </ng-container>
+</ng-container>
+<ng-template #unavailable><p role="status">Wait for your learning progress to load. Your saved subjects are preserved.</p><button type="button" (click)="leave.emit('learning')">Return to Learn</button></ng-template>
