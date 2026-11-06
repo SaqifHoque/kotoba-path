@@ -19,7 +19,8 @@
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
     <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="resetSessions()"></app-settings>
     <ng-container *ngIf="cards.length && !account.changing">
-      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-hub>
+      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)" (guide)="startGuided()"></app-study-hub>
+      <app-guided-lesson *ngIf="view==='guided'" [cards]="cards" (leave)="navigate($event)"></app-guided-lesson>
       <app-study-home *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path class="study-screen" *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
       <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
