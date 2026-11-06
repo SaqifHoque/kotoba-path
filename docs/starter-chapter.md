@@ -34,8 +34,8 @@ separate from Angular lets a later guided player use the same content.
 
 The chapter ID is `chapter:people-trees-and-rest`, version `1.0.0`. Kanji references
 reuse published `k:` identities. Words have explicit `v:` IDs, including the
-existing `v:休日:きゅうじつ`. The other five word IDs are reserved in this chapter.
-There is no new enrollment, catalog level or persisted chapter-progress format.
+existing `v:休日:きゅうじつ`. The guided player registers the other five word IDs in the shared typed catalog.
+Reference browsing does not enroll them or change catalog levels.
 Do not regenerate IDs from edited display text. Bump the chapter version when
 changing its content and retain IDs for the same subjects.
 
@@ -51,13 +51,14 @@ It validates our compiled authored content, not arbitrary imported files.
 Browsing, reading toggles, word-to-kanji links and answer disclosure do not write
 study progress or enqueue history. Existing kanji/vocabulary/Forge IDs, lesson
 eligibility, review dates, notes, backups and account behavior are unchanged.
-The five chapter-only words do not enter legacy lesson queues automatically.
+The typed catalog includes the chapter words; browsing does not introduce them.
+The ordinary typed course retains its eligibility gates, while the guided player
+uses the authored teaching order and shared workload limits.
 
-The next feature is the guided lesson player. It must explicitly define how
-chapter subjects enter reviews, preserve existing records (especially the already
-published 休日), support resume, and distinguish introduction from scheduled
-mastery. Chapter rewards, broader progression, audio and gamification remain
-separate roadmap features.
+The [guided lesson player](guided-lessons.md) defines paced enrollment and
+resume while preserving existing records, including the already published 休日.
+Introduction remains distinct from scheduled mastery. Chapter rewards, broader
+progression, audio and gamification remain separate roadmap features.
 
 ## Verification
 
@@ -85,3 +86,7 @@ Browser verification on the production demo covers:
 - Existing typed lessons still starting normally after leaving the chapter.
 
 There are no backend endpoints, database migrations or new dependencies in this PR.
+
+The [guided lesson player](guided-lessons.md) now uses this content for typed
+checks and paced enrollment. Reference browsing remains read-only; the typed
+catalog additionally registers the chapter words for shared scheduled reviews.
