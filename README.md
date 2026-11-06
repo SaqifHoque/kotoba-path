@@ -149,3 +149,11 @@ Plan your study time with Today’s [review forecast](docs/review-forecast.md): 
 Learning progress saves automatically. Use Settings for account access and [progress downloads/imports](docs/saving-and-imports.md), with a preview before applying a file.
 
 Study navigation is organized around Today, Learn, Review, Library, and Profile. See the [unified study guide](docs/unified-study.md) for session continuity and how existing progress is preserved.
+
+## Full-stack Vercel container + Neon
+
+`Dockerfile.vercel` builds Angular and packages its output into the existing Spring Boot application. Vercel's Container runtime serves the complete same-origin app, including account registration/login/recovery, PostgreSQL study synchronization, review history, and encyclopedia APIs. No Java API rewrite is needed. The container runs as a non-root user.
+
+Configure server-only `DATABASE_URL` as a JDBC PostgreSQL URL with `sslmode=require`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, and an unpooled `MIGRATION_DATABASE_URL` for Flyway. Use `PORT=8080` and `FORWARD_HEADERS_STRATEGY=native` behind Vercel. Separate preview and production database branches. Existing Flyway migrations remain authoritative. Initial catalog import uses a transaction advisory lock to avoid duplicate imports across replicas. `/api/health` verifies database connectivity.
+
+Run `mvn test` and frontend `npm ci && npm run build` before release. Vercel container availability and startup/build logs must be verified on the target account; a configured database alone is not a successful deployment.

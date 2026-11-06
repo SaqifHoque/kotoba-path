@@ -60,3 +60,9 @@ playwright-report/
 # Docker-only local overrides
 compose.override.yaml
 docker-compose.override.yml
+
+# Private deployment credentials and local metadata
+.env.deployment-*
+.vercel/
+__pycache__/
+.pytest_cache/
