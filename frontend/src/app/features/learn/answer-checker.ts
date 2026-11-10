@@ -9,6 +9,7 @@ export interface AnswerResult {
 
 // Original, deliberately small additions to the catalog's English glosses.
 export const MEANING_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  'v:休日:きゅうじつ': ['day off'],
   'k:大': ['large'], 'k:小': ['little'], 'k:人': ['human'],
   'k:休': ['take a rest'], 'k:見': ['look', 'look at'], 'k:車': ['automobile']
 };

@@ -1,3 +1,4 @@
+import { withChapterWords } from '../chapters/chapter-subjects';
 import { LearningComponent } from '../learn/kanji-curriculum';
 import { KanjiCard, buildLevels } from '../learn/kanji-engine';
 import { buildVocabulary } from '../learn/practice-engine';
@@ -51,7 +52,7 @@ export function buildForge(cards: KanjiCard[]): Subject[] {
       prerequisites:word.prerequisites.map(k=>`k:${k}`),level:Math.max(...word.prerequisites.map(k=>levels.get(k)!)),
       hint:word.context ? `${word.context[0]} — ${word.context[1]}` : `Read ${word.text} as a whole word: ${word.reading}. Link its meaning, “${word.meaning}”, to a situation you can picture.`});
   }
-  return [...radicals.values(),...subjects].sort((a,b)=>a.level-b.level || ['radical','kanji','vocabulary'].indexOf(a.kind)-['radical','kanji','vocabulary'].indexOf(b.kind));
+  return withChapterWords([...radicals.values(),...subjects]).sort((a,b)=>a.level-b.level || ['radical','kanji','vocabulary'].indexOf(a.kind)-['radical','kanji','vocabulary'].indexOf(b.kind));
 }
 export function skills(subject: Subject): Skill[] { return subject.readings.length ? ['meaning','reading'] : ['meaning']; }
 export function mastery(record?: ForgeRecord): number { return record ? Math.min(record.meaning.stage,record.reading?.stage ?? 9) : 0; }
@@ -71,9 +72,12 @@ export function lessonAllowance(subjects: Subject[], state: ForgeState, now: num
   return Math.max(0,Math.min(state.dailyLimit-introduced,50-apprentice));
 }
 function firstTrack(now: number): Track { return {stage:1,due:now+WAITS[1],reviews:0,correct:0,misses:0,updatedAt:now}; }
+export function newForgeRecord(subject: Subject, now: number): ForgeRecord {
+  return {meaning:firstTrack(now),...(subject.readings.length?{reading:firstTrack(now)}:{}),lessonAt:now,note:'',noteAt:0};
+}
 export function learn(subject: Subject, subjects: Subject[], state: ForgeState, now: number): ForgeState {
   if(!canLearn(subject,state)||!lessonAllowance(subjects,state,now))return state;
-  return {...state,records:{...state.records,[subject.id]:{meaning:firstTrack(now),...(subject.readings.length?{reading:firstTrack(now)}:{}),lessonAt:now,note:'',noteAt:0}}};
+  return {...state,records:{...state.records,[subject.id]:newForgeRecord(subject,now)}};
 }
 export function review(subject: Subject, skill: Skill, correct: boolean, subjects: Subject[], state: ForgeState, now: number): ForgeState {
   const record=state.records[subject.id],track=record?.[skill];

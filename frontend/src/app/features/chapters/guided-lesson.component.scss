@@ -1,0 +1,17 @@
+:host { display: block; padding: 2rem 0; max-width: 800px; }
+h1 { font: 600 clamp(2rem, 5vw, 3rem) var(--jp); }
+h2 { font-size: 1.5rem; }
+p { line-height: 1.75; overflow-wrap: anywhere; }
+.eyebrow { color: var(--rust); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+progress { width: 100%; accent-color: var(--rust); }
+article { margin: 1.5rem 0; padding: clamp(1rem, 4vw, 2rem); border: 1px solid var(--line); background: #fff8; }
+.glyph { display: block; font: clamp(3rem, 8vw, 5rem) var(--jp); margin-bottom: .8rem; }
+.meaning { font-size: 1.3rem; }
+.note { font-size: .85rem; color: var(--muted); }
+label { display: block; margin: 1rem 0 .5rem; }
+input { display: block; box-sizing: border-box; width: 100%; min-width: 0; padding: .8rem; margin-bottom: 1rem; border: 1px solid var(--line); font: inherit; background: white; }
+button { padding: .8rem 1rem; color: var(--ink); background: white; border: 1px solid var(--line); font: inherit; cursor: pointer; white-space: normal; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.primary { color: white; background: var(--ink); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 3px solid var(--rust); }

@@ -1,0 +1,31 @@
+:host { display: block; padding: 2rem 0; }
+h1 { font: 600 clamp(2rem, 5vw, 3rem) var(--jp); }
+h2 { font: 600 1.6rem var(--jp); }
+h3 { font: 600 1.25rem var(--jp); margin: 2rem 0 .7rem; }
+p { line-height: 1.7; overflow-wrap: anywhere; }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .7rem; color: var(--rust); }
+.explorer { display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2rem); margin-top: 2rem; }
+.search, .connections { min-width: 0; }
+label { display: block; font-size: .9rem; line-height: 1.6; }
+input { width: 100%; box-sizing: border-box; padding: .8rem; border: 1px solid var(--line); background: white; color: var(--ink); font: inherit; }
+button { color: var(--ink); background: white; border: 1px solid var(--line); padding: .7rem .8rem; font: inherit; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+button[aria-pressed=true] { border-color: var(--rust); background: #f5e5d7; }
+.results { list-style: none; padding: 0; }
+.results li { margin-bottom: .5rem; }
+.results button { width: 100%; display: flex; gap: .8rem; align-items: center; text-align: left; }
+.result-text { font: 1.4rem var(--jp); min-width: 2rem; }
+small { display: block; color: var(--muted); font-size: .75rem; margin-top: .4rem; }
+.selected-item { border: 1px solid var(--line); border-top: 3px solid var(--rust); padding: clamp(1rem, 3vw, 1.7rem); margin-top: 1rem; background: #fff8; }
+.glyph { display: block; font: 4rem var(--jp); margin-bottom: .8rem; }
+.glyph-image { display: block; width: 4rem; height: 4rem; margin-bottom: .8rem; }
+.small-image { width: 2rem; height: 2rem; display: block; margin-bottom: .5rem; }
+.note { color: var(--muted); font-size: .85rem; }
+.links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: .7rem; margin: 1rem 0; }
+.links button { display: block; text-align: left; line-height: 1.6; }
+.link-glyph { display: block; font: 2rem var(--jp); margin-bottom: .5rem; }
+.words ruby { display: block; font: 1.5rem var(--jp); margin: .5rem 0; }
+rt { font-size: .7rem; }
+blockquote { border-left: 3px solid var(--rust); margin: 1rem 0; padding-left: 1rem; }
+.personal-note { white-space: pre-wrap; }
+@media(max-width:650px) { .explorer { grid-template-columns: minmax(0,1fr); } .results { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,150px),1fr)); gap: .5rem; } .results li { margin: 0; } .results button { height: 100%; } }
