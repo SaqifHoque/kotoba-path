@@ -4,7 +4,7 @@ import { Word, availableWords, targetedVocabulary } from '../learn/practice-engi
 import { ForgeState, Subject, canLearn, dueQuestions, lessonAllowance, mastery } from '../forge/forge-engine';
 
 export type StudyMode = 'path' | 'forge';
-export type StudyView = 'associations' | 'guided' | 'home' | 'learn' | 'forge' | 'history' | 'catalog' | 'settings' | 'learning' | 'reviews' | 'library';
+export type StudyView = 'typed-review' | 'associations' | 'guided' | 'home' | 'learn' | 'forge' | 'history' | 'catalog' | 'settings' | 'learning' | 'reviews' | 'library';
 export type StudyAction = 'kanji-lessons' | 'kanji-reviews' | 'vocabulary' | 'forge-lessons' | 'forge-reviews' | 'vocabulary-reviews';
 export interface StudyLaunch { id: number; action: StudyAction; }
 export interface HomePreference { version: 1; mode: StudyMode; }
@@ -28,7 +28,7 @@ export function hasStudyProgress(state: HomeProgress): boolean {
 export function preferredMode(state: HomeProgress, preference: HomePreference | null): StudyMode {
   return preference?.mode ?? (Object.keys(state.forge.records).length && !Object.keys(state.kanji).length && !Object.keys(state.vocabulary).length ? 'forge' : 'path');
 }
-export function actionView(action: StudyAction): 'learn' | 'forge' { return action.startsWith('forge-') ? 'forge' : 'learn'; }
+export function actionView(action: StudyAction): 'learn' | 'forge' | 'typed-review' { return action === 'forge-reviews' ? 'typed-review' : action.startsWith('forge-') ? 'forge' : 'learn'; }
 
 /** Derive counts from the same eligibility and limit rules used by the study screens. */
 export function dailyPlan(cards: KanjiCard[], words: Word[], subjects: Subject[], state: HomeProgress, mode: StudyMode, now: number): DailyPlan {
@@ -47,8 +47,8 @@ export function dailyPlan(cards: KanjiCard[], words: Word[], subjects: Subject[]
   const choices: {action: StudyAction; label: string; detail: string; due: number}[] = [];
   if (kanji.length) choices.push({action: 'kanji-reviews', label: `Review kanji · ${kanji.length} due`, detail: 'Recall meaning and reading in a batch of up to 20 kanji.', due: state.kanji[kanji[0].character].due});
   if (vocabulary.length) choices.push({action: 'vocabulary-reviews', label: `Review vocabulary · ${vocabulary.length} due`, detail: 'Review whole-word readings in a batch of up to 10 words.', due: state.vocabulary[vocabulary[0].id].due});
-  if (forge.length) choices.push({action: 'forge-reviews', label: `Review meanings and readings · ${forge.length} questions`, detail: 'Review meaning and reading tracks in a batch of up to 40 questions.', due: state.forge.records[forge[0].subject.id][forge[0].skill]!.due!});
-  choices.sort((a, b) => a.due - b.due || Number(actionView(a.action) !== (mode === 'forge' ? 'forge' : 'learn')) - Number(actionView(b.action) !== (mode === 'forge' ? 'forge' : 'learn')));
+  if (forge.length) choices.push({action: 'forge-reviews', label: `Review meanings and readings · ${forge.length} questions`, detail: 'Review meaning and reading tracks in a batch of up to 20 questions.', due: state.forge.records[forge[0].subject.id][forge[0].skill]!.due!});
+  choices.sort((a, b) => a.due - b.due || Number(a.action.startsWith('forge-') !== (mode === 'forge')) - Number(b.action.startsWith('forge-') !== (mode === 'forge')));
   let next: DailyPlan['next'] = choices[0] ?? null;
   if (!next && mode === 'forge' && forgeLessons) next = {action: 'forge-lessons', label: 'Learn new items', detail: 'Study up to five components, kanji, or words with typed recall.'};
   if (!next && mode === 'path' && newWords) next = {action: 'vocabulary', label: 'Learn unlocked vocabulary', detail: 'Put familiar kanji to work through whole-word reading.'};
