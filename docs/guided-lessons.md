@@ -106,3 +106,7 @@ learning events (22 correct checks and one incorrect), and zero scheduled events
 Replay preserved Burned records and notes. Account namespaces, daily-limit
 pauses, mobile keyboard controls, blocked resume storage, malformed cursors,
 offline introductions and import invalidation were also verified in the browser.
+
+The [association explorer](association-explorer.md) is available from each
+guided subject. Returning from it keeps the current step, feedback and draft
+answer without submitting a check or changing the review schedule.
