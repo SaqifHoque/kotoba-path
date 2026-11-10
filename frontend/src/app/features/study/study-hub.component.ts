@@ -14,6 +14,7 @@ import { DEMO_MODE } from '../../demo-mode';
   templateUrl:'./study-hub.component.html',styleUrls:['./study-hub.component.scss']})
 export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
   @Input() sessions: OpenSession[] = [];
+  @Output() explore = new EventEmitter<string>();
   @Output() guide = new EventEmitter<void>();
   @Output() resume = new EventEmitter<OpenSession>();
   @Input() cards: KanjiCard[] = [];

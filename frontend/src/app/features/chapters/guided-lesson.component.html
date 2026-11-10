@@ -37,6 +37,7 @@
             <p *ngIf="feedback.result.status==='incorrect'">Accepted answers: {{feedback.result.accepted.join(' · ')}}</p>
             <button *ngIf="feedback.result.status!=='correct'" type="button" (click)="retry()">Try again</button>
           </div>
+          <button type="button" (click)="explore.emit(subject.id)">Explore this item</button>
         </ng-container>
         <button *ngIf="step.kind!=='check'||lesson.feedback?.result?.status==='correct'" type="button" class="primary" [disabled]="moving||!lesson.allowed" (click)="next()">Continue</button>
       </article>

@@ -1,7 +1,7 @@
 <header><span class="eyebrow">{{section==='learning'?'Build understanding':section==='reviews'?'Make it stick':'Follow your curiosity'}}</span><h1>{{section==='learning'?'Learn':section==='reviews'?'Review':'Library'}}</h1><p>{{section==='learning'?'A clear lesson to begin, with your current milestones in one place.':section==='reviews'?'Recall what you have learned, at the right time.':'Browse Japanese and revisit the learning tools you already use.'}}</p></header>
 <ng-container *ngIf="sync.ready&&plan as p; else loading">
   <section class="open-sessions" *ngIf="sessions.length&&section!=='library'" aria-label="Your open sessions"><h2>Pick up where you left off</h2><button type="button" *ngFor="let session of sessions" (click)="resume.emit(session)">Continue {{session.label}} · {{session.remaining}} steps</button></section>
-  <app-starter-chapter *ngIf="section==='learning'||section==='library'" [cards]="cards" (guide)="guide.emit()"></app-starter-chapter>
+  <app-starter-chapter *ngIf="section==='learning'||section==='library'" [cards]="cards" (guide)="guide.emit()" (explore)="explore.emit($event)"></app-starter-chapter>
   <ng-container *ngIf="section==='learning'">
     <section class="recommended" aria-labelledby="lesson-title">
       <span class="eyebrow">Your next lesson</span>
@@ -28,6 +28,7 @@
   </ng-container>
   <ng-container *ngIf="section==='library'">
     <div class="cards">
+      <article><h2>Kanji &amp; word connections</h2><p>Follow teaching components, dictionary radicals, and whole-word readings through the study catalog.</p><button type="button" (click)="open.emit('associations')">Explore connections</button></article>
       <article><h2>Kanji, radicals &amp; words</h2><p>Browse the existing typed-course catalog, mnemonic notes, and extra practice.</p><button type="button" (click)="open.emit('forge')">Browse typed course</button></article>
       <article><h2>Reading path map</h2><p>Explore your existing levels, proficiency tools, and vocabulary practice.</p><button type="button" (click)="open.emit('learn')">Browse reading path</button></article>
       <article><h2>Reading encyclopedia</h2><p>Look up Japanese text and explore the visual reference.</p><button type="button" [disabled]="demo" (click)="open.emit('catalog')">Open encyclopedia</button><p *ngIf="demo" class="note">The encyclopedia is available in the self-hosted app.</p></article>

@@ -23,6 +23,7 @@
       <div class="grid">
         <article *ngFor="let item of chapter.kanji" [attr.id]="'starter-'+item.subjectId">
           <h4><span lang="ja" class="glyph">{{character(item.subjectId)}}</span>{{item.meaning}}</h4>
+          <button type="button" [attr.aria-label]="'Explore connections for '+character(item.subjectId)" (click)="explore.emit(item.subjectId)">Explore connections</button>
           <p class="association"><span *ngFor="let id of item.shapeIds; let last=last"><span lang="ja">{{shape(id).form}}</span> ({{shape(id).name}})<span *ngIf="!last"> + </span></span></p>
           <p>{{item.memory}}</p>
           <p><strong>Readings in this chapter:</strong> <span lang="ja">{{item.reading}}</span></p>
@@ -34,6 +35,7 @@
       <div class="grid">
         <article *ngFor="let word of chapter.words">
           <h4><ruby lang="ja">{{word.text}}<rt *ngIf="showReadings">{{word.reading}}</rt></ruby> · {{word.meaning}}</h4>
+          <button type="button" [attr.aria-label]="'Explore connections for word '+word.text" (click)="explore.emit(word.id)">Explore connections</button>
           <p class="word-links">Kanji: <a *ngFor="let id of word.kanjiIds" [attr.href]="'#starter-'+id"><span lang="ja">{{character(id)}}</span></a></p>
           <p>{{word.readingNote}}</p>
           <blockquote>
