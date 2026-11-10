@@ -1,0 +1,44 @@
+<header><span class="eyebrow">Follow the connections</span><h1>Kanji &amp; word explorer</h1><p>Connect shapes to kanji and kanji to whole words. Explore freely; your lesson stages and review dates stay as they are.</p><button type="button" (click)="leave.emit()">{{returnLabel}}</button></header>
+<div class="explorer" *ngIf="available; else unavailable">
+  <section class="search" aria-labelledby="search-title">
+    <h2 id="search-title">Find a connection</h2>
+    <form (ngSubmit)="matches.items.length&&select(matches.items[0].id)">
+      <label for="association-query">Kanji, kana reading, or English meaning</label>
+      <input id="association-query" name="association-query" type="search" [(ngModel)]="query" (ngModelChange)="searchItems()" autocomplete="off" maxlength="100" placeholder="休, やすむ, tree…">
+    </form>
+    <p role="status" aria-live="polite">{{query.trim()?'Showing '+matches.items.length+' of '+matches.total+' matches':'Start with a familiar item'}}</p>
+    <p *ngIf="query.trim()&&!matches.total">No matching items in the study catalog. Try another kanji, kana reading, or English meaning.</p>
+    <ul class="results"><li *ngFor="let item of matches.items; trackBy:trackSubject"><button type="button" [attr.aria-pressed]="detail?.subject?.id===item.id" (click)="select(item.id)"><span class="result-text" lang="ja">{{item.text}}</span><span>{{item.meaning}}<small>{{kind(item)}}</small></span></button></li></ul>
+  </section>
+  <section class="connections" aria-label="Selected item and its connections">
+    <button *ngIf="canGoBack" type="button" (click)="back()">← Previous item</button>
+    <ng-container *ngIf="detail as d; else missing">
+      <article class="selected-item">
+        <span class="eyebrow">{{kind(d.subject)}}</span>
+        <h2 #itemHeading tabindex="-1"><img *ngIf="d.subject.image; else character" [src]="'assets/radicals/'+d.subject.image" [alt]="d.subject.meaning+' radical'" class="glyph-image"><ng-template #character><span lang="ja" class="glyph">{{d.subject.text}}</span></ng-template>{{d.subject.meaning}}</h2>
+        <p *ngIf="d.subject.readings.length"><strong>{{d.subject.kind==='vocabulary'?'Whole-word reading':'Typed-review reading'}}:</strong> <span lang="ja">{{d.subject.readings.join(' · ')}}</span></p>
+        <p *ngIf="d.subject.otherReadings?.length"><strong>Other listed readings:</strong> <span lang="ja">{{d.subject.otherReadings?.join(' · ')}}</span></p>
+        <p class="note">Typed study: {{introduced?stage:'Not introduced'}}.</p>
+        <p *ngIf="chapterKanji as item">{{item.memory}}</p>
+        <ng-container *ngIf="chapterWord as word; else catalogHint"><p>{{word.readingNote}}</p><blockquote><p lang="ja">{{word.sentence.text}}</p><p lang="ja" class="note">{{word.sentence.reading}}</p><p>{{word.sentence.meaning}}</p><p class="note">{{word.sentence.note}}</p></blockquote></ng-container>
+        <ng-template #catalogHint><p *ngIf="!chapterKanji">{{d.subject.hint}}</p></ng-template>
+        <p *ngIf="note" class="personal-note"><strong>Your memory note:</strong> {{note}}</p>
+        <p *ngIf="synonyms.length"><strong>Your meaning synonyms:</strong> {{synonyms.join(' · ')}}</p>
+      </article>
+      <section *ngIf="d.subject.kind==='kanji'" aria-labelledby="components-title">
+        <h3 id="components-title">Teaching components</h3>
+        <p class="note">Visual memory links authored for this kanji. A link describes a shape, rather than its number of occurrences or position.</p>
+        <div class="links" *ngIf="d.components.length; else noComponents"><button type="button" *ngFor="let link of d.components" (click)="select(link.subject.id)"><span lang="ja" class="link-glyph">{{link.form}}</span>{{link.subject.meaning}}<small>Explore <span lang="ja">{{link.subject.text}}</span></small></button></div>
+        <ng-template #noComponents><p>Teaching component links haven’t been authored for this kanji yet.</p></ng-template>
+        <h3>Dictionary radical</h3><p class="note">The primary radical groups kanji for dictionary lookup. Teaching components are listed separately above.</p>
+        <div class="links"><button type="button" *ngFor="let item of d.primaryRadicals; trackBy:trackSubject" (click)="select(item.id)"><img *ngIf="item.image; else radicalText" [src]="'assets/radicals/'+item.image" [alt]="item.meaning+' radical'" class="small-image"><ng-template #radicalText><span lang="ja" class="link-glyph">{{item.text}}</span></ng-template>{{item.meaning}}</button></div>
+      </section>
+      <section *ngIf="d.kanji.length" aria-labelledby="word-kanji-title"><h3 id="word-kanji-title">Kanji in this word</h3><p>Learn the complete word reading above. Individual kanji may use different readings in other words.</p><div class="links"><button type="button" *ngFor="let item of d.kanji; trackBy:trackSubject" (click)="select(item.id)"><span lang="ja" class="link-glyph">{{item.text}}</span>{{item.meaning}}</button></div></section>
+      <section *ngIf="d.usedInKanji.length" aria-labelledby="used-in-title"><h3 id="used-in-title">Used as a teaching component in</h3><div class="links"><button type="button" *ngFor="let item of d.usedInKanji; trackBy:trackSubject" (click)="select(item.id)"><span lang="ja" class="link-glyph">{{item.text}}</span>{{item.meaning}}</button></div></section>
+      <section *ngIf="d.classifiedKanji.length" aria-labelledby="classified-title"><h3 id="classified-title">Kanji with this dictionary radical</h3><p class="note">{{d.classifiedKanji.length}} kanji in the study catalog.</p><div class="links"><button type="button" *ngFor="let item of d.classifiedKanji.slice(0,kanjiLimit); trackBy:trackSubject" (click)="select(item.id)"><span lang="ja" class="link-glyph">{{item.text}}</span>{{item.meaning}}</button></div><button type="button" *ngIf="kanjiLimit<d.classifiedKanji.length" (click)="kanjiLimit=kanjiLimit+12">Show more kanji</button></section>
+      <section *ngIf="d.subject.kind!=='radical'" aria-labelledby="words-title"><h3 id="words-title">{{d.subject.kind==='vocabulary'?'More words using these kanji':'Words with this kanji'}}</h3><p class="note">{{d.words.length}} related words in the study catalog. Readings belong to each whole word.</p><div class="links words"><button type="button" *ngFor="let item of d.words.slice(0,wordLimit); trackBy:trackSubject" (click)="select(item.id)"><ruby lang="ja">{{item.text}}<rt>{{item.readings.join(' · ')}}</rt></ruby><span>{{item.meaning}}</span></button></div><p *ngIf="!d.words.length">No related words are available in this catalog yet.</p><button type="button" *ngIf="wordLimit<d.words.length" (click)="wordLimit=wordLimit+12">Show more words</button></section>
+    </ng-container>
+    <ng-template #missing><p role="status">This item isn’t available in the current study catalog. Choose an item from the search results.</p></ng-template>
+  </section>
+</div>
+<ng-template #unavailable><p role="alert">Connections could not be loaded. Your lessons and saved progress are still available.</p></ng-template>

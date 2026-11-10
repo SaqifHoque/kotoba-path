@@ -60,7 +60,9 @@ export function buildAssociationIndex(subjects: Subject[]): AssociationIndex {
         usedInKanji: [...(usedIn.get(id) ?? [])],
         classifiedKanji: [...(classified.get(id) ?? [])],
         kanji: subject.kind === 'vocabulary' ? lookup(subject.prerequisites, 'kanji') : [],
-        words: [...(words.get(id) ?? [])]
+        words: subject.kind === 'vocabulary'
+          ? [...new Map(subject.prerequisites.flatMap(kanjiId => words.get(kanjiId) ?? []).filter(word => word.id !== id).map(word => [word.id, word])).values()]
+          : [...(words.get(id) ?? [])]
       };
     }
   };
