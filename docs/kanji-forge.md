@@ -14,7 +14,7 @@ Open **Kanji Forge** in the sidebar. This optional mode has its own curriculum s
 
 ## Learning tools and motivation
 
-Daily new-item limits are 5, 10, or 20, counted by the browser's local calendar date. Lesson batches contain up to five subjects. The workload guard pauses new lessons at 50 Apprentice subjects or 20 due questions. Review batches contain up to 40 questions.
+Daily new-item limits are 5, 10, or 20, counted by the browser's local calendar date. Lesson batches contain up to five subjects. The workload guard pauses new lessons at 50 Apprentice subjects or 20 due questions. Scheduled typed reviews use the [focused review screen](review-experience.md), with 10/20/40-question batches (20 by default) and immediate per-answer saving.
 
 The dashboard shows stage counts, scheduled-review accuracy, next review time, milestone progress, and recall XP (five per introduced subject and ten per correct scheduled answer). First Spark, Ten Tempered, and First Flame badges reward introduction, Guru-level retention, and the first Burned item.
 

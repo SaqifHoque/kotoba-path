@@ -18,7 +18,7 @@ Review shows the next due review and separate kanji, vocabulary, and typed-answe
 
 ## Navigation and open sessions
 
-Reading-path and typed-course screens remain mounted while browsing this tab, but hidden screens are explicitly removed from layout. Today offers **Continue session** for the most recently selected open course. Learn and Review also list open sessions. Current input, feedback, and remaining questions survive ordinary navigation. Explicitly starting another session in the same course replaces that course’s unfinished queue; completed work stays recorded.
+Reading-path and typed-course lesson/practice screens remain mounted while browsing this tab, but hidden screens are explicitly removed from layout. Scheduled typed-review state is kept in a tab-local service when its screen closes. Today offers **Continue session** for the most recently selected open course. Learn and Review also list open sessions. Current input, feedback, and remaining questions survive ordinary navigation. Explicitly starting another session in the same course replaces that course’s unfinished queue; completed work stays recorded.
 
 This is in-memory continuity, not a saved session file. Reloading, changing accounts, or importing progress closes suspended sessions. Completed work remains saved through the existing synchronization service. A progress import resets both course screens to prevent resuming an obsolete queue. Account registration still keeps the one-time recovery key visible in Profile until the user completes that step.
 
@@ -29,3 +29,6 @@ The compact navigation closes after selection, supports Escape, and returns keyb
 `npm run test:overview` covers new/existing preferences, primary-section mappings, lesson eligibility, separate milestone semantics, and due-only vocabulary queues. It is included in `npm run test:engines`. Run production and public-demo builds as well.
 
 Browser verification follows Today → actual lesson/review → study-profile API → updated overview. It covers optional onboarding, read-only browsing, typed and reading-path sessions, draft-input preservation, due-only vocabulary, history counts, progress import, account registration, offline cache/reconnection, and compact navigation on a 390px screen.
+
+Scheduled typed reviews now use the [focused review experience](review-experience.md)
+with 10/20/40-question batches, per-answer saving and session summaries.
