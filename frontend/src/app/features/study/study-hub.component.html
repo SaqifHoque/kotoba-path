@@ -28,6 +28,7 @@
   </ng-container>
   <ng-container *ngIf="section==='library'">
     <div class="cards">
+      <article><h2>Kanji &amp; word connections</h2><p>Follow teaching components, dictionary radicals, and whole-word readings through the study catalog.</p><button type="button" (click)="open.emit('associations')">Explore connections</button></article>
       <article><h2>Kanji, radicals &amp; words</h2><p>Browse the existing typed-course catalog, mnemonic notes, and extra practice.</p><button type="button" (click)="open.emit('forge')">Browse typed course</button></article>
       <article><h2>Reading path map</h2><p>Explore your existing levels, proficiency tools, and vocabulary practice.</p><button type="button" (click)="open.emit('learn')">Browse reading path</button></article>
       <article><h2>Reading encyclopedia</h2><p>Look up Japanese text and explore the visual reference.</p><button type="button" [disabled]="demo" (click)="open.emit('catalog')">Open encyclopedia</button><p *ngIf="demo" class="note">The encyclopedia is available in the self-hosted app.</p></article>

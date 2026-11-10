@@ -1,3 +1,4 @@
+import { AssociationExplorerComponent } from './features/associations/association-explorer.component';
 import { GuidedLessonComponent } from './features/chapters/guided-lesson.component';
 import { GuidedLessonService } from './features/chapters/guided-lesson.service';
 import { StudyHubComponent } from './features/study/study-hub.component';
@@ -19,17 +20,19 @@ import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.comp
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [AssociationExplorerComponent, GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
+  associationId = 'k:休';
+  associationReturn: StudyView = 'library';
   menuOpen = false; view: StudyView = 'home'; section: StudySection = 'home'; pathVisited = false; forgeVisited = false;
   @ViewChild(KanjiPathComponent) private path?: KanjiPathComponent;
   @ViewChild(ForgeComponent) private forge?: ForgeComponent;
   private lastSessionView: OpenSession['view']|null = null;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
-  readonly titles: Record<StudyView, string> = {guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
-  readonly subtitles: Record<StudyView, string> = {guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
+  readonly titles: Record<StudyView, string> = {associations:'Kanji & word explorer',guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
+  readonly subtitles: Record<StudyView, string> = {associations:'Shapes · kanji · words',guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
   @ViewChild('mainContent') private content?: ElementRef<HTMLElement>;
   @ViewChild('menuToggle') private menuToggle?: ElementRef<HTMLButtonElement>;
   private readonly media=window.matchMedia('(max-width:850px)');
@@ -44,6 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
       error: () => {this.loading = false; this.error = 'Your study catalog could not be loaded. Check your connection and retry.';}});
   }
   navigate(view: StudyView): void {
+    if (view === 'associations' && this.view !== 'associations') this.associationReturn = this.view;
     this.view = view; this.section = sectionFor(view); this.menuOpen = false; this.launch = null;
     if (view === 'learn') this.pathVisited = true;
     if (view === 'forge') this.forgeVisited = true;
@@ -56,6 +60,10 @@ export class AppComponent implements OnInit, OnDestroy {
     this.lastSessionView=this.view as 'learn'|'forge';
     this.launch = {id: ++this.nextLaunch, action};
     this.focusContent();
+  }
+  explore(id: string): void { this.associationId = id; this.navigate('associations'); }
+  get associationReturnLabel(): string {
+    return this.associationReturn === 'guided' ? 'Return to guided chapter' : this.associationReturn === 'learning' ? 'Return to Learn' : 'Return to Library';
   }
   startGuided(): void {
     this.lessons.restore();
