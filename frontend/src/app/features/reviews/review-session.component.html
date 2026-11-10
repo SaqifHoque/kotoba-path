@@ -1,0 +1,37 @@
+<header><span class="eyebrow">Strengthen recall</span><h1>Meaning &amp; reading review</h1><p>One question at a time. Meaning and reading have separate review dates.</p></header>
+<ng-container *ngIf="review.allowed&&review.batch as batch; else setup">
+  <ng-container *ngIf="review.summary as summary">
+    <section *ngIf="review.complete; else active" class="summary" aria-label="Review batch summary">
+      <h2 #summaryHeading tabindex="-1">{{batch.closed&&summary.remaining?'Finished for now':summary.total?'Batch complete':'You’re caught up for now'}}</h2>
+      <div class="counts"><p><strong>{{summary.answered}} / {{summary.total}}</strong> questions answered</p><p><strong>{{summary.subjects}}</strong> subjects with a scored answer</p><p><strong>{{summary.accuracy===null?'—':summary.accuracy+'%'}}</strong> scored accuracy</p></div>
+      <p>{{summary.correct}} correct · {{summary.incorrect}} incorrect · {{summary.skipped}} skipped because the saved review changed.</p>
+      <p *ngIf="summary.remaining">{{summary.remaining}} unanswered question(s) were left for later. Their review dates are unchanged.</p>
+      <p *ngIf="!summary.total&&nextDue">Next review: {{nextDue|date:'medium'}}.</p>
+      <p class="note">Scored answers were recorded as you checked them. The saving status above shows whether they have synced.</p>
+      <section *ngIf="summary.mistakes.length" aria-labelledby="mistakes-title"><h3 id="mistakes-title">Take another look</h3><p>Revisit these answers at your own pace. Reading an explanation here does not score another review.</p><article *ngFor="let mistake of summary.mistakes" class="mistake"><h4><span lang="ja">{{mistake.question.subject.text}}</span> · {{mistake.question.skill}}</h4><p>Accepted answers: {{mistake.accepted.join(' · ')}}</p><details><summary>Memory aid and context</summary><p>{{mistake.question.subject.hint}}</p></details><button type="button" (click)="explore.emit(mistake.question.subject.id)">Explore this item</button></article></section>
+      <label for="next-review-size">Questions in the next batch</label><select id="next-review-size" [(ngModel)]="review.limit"><option *ngFor="let size of batchSizes" [ngValue]="size">Up to {{size}} questions</option></select>
+      <button type="button" class="primary" [disabled]="!review.canStart" (click)="begin()">Start next batch</button>
+      <button type="button" (click)="leave.emit()">Return to Review</button>
+    </section>
+    <ng-template #active>
+      <p class="position">{{summary.answered}} answered · {{summary.skipped}} skipped · {{summary.total}} questions in this batch</p><progress [value]="batch.outcomes.length" [max]="summary.total" aria-label="Review batch progress"></progress>
+      <section *ngIf="review.question as q" class="question" aria-label="Scheduled review question">
+        <span class="kind">{{q.subject.kind}}</span>
+        <h2><img *ngIf="q.subject.image; else glyph" class="subject-image" [src]="'assets/radicals/'+q.subject.image" alt="Radical shape"><ng-template #glyph><span lang="ja">{{q.subject.text}}</span></ng-template></h2>
+        <p class="skill" [class.reading]="q.skill==='reading'">{{q.skill==='meaning'?'Meaning · answer in English':'Reading · answer in kana'}}</p>
+        <form *ngIf="!review.feedback||review.feedback.status==='retry'" (ngSubmit)="check()">
+          <label for="review-answer">{{q.skill==='meaning'?'Meaning in English':'Reading in hiragana or katakana'}}</label><input #answer id="review-answer" name="review-answer" [(ngModel)]="review.draft" [disabled]="!review.allowed" [attr.lang]="q.skill==='reading'?'ja':'en'" [attr.aria-describedby]="review.feedback?'review-feedback':null" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="primary" type="submit" [disabled]="!review.draft.trim()||!review.allowed">Check answer</button><button type="button" [disabled]="!review.allowed" (click)="check(true)">I don’t know</button>
+        </form>
+        <div *ngIf="review.feedback as feedback" id="review-feedback" role="status" aria-live="polite">
+          <h3 #feedbackHeading tabindex="-1" *ngIf="feedback.status!=='retry'">{{feedback.status==='correct'?'Correct':feedback.status==='incorrect'?'Let’s remember this one':'Review skipped'}}</h3><p>{{feedback.message}}</p>
+          <ng-container *ngIf="review.scored as scored"><p><strong>Accepted {{q.skill}}:</strong> {{scored.accepted.join(' · ')}}</p><p>{{stages[scored.beforeStage]}} → {{stages[scored.afterStage]}}</p><p *ngIf="scored.nextDue!==null; else burned">Next {{q.skill}} review: {{scored.nextDue|date:'medium'}}.</p><ng-template #burned><p>This skill is Burned and has no further scheduled review.</p></ng-template><p class="note">Answer recorded. Check the saving status above before leaving this tab.</p><details><summary>Memory aid and context</summary><p>{{q.subject.hint}}</p><p *ngIf="note"><strong>Your mnemonic:</strong> {{note}}</p></details><button type="button" (click)="explore.emit(q.subject.id)">Explore this item</button></ng-container>
+          <button *ngIf="feedback.status!=='retry'" type="button" class="primary" [disabled]="!review.allowed" (click)="next()">Continue</button>
+        </div>
+      </section>
+      <div class="session-actions"><button type="button" (click)="leave.emit()">Pause &amp; return to Review</button><button type="button" [disabled]="!review.allowed" (click)="finish()">Finish for now</button></div>
+      <p class="note">Pause keeps this batch in the tab. Reloading closes the batch; already recorded answers stay saved and remaining questions stay due.</p>
+    </ng-template>
+  </ng-container>
+</ng-container>
+<ng-template #setup><p *ngIf="!review.canStart" role="status">Wait for your saved progress to load.</p><ng-container *ngIf="review.canStart"><label for="review-size">Questions in a batch</label><select id="review-size" [(ngModel)]="review.limit"><option *ngFor="let size of batchSizes" [ngValue]="size">Up to {{size}} questions</option></select><button type="button" class="primary" (click)="begin()">Start due reviews</button></ng-container><button type="button" (click)="leave.emit()">Return to Review</button></ng-template>
