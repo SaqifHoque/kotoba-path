@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { OpenSession } from '../study/study-overview';
 import { acceptedMeanings, checkAnswer } from '../learn/answer-checker';
 import { setMeaningSynonyms } from '../learn/meaning-synonyms';
@@ -9,13 +10,14 @@ import { StudyLaunch } from '../home/study-home';
 import { Subscription } from 'rxjs';
 import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
-import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, review, skills, weakSubjects } from './forge-engine';
+import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, skills, weakSubjects } from './forge-engine';
 
-@Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
+@Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule, WordAudioComponent],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
 export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
+  @Output() reviewRequested = new EventEmitter<void>();
   @Input() launch:StudyLaunch|null=null; @Output() launched=new EventEmitter<number>(); private lastLaunch=0;
   subjects:Subject[]=[]; state:ForgeState=emptyForge(); loading=true; error=''; message=''; now=Date.now();
-  mode:'dashboard'|'lesson'|'review'|'practice'='dashboard'; queue:Question[]=[]; study=false; checked=false; correct=false; answer=''; note='';
+  mode:'dashboard'|'lesson'|'practice'='dashboard'; queue:Question[]=[]; study=false; checked=false; correct=false; answer=''; note='';
   feedback=''; synonymDraft=''; synonymError='';
   stageNames=STAGES; selectedKind:'all'|'radical'|'kanji'|'vocabulary'='all'; page=1;
   private subscription?:Subscription; private loadingSubscription?:Subscription; private timer?:ReturnType<typeof setInterval>;
@@ -38,7 +40,7 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
     if(this.launch.action==='forge-reviews')this.startReviews();else this.startLessons();
     const id=this.launch.id;queueMicrotask(()=>this.launched.emit(id));
   }
-  get openSession():OpenSession|null { return this.mode==='dashboard'||!this.queue.length?null:{view:'forge',label:this.mode==='review'?'typed review':this.mode==='lesson'?'typed lesson':'typed practice',remaining:this.queue.length,review:this.mode==='review'}; }
+  get openSession():OpenSession|null { return this.mode==='dashboard'||!this.queue.length?null:{view:'forge',label:this.mode==='lesson'?'typed lesson':'typed practice',remaining:this.queue.length,review:false}; }
   get current():Question|undefined{return this.queue[0];}
   get due():Question[]{return dueQuestions(this.subjects,this.state,this.now);}
   get allowance():number{return lessonAllowance(this.subjects,this.state,this.now);}
@@ -67,7 +69,7 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
     if(!lessons.length)return;
     this.message='';this.mode='lesson';this.queue=lessons.flatMap(subject=>skills(subject).map(skill=>({subject,skill})));this.reset();this.study=true;
   }
-  startReviews():void{this.now=Date.now();this.queue=this.due.slice(0,40);if(this.queue.length){this.mode='review';this.reset();this.study=false;}}
+  startReviews():void{this.reviewRequested.emit();}
   practice(items:Subject[]):void{
     const allowed=items.filter(s=>!!this.state.records[s.id]);if(!allowed.length)return;
     this.queue=allowed.slice(0,10).flatMap(subject=>skills(subject).map(skill=>({subject,skill})));this.mode='practice';this.study=false;this.reset();
@@ -86,10 +88,6 @@ export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
     const q=this.current;if(!q||!this.checked)return;
     if(this.mode==='lesson'&&!this.correct){this.answer='';this.checked=false;this.feedback='';return;}
     this.now=Date.now();
-    if(this.mode==='review'){
-      const next=review(q.subject,q.skill,this.correct,this.subjects,this.state,this.now);
-      if(next!==this.state)this.persist(next,{mode:'forge',subject:q.subject.id,label:q.subject.text,skill:q.skill,kind:'scheduled',outcome:this.correct?'correct':'incorrect',occurredAt:this.now});
-    }
     const finishedSubject=this.queue[1]?.subject.id!==q.subject.id;
     if(this.mode==='lesson'&&finishedSubject){
       const next=learn(q.subject,this.subjects,this.state,this.now);

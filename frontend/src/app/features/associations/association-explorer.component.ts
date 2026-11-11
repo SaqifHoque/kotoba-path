@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { STARTER_CHAPTER } from '../chapters/starter-chapter';
 import { AssociationDetails, AssociationIndex, buildAssociationIndex } from './association-index';
 import { AssociationMatches, AssociationSearch, associationSearch } from './association-search';
 
-@Component({selector: 'app-association-explorer', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-association-explorer', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent],
   templateUrl: './association-explorer.component.html', styleUrls: ['./association-explorer.component.scss']})
 export class AssociationExplorerComponent implements OnChanges {
   @Input() subjects: Subject[] = [];

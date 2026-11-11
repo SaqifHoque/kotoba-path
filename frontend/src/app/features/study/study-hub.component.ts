@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { KanjiCard } from '../learn/kanji-engine';
@@ -10,9 +11,11 @@ import { StudyRoutineService } from './study-routine.service';
 import { StarterChapterComponent } from '../chapters/starter-chapter.component';
 import { DEMO_MODE } from '../../demo-mode';
 
-@Component({selector:'app-study-hub',standalone:true,imports:[CommonModule, StarterChapterComponent],
+@Component({selector:'app-study-hub',standalone:true,imports:[CommonModule, FormsModule, StarterChapterComponent],
   templateUrl:'./study-hub.component.html',styleUrls:['./study-hub.component.scss']})
 export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
+  reviewLimit = 20;
+  @Output() typedReviews = new EventEmitter<number>();
   @Input() sessions: OpenSession[] = [];
   @Output() explore = new EventEmitter<string>();
   @Output() guide = new EventEmitter<void>();

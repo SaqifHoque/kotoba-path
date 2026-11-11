@@ -44,5 +44,5 @@ state=empty();state.forge.records[radical.id]=record(radical,now+day);assert.equ
 assert.equal(preferredMode(state,{version:1,mode:'path'}),'path');assert.equal(hasStudyProgress(state),true);
 assert.equal(parseHomePreference(null),null);assert.deepEqual(parseHomePreference('{"version":1,"mode":"forge"}'),{version:1,mode:'forge'});
 assert.throws(()=>parseHomePreference('{"version":2,"mode":"forge"}'));assert.throws(()=>parseHomePreference('bad'));
-assert.equal(actionView('vocabulary'),'learn');assert.equal(actionView('forge-reviews'),'forge');
+assert.equal(actionView('vocabulary'),'learn');assert.equal(actionView('forge-reviews'),'typed-review');
 console.log('PASS: daily priorities, cross-mode overdue work, due boundaries, vocabulary eligibility, separate question/subject units, Burned exclusion, daily limits, workload guards, immutable planning, preferences, and existing-progress detection.');

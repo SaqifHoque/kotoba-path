@@ -14,7 +14,7 @@ Synonyms can be saved before introducing an item. They sync with the active gues
 
 Reading checks in Forge and Words & reading accept equivalent hiragana, katakana, and half-width kana. Small kana, long vowels, and whole-word kana endings still matter.
 
-Japanese input in a Forge meaning check, non-kana input in a reading check, or another listed non-target kanji reading prompts a retry on the same question. These inputs are not scored and cannot advance the session. Wrong kana and **I don’t know** are incorrect answers. Forge records scheduled results on **Continue**; Words & reading records a result when a rating is chosen, and an incorrect reading only allows **Again**. Extra Forge practice continues to leave mastery unchanged.
+Japanese input in a Forge meaning check, non-kana input in a reading check, or another listed non-target kanji reading prompts a retry on the same question. These inputs are not scored and cannot advance the session. Wrong kana and **I don’t know** are incorrect answers. Scheduled typed reviews record results on **Check answer** (or **I don’t know**); Continue moves to the next question without scoring again; Words & reading records a result when a rating is chosen, and an incorrect reading only allows **Again**. Extra Forge practice continues to leave mastery unchanged.
 
 ## Persistence and compatibility
 

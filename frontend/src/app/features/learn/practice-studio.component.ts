@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { checkReading } from './answer-checker';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ import { Band } from './proficiency';
 import { StudySyncService } from './study-sync.service';
 import { recallAttempt, ReviewAttempt } from './review-history';
 
-@Component({selector: 'app-practice-studio', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-practice-studio', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent],
   templateUrl: './practice-studio.component.html', styleUrls: ['./practice-studio.component.scss']})
 export class PracticeStudioComponent implements OnChanges, OnDestroy {
   @Input() cards: KanjiCard[] = [];

@@ -3,11 +3,11 @@ import { Subject, mastery } from '../forge/forge-engine';
 import { DailyPlan, HomePreference, HomeProgress, StudyAction, StudyMode, StudyView, hasStudyProgress, preferredMode } from '../home/study-home';
 
 export type StudySection = 'home' | 'learning' | 'reviews' | 'library' | 'settings';
-export interface OpenSession { view: 'learn' | 'forge' | 'guided'; label: string; remaining: number; review: boolean; }
+export interface OpenSession { view: 'learn' | 'forge' | 'guided' | 'typed-review'; label: string; remaining: number; review: boolean; }
 export interface LearningMilestone { title: string; completed: number; total: number; detail: string; }
 export function sectionFor(view: StudyView): StudySection {
   if (view === 'learn' || view === 'forge' || view === 'guided') return 'learning';
-  if (view === 'history') return 'reviews';
+  if (view === 'history' || view === 'typed-review') return 'reviews';
   if (view === 'catalog' || view === 'associations') return 'library';
   return view;
 }
