@@ -111,3 +111,5 @@ I-don’t-know scoring and a correct zero-accuracy summary.
 A further real-API check received a newer track through an actual save conflict
 and merge. The open review was skipped without altering that track or adding a
 scheduled-history event.
+
+Vocabulary feedback and mistake summaries now offer [pronunciation playback](vocabulary-audio.md) after scoring. Audio never scores another review and is absent from unanswered or unscored-retry questions.
