@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { OpenSession } from '../study/study-overview';
 import { acceptedMeanings, checkAnswer } from '../learn/answer-checker';
 import { setMeaningSynonyms } from '../learn/meaning-synonyms';
@@ -11,7 +12,7 @@ import { ReviewAttempt } from '../learn/review-history';
 import { StudySyncService } from '../learn/study-sync.service';
 import { Subject, Skill, Question, ForgeState, STAGES, canLearn, contrasts, dueQuestions, emptyForge, learn, lessonAllowance, mastery, skills, weakSubjects } from './forge-engine';
 
-@Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
+@Component({selector:'app-forge',standalone:true,imports:[CommonModule,FormsModule, WordAudioComponent],templateUrl:'./forge.component.html',styleUrls:['./forge.component.scss']})
 export class ForgeComponent implements OnInit, OnChanges, OnDestroy {
   @Output() reviewRequested = new EventEmitter<void>();
   @Input() launch:StudyLaunch|null=null; @Output() launched=new EventEmitter<number>(); private lastLaunch=0;

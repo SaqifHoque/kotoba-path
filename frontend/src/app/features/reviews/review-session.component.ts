@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { STAGES } from '../forge/forge-engine';
 import { REVIEW_BATCH_SIZES } from './review-session';
 import { ReviewSessionService } from './review-session.service';
 
-@Component({selector: 'app-review-session', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-review-session', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent],
   templateUrl: './review-session.component.html', styleUrls: ['./review-session.component.scss']})
 export class ReviewSessionComponent {
   @Output() leave = new EventEmitter<void>();

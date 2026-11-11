@@ -110,3 +110,5 @@ offline introductions and import invalidation were also verified in the browser.
 The [association explorer](association-explorer.md) is available from each
 guided subject. Returning from it keeps the current step, feedback and draft
 answer without submitting a check or changing the review schedule.
+
+Word study cards now offer [Japanese device/browser pronunciation](vocabulary-audio.md). Hidden meaning/reading checks keep those controls out of the quiz.

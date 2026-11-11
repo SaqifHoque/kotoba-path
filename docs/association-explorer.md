@@ -97,3 +97,5 @@ reverse links, sentences, pagination, empty/missing-content messages, saved
 notes and synonyms, and returning with a guided draft/cursor intact. Storage
 snapshots include a pending review event and are compared before/after browsing;
 network mutation requests and runtime errors are also checked.
+
+Selected words now offer [pronunciation audio](vocabulary-audio.md) from their published kana reading, with normal/slow playback and no progress changes.

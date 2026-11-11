@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { KanjiCard } from '../learn/kanji-curriculum';
 import { validateChapter } from './chapter';
 import { GuidedLessonService } from './guided-lesson.service';
 
-@Component({selector: 'app-guided-lesson', standalone: true, imports: [CommonModule, FormsModule],
+@Component({selector: 'app-guided-lesson', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent],
   templateUrl: './guided-lesson.component.html', styleUrls: ['./guided-lesson.component.scss']})
 export class GuidedLessonComponent implements OnChanges, OnDestroy {
   @Input() cards: KanjiCard[] = [];

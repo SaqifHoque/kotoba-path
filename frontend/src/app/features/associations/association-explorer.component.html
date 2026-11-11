@@ -18,6 +18,7 @@
         <h2 #itemHeading tabindex="-1"><img *ngIf="d.subject.image; else character" [src]="'assets/radicals/'+d.subject.image" [alt]="d.subject.meaning+' radical'" class="glyph-image"><ng-template #character><span lang="ja" class="glyph">{{d.subject.text}}</span></ng-template>{{d.subject.meaning}}</h2>
         <p *ngIf="d.subject.readings.length"><strong>{{d.subject.kind==='vocabulary'?'Whole-word reading':'Typed-review reading'}}:</strong> <span lang="ja">{{d.subject.readings.join(' · ')}}</span></p>
         <p *ngIf="d.subject.otherReadings?.length"><strong>Other listed readings:</strong> <span lang="ja">{{d.subject.otherReadings?.join(' · ')}}</span></p>
+        <app-word-audio *ngIf="d.subject.kind==='vocabulary'" [wordId]="d.subject.id" [text]="d.subject.text" [readings]="d.subject.readings"></app-word-audio>
         <p class="note">Typed study: {{introduced?stage:'Not introduced'}}.</p>
         <p *ngIf="chapterKanji as item">{{item.memory}}</p>
         <ng-container *ngIf="chapterWord as word; else catalogHint"><p>{{word.readingNote}}</p><blockquote><p lang="ja">{{word.sentence.text}}</p><p lang="ja" class="note">{{word.sentence.reading}}</p><p>{{word.sentence.meaning}}</p><p class="note">{{word.sentence.note}}</p></blockquote></ng-container>
