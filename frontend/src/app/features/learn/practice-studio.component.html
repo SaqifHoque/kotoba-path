@@ -25,6 +25,7 @@
       <div *ngIf="checked">
         <p *ngIf="e.kind==='reading'">{{correct ? 'Correct reading!' : 'Study the reading, then choose Again.'}}</p>
         <p class="solution" lang="ja">{{solution}}</p>
+        <app-word-audio *ngIf="e.kind!=='kanji'" [wordId]="'v:'+e.word.id" [text]="e.word.text" [readings]="e.word.reading"></app-word-audio>
         <div *ngIf="e.kind==='reading' && e.word.context as context"><p lang="ja">{{context[0]}}</p><p>{{context[1]}}</p></div>
         <p *ngIf="e.kind!=='reading'">Choose Again if you needed the answer.</p>
         <div class="ratings"><button (click)="rate('again')">Again · 10 min</button><button [disabled]="e.kind==='reading' && !correct" (click)="rate('hard')">Hard · 1 day</button><button [disabled]="e.kind==='reading' && !correct" (click)="rate('good')">Good</button></div>

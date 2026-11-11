@@ -1,3 +1,4 @@
+import { WordAudioService } from '../audio/word-audio.service';
 import { WordAudioComponent } from '../audio/word-audio.component';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,7 +14,7 @@ import { STARTER_CHAPTER } from './starter-chapter';
 export class StarterChapterComponent implements OnChanges {
   @Output() explore = new EventEmitter<string>();
   @Output() guide = new EventEmitter<void>();
-  constructor(public readonly lesson: GuidedLessonService) {}
+  constructor(public readonly lesson: GuidedLessonService, private readonly audio: WordAudioService) {}
   @Input() cards: KanjiCard[] = [];
   readonly chapter = STARTER_CHAPTER;
   showReadings = true;
@@ -29,6 +30,7 @@ export class StarterChapterComponent implements OnChanges {
       this.lesson.restore();
     } catch { /* Keep the existing courses available if chapter content is incompatible. */ }
   }
+  chapterToggled(event: Event): void { if (!(event.target as HTMLDetailsElement).open) this.audio.stop(); }
   character(id: string): string { return this.characters.get(id) ?? ''; }
   shape(id: string) { return this.chapter.shapes.find(shape => shape.id === id)!; }
 }
