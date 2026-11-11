@@ -1,3 +1,4 @@
+import { WordAudioComponent } from '../audio/word-audio.component';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KanjiCard } from '../learn/kanji-curriculum';
@@ -6,7 +7,7 @@ import { GuidedLessonService } from './guided-lesson.service';
 import { STARTER_CHAPTER } from './starter-chapter';
 
 @Component({
-  selector: 'app-starter-chapter', standalone: true, imports: [CommonModule],
+  selector: 'app-starter-chapter', standalone: true, imports: [CommonModule, WordAudioComponent],
   templateUrl: './starter-chapter.component.html', styleUrls: ['./starter-chapter.component.scss']
 })
 export class StarterChapterComponent implements OnChanges {
