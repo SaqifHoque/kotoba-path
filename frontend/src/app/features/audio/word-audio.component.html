@@ -1,0 +1,11 @@
+<div class="word-audio" role="group" [attr.aria-label]="'Pronunciation for '+text" *ngIf="audio.state$|async as state">
+  <ng-container *ngIf="target as word; else noReading">
+    <ng-container *ngIf="word.readings.length>1"><label [attr.for]="owner+'-reading'">Reading to hear</label><select [id]="owner+'-reading'" [(ngModel)]="reading" (ngModelChange)="audio.stop(owner)" lang="ja"><option *ngFor="let item of word.readings" [ngValue]="item">{{item}}</option></select></ng-container>
+    <div class="controls"><button type="button" [disabled]="!state.available" [attr.aria-label]="'Play pronunciation for '+text" (click)="play(1)">▶ Hear word</button><button type="button" [disabled]="!state.available" [attr.aria-label]="'Play '+text+' slowly'" (click)="play(0.75)">Hear slowly</button><button *ngIf="state.owner===owner&&(state.phase==='starting'||state.phase==='speaking')" type="button" (click)="audio.stop(owner)">Stop audio</button></div>
+    <p *ngIf="state.available" class="source">{{state.localVoice?'Japanese device voice':'Japanese browser voice'}} · <span lang="ja">{{reading}}</span></p>
+    <p *ngIf="!state.available" class="source">{{state.supported?'No Japanese voice is available on this device. Add one in device settings, then refresh audio.':'Pronunciation audio is unavailable in this browser.'}}</p>
+    <button *ngIf="!state.available&&state.supported" type="button" (click)="audio.refresh()">Refresh audio</button>
+    <p *ngIf="state.owner===owner&&state.message" role="status" aria-live="polite">{{state.message}}</p>
+  </ng-container>
+  <ng-template #noReading><p class="source">Pronunciation is unavailable for this word’s listed reading.</p></ng-template>
+</div>
