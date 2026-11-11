@@ -29,8 +29,10 @@ export class AudioPlayer {
     try { if (this.port.supported) voices = this.port.voices(); } catch { /* Voice discovery can be temporarily unavailable. */ }
     if (this.pending && !voices.some(voice => voice.voiceURI === this.activeVoiceURI && /^ja(?:[-_]|$)/i.test(voice.lang))) this.stop();
     this.voice = japaneseVoice(voices);
+    const recovered = !this.state.available && !!this.voice && !this.pending;
     this.publish({...this.state, supported: this.port.supported, available: !!this.voice,
-      localVoice: this.pending ? this.state.localVoice : !!this.voice?.localService});
+      localVoice: this.pending ? this.state.localVoice : !!this.voice?.localService,
+      ...(recovered ? {phase: 'idle' as const, owner: null, message: ''} : {})});
   }
   play(owner: string, word: AudioWord, reading: string, rate: WordAudioRate): void {
     if (!word.readings.includes(reading) || ![1, 0.75].includes(rate)) return;
