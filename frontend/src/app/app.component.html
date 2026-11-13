@@ -19,9 +19,10 @@
     <app-save-status *ngIf="cards.length" (settings)="navigate('settings')"></app-save-status>
     <app-settings *ngIf="cards.length&&view==='settings'" [cards]="cards" (imported)="resetSessions()"></app-settings>
     <ng-container *ngIf="cards.length && !account.changing">
-      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)" (guide)="startGuided()" (explore)="explore($event)" (typedReviews)="startTypedReviews($event)"></app-study-hub>
-      <app-guided-lesson *ngIf="view==='guided'" [cards]="cards" (leave)="navigate($event)" (explore)="explore($event)"></app-guided-lesson>
+      <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)" (guide)="startGuided()" (explore)="explore($event)" (typedReviews)="startTypedReviews($event)" (readingPractice)="startReading()" (sentencePractice)="startReading($event)"></app-study-hub>
+      <app-guided-lesson *ngIf="view==='guided'" [cards]="cards" (leave)="navigate($event)" (explore)="explore($event)" (sentencePractice)="startReading($event)"></app-guided-lesson>
       <app-association-explorer *ngIf="view==='associations'" [subjects]="lessons.sync.forgeSubjects" [subjectId]="associationId" [returnLabel]="associationReturnLabel" (selected)="associationId=$event" (leave)="navigate(associationReturn)"></app-association-explorer>
+      <app-reading-practice *ngIf="view==='reading-practice'" (leave)="returnFromReading()" (explore)="explore($event)"></app-reading-practice>
       <app-review-session *ngIf="view==='typed-review'" (leave)="navigate('reviews')" (explore)="explore($event)"></app-review-session>
       <app-study-home *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path class="study-screen" *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>

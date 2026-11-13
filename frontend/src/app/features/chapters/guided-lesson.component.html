@@ -25,7 +25,8 @@
             <p *ngIf="word as item">{{item.readingNote}}</p>
             <p><strong>Reading for typed reviews:</strong> <span lang="ja">{{subject.readings.join(' · ')}}</span></p>
             <p class="note" *ngIf="subject.kind==='kanji'">Use one of these readings in the next check. Whole words can use other readings.</p>
-            <app-word-audio *ngIf="word as item" [wordId]="item.id" [text]="item.text" [readings]="item.reading"></app-word-audio>
+            <button type="button" *ngIf="word as item" (click)="sentencePractice.emit(item.id)">Practise this sentence</button>
+            <app-word-audio *ngIf="word as item"  [wordId]="item.id" [text]="item.text" [readings]="item.reading"></app-word-audio>
             <blockquote *ngIf="word as item"><p lang="ja">{{item.sentence.text}}</p><p lang="ja">{{item.sentence.reading}}</p><p>{{item.sentence.meaning}}</p><p class="note">{{item.sentence.note}}</p></blockquote>
           </ng-container>
           <form *ngIf="step.kind==='check'" (ngSubmit)="lesson.check()">

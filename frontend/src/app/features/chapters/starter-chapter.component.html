@@ -36,7 +36,8 @@
         <article *ngFor="let word of chapter.words">
           <h4><ruby lang="ja">{{word.text}}<rt *ngIf="showReadings">{{word.reading}}</rt></ruby> · {{word.meaning}}</h4>
           <button type="button" [attr.aria-label]="'Explore connections for word '+word.text" (click)="explore.emit(word.id)">Explore connections</button>
-          <app-word-audio [wordId]="word.id" [text]="word.text" [readings]="word.reading"></app-word-audio>
+          <button type="button" [attr.aria-label]="'Practise sentence for '+word.text" (click)="sentencePractice.emit(word.id)">Practise this sentence</button>
+          <app-word-audio [wordId]="word.id"  [text]="word.text" [readings]="word.reading"></app-word-audio>
           <p class="word-links">Kanji: <a *ngFor="let id of word.kanjiIds" [attr.href]="'#starter-'+id"><span lang="ja">{{character(id)}}</span></a></p>
           <p>{{word.readingNote}}</p>
           <blockquote>

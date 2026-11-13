@@ -12,6 +12,7 @@ import { STARTER_CHAPTER } from './starter-chapter';
   templateUrl: './starter-chapter.component.html', styleUrls: ['./starter-chapter.component.scss']
 })
 export class StarterChapterComponent implements OnChanges {
+  @Output() sentencePractice = new EventEmitter<string>();
   @Output() explore = new EventEmitter<string>();
   @Output() guide = new EventEmitter<void>();
   constructor(public readonly lesson: GuidedLessonService, private readonly audio: WordAudioService) {}

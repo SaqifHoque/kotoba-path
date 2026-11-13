@@ -1,0 +1,60 @@
+<section class="reading">
+  <header>
+    <h1 #heading tabindex="-1">Read Japanese in context</h1>
+    <p>Practise familiar words in six sentences and a short story. Scheduled review stages and dates stay unchanged.</p>
+    <button type="button" (click)="leave.emit()">Return to study</button>
+  </header>
+  <p *ngIf="!reading.allowed" role="status">Reading practice is unavailable while your account loads or changes. Open it again from Learn.</p>
+  <ng-container *ngIf="reading.allowed">
+    <article *ngIf="reading.card as card">
+      <p>Part {{(reading.session?.cursor ?? 0) + 1}} of {{reading.session?.cards?.length}} · {{card.title}}</p>
+      <p class="japanese" lang="ja" *ngIf="parts as p; else passage">{{p.before}}<mark>{{p.target}}</mark>{{p.after}}</p>
+      <ng-template #passage><p class="japanese" lang="ja">{{card.text}}</p></ng-template>
+      <div class="actions" aria-label="Optional reading support">
+        <button type="button" (click)="reading.help('kana')" [disabled]="reading.attempt?.support?.includes('kana')">Show kana guide</button>
+        <button type="button" (click)="reading.help('meaning')" [disabled]="reading.attempt?.support?.includes('meaning')">Show meaning</button>
+        <button type="button" *ngIf="card.wordId" (click)="lookup()">Look up word</button>
+      </div>
+      <p class="guide" lang="ja" *ngIf="reading.attempt?.support?.includes('kana')">{{card.kana}}</p>
+      <p *ngIf="reading.attempt?.support?.includes('meaning') || disclosed">{{card.meaning}}</p>
+      <ng-container *ngIf="card.target as target">
+        <form *ngIf="!reading.attempt?.reading" (ngSubmit)="check()">
+          <label for="sentence-reading">Read {{target.text}} as it appears in this sentence (kana)</label>
+          <input id="sentence-reading" name="reading" lang="ja" autocomplete="off" spellcheck="false" [(ngModel)]="reading.draft">
+          <div class="actions"><button type="submit" [disabled]="!reading.draft.trim()">Check word reading</button>
+          <button type="button" (click)="check(true)">Reveal reading</button></div>
+          <p *ngIf="reading.feedback" role="status">{{reading.feedback.message}}</p>
+        </form>
+        <div *ngIf="reading.attempt?.reading as result">
+          <p #feedback tabindex="-1">{{result.correct ? 'Correct reading' : 'Study this reading'}}: <span lang="ja">{{target.reading}}</span>{{result.supported ? ' · reading support used' : ''}}</p>
+          <app-word-audio [wordId]="card.wordId ?? ''" [text]="target.text" [readings]="target.reading"></app-word-audio>
+        </div>
+      </ng-container>
+      <section *ngIf="!card.target || reading.attempt?.reading">
+        <ng-container *ngIf="reading.question as question">
+          <h2>{{question.prompt}}</h2>
+          <div class="choices">
+            <button type="button" *ngFor="let choice of question.choices; let i=index" (click)="choose(i)" [disabled]="!!reading.result" [attr.aria-pressed]="reading.result?.choice === i">{{choice}}</button>
+          </div>
+          <div *ngIf="reading.result as result">
+            <p #feedback tabindex="-1">{{result.correct ? 'Correct.' : 'Correct answer: ' + question.choices[question.correct]}} {{question.explanation}}{{result.supported ? ' · reading support used' : ''}}</p>
+            <button type="button" (click)="next()">Continue</button>
+          </div>
+        </ng-container>
+      </section>
+      <details #grammar (toggle)="$any($event.target).open && reading.help('grammar')">
+        <summary>Grammar help (counts as reading support)</summary><p>{{card.note}}</p>
+      </details>
+      <div class="actions"><button type="button" (click)="leave.emit()">Pause practice</button><button type="button" (click)="finish()">Finish for now</button></div>
+    </article>
+    <article *ngIf="reading.session?.closed && reading.summary as summary">
+      <h2>Practice complete for now</h2>
+      <p>{{summary.completed}} of {{summary.total}} parts completed.</p>
+      <p>Word readings: {{summary.readingCorrect}} correct of {{summary.readings}} answered; {{summary.readingIndependent}} correct without reading support.</p>
+      <p>Comprehension: {{summary.correct}} correct of {{summary.answered}} answered; {{summary.supported}} answers used reading support. {{summary.questionTotal - summary.answered}} unanswered.</p>
+      <p>Results stay in this tab. Reloading closes this practice session.</p>
+      <button type="button" (click)="begin()">Practise all six sentences and story</button>
+      <button type="button" (click)="leave.emit()">Return to study</button>
+    </article>
+  </ng-container>
+</section>

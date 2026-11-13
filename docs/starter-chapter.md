@@ -90,3 +90,5 @@ There are no backend endpoints, database migrations or new dependencies in this 
 The [guided lesson player](guided-lessons.md) now uses this content for typed
 checks and paced enrollment. Reference browsing remains read-only; the typed
 catalog additionally registers the chapter words for shared scheduled reviews.
+
+See [sentence and reading practice](reading-practice.md) for contextual reading, comprehension and tab-local results.
