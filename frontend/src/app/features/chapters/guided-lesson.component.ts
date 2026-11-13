@@ -10,6 +10,7 @@ import { GuidedLessonService } from './guided-lesson.service';
   templateUrl: './guided-lesson.component.html', styleUrls: ['./guided-lesson.component.scss']})
 export class GuidedLessonComponent implements OnChanges, OnDestroy {
   @Input() cards: KanjiCard[] = [];
+  @Output() sentencePractice = new EventEmitter<string>();
   @Output() explore = new EventEmitter<string>();
   @Output() leave = new EventEmitter<'learning' | 'reviews'>();
   @ViewChild('heading') private heading?: ElementRef<HTMLElement>;

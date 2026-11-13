@@ -4,7 +4,7 @@ import { Word, availableWords, targetedVocabulary } from '../learn/practice-engi
 import { ForgeState, Subject, canLearn, dueQuestions, lessonAllowance, mastery } from '../forge/forge-engine';
 
 export type StudyMode = 'path' | 'forge';
-export type StudyView = 'typed-review' | 'associations' | 'guided' | 'home' | 'learn' | 'forge' | 'history' | 'catalog' | 'settings' | 'learning' | 'reviews' | 'library';
+export type StudyView = 'reading-practice' | 'typed-review' | 'associations' | 'guided' | 'home' | 'learn' | 'forge' | 'history' | 'catalog' | 'settings' | 'learning' | 'reviews' | 'library';
 export type StudyAction = 'kanji-lessons' | 'kanji-reviews' | 'vocabulary' | 'forge-lessons' | 'forge-reviews' | 'vocabulary-reviews';
 export interface StudyLaunch { id: number; action: StudyAction; }
 export interface HomePreference { version: 1; mode: StudyMode; }

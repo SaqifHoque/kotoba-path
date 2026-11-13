@@ -14,6 +14,8 @@ import { DEMO_MODE } from '../../demo-mode';
 @Component({selector:'app-study-hub',standalone:true,imports:[CommonModule, FormsModule, StarterChapterComponent],
   templateUrl:'./study-hub.component.html',styleUrls:['./study-hub.component.scss']})
 export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
+  @Output() readingPractice = new EventEmitter<void>();
+  @Output() sentencePractice = new EventEmitter<string>();
   reviewLimit = 20;
   @Output() typedReviews = new EventEmitter<number>();
   @Input() sessions: OpenSession[] = [];
