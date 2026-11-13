@@ -32,3 +32,5 @@ Browser verification follows Today → actual lesson/review → study-profile AP
 
 Scheduled typed reviews now use the [focused review experience](review-experience.md)
 with 10/20/40-question batches, per-answer saving and session summaries.
+
+See [sentence and reading practice](reading-practice.md) for contextual reading, comprehension and tab-local results.
