@@ -29,7 +29,7 @@ export class ReadingPracticeService {
     const session = beginReading(STARTER_READING, wordId);
     this.session = session; this.owner = this.account.account.id; this.draft = ''; this.feedback = undefined;
   }
-  help(kind:'kana'|'meaning'|'lookup'): void {
+  help(kind:'kana'|'meaning'|'lookup'|'grammar'): void {
     if (this.allowed && this.session) this.session = supportReading(this.session,kind);
   }
   check(reveal = false): void {

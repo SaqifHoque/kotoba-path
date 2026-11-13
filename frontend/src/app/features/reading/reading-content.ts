@@ -29,7 +29,9 @@ export function validateReading(cards: readonly ReadingCard[]): void {
       const source = STARTER_CHAPTER.words.find(w => w.id === card.wordId);
       if (!source || source.sentence.text !== card.text || source.sentence.reading !== card.kana ||
           source.sentence.meaning !== card.meaning || source.sentence.note !== card.note) throw new Error('Sentence differs from chapter');
-      if (!card.target || card.text.split(card.target.text).length !== 2 ||
+      if (!card.target || !card.target.text || card.text.split(card.target.text).length !== 2 ||
+          [...source.text].some(c => /\p{Script=Han}/u.test(c) && !card.target!.text.includes(c)) ||
+          !card.kana.includes(card.target.reading) ||
           !/^[ぁ-ゖー]+$/u.test(card.target.reading)) throw new Error('Invalid sentence target');
     } else if (card.target) throw new Error('A target needs a canonical word');
     if (!card.questions.length) throw new Error('Missing comprehension checks');

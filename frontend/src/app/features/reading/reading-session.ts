@@ -2,7 +2,7 @@ import { checkReading } from '../learn/answer-checker';
 import { ReadingCard, validateReading } from './reading-content';
 export interface ReadingResult { correct: boolean; supported: boolean; choice?: number; }
 export interface CardAttempt {
-  support: ('kana'|'meaning'|'lookup')[];
+  support: ('kana'|'meaning'|'lookup'|'grammar')[];
   reading?: ReadingResult;
   answers: ReadingResult[];
 }

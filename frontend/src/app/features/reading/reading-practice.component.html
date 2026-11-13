@@ -42,7 +42,7 @@
           </div>
         </ng-container>
       </section>
-      <details (toggle)="$any($event.target).open && reading.help('meaning')">
+      <details #grammar (toggle)="$any($event.target).open && reading.help('grammar')">
         <summary>Grammar help (counts as reading support)</summary><p>{{card.note}}</p>
       </details>
       <div class="actions"><button type="button" (click)="leave.emit()">Pause practice</button><button type="button" (click)="finish()">Finish for now</button></div>
