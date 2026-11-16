@@ -32,7 +32,7 @@ export class ReviewSessionService {
     this.scope = scope ? {label:scope.label, subjectIds:[...scope.subjectIds]} : undefined;
     this.owner = this.account.account.id; this.limit = limit; this.batch = batch; this.feedback = undefined; this.draft = '';
   }
-  restart(limit = this.limit): void { if (this.allowed) this.begin(limit,this.scope); }
+  restart(limit = this.limit): void { if (this.allowed) this.begin(limit,this.scope); else if (this.canStart) this.begin(limit); }
   includesSubject(id: string): boolean { return !this.scope || this.scope.subjectIds.includes(id); }
   check(dontKnow = false): void {
     if (!this.allowed || !this.batch || (this.feedback && this.feedback.status !== 'retry') || (!dontKnow && !this.draft.trim())) return;
