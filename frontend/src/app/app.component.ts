@@ -1,3 +1,4 @@
+import { ChapterProgressService } from './features/chapters/chapter-progress.service';
 import { ReadingPracticeComponent } from './features/reading/reading-practice.component';
 import { ReadingPracticeService } from './features/reading/reading-practice.service';
 import { WordAudioService } from './features/audio/word-audio.service';
@@ -45,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
   compactNavigation=this.media.matches;
   private readonly navChanged=()=>{this.compactNavigation=this.media.matches;this.menuOpen=false;};
   private nextLaunch = 0; private subscription?: Subscription;
-  constructor(public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
+  constructor(private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.media.addEventListener('change',this.navChanged);this.loadCatalog(); }
   loadCatalog(): void {
     this.loading = true; this.error = ''; this.subscription?.unsubscribe();
@@ -69,6 +70,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.lastSessionView=this.view as 'learn'|'forge';
     this.launch = {id: ++this.nextLaunch, action};
     this.focusContent();
+  }
+  startChapterReviews(): void {
+    const progress = this.chapterProgress.snapshot();
+    if (!progress) return;
+    this.reviews.begin(20,{label:this.chapterProgress.chapter.title,subjectIds:progress.subjectIds});
+    if (!this.reviews.allowed) return;
+    this.lastSessionView = 'typed-review'; this.navigate('typed-review');
   }
   startTypedReviews(limit = 20): void {
     this.reviews.begin(limit);

@@ -92,3 +92,5 @@ checks and paced enrollment. Reference browsing remains read-only; the typed
 catalog additionally registers the chapter words for shared scheduled reviews.
 
 See [sentence and reading practice](reading-practice.md) for contextual reading, comprehension and tab-local results.
+
+See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.

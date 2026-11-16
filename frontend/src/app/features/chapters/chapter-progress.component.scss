@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  margin: 1.5rem 0;
+}
+.journey {
+  padding: 1.5rem;
+  border: 1px solid #cddbd3;
+  border-radius: 1rem;
+  background: #fbfdf9;
+  color: #203d32;
+}
+.eyebrow {
+  font-size: .8rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+h2, h3 { line-height: 1.4; }
+p { line-height: 1.65; }
+.milestones {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.milestones li {
+  padding: 1rem;
+  border: 1px solid #d5dfd7;
+  border-radius: .75rem;
+  background: white;
+}
+.milestones li.reached { border-color: #45765c; }
+progress {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+  accent-color: #45765c;
+}
+.next { padding: 1rem; background: #eaf2e8; border-radius: .75rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1rem 0; }
+button {
+  font: inherit;
+  min-height: 44px;
+  max-width: 100%;
+  padding: .65rem 1rem;
+  border: 1px solid #6c8e78;
+  border-radius: .5rem;
+  color: #203d32;
+  background: white;
+  cursor: pointer;
+}
+button:focus-visible, summary:focus-visible { outline: 3px solid #9b6500; outline-offset: 3px; }
+summary { cursor: pointer; padding: .75rem 0; line-height: 1.5; }
+.subjects { list-style: none; padding: 0; }
+.subjects li { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: .75rem 0; }
+.note { font-size: .9rem; }
+@media (max-width: 900px) { .milestones { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .journey { padding: 1rem; } }
