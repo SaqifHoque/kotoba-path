@@ -3,6 +3,7 @@ import { ReviewAttempt } from '../learn/review-history';
 import { ForgeState, Question, Subject, Track, dueQuestions, review } from '../forge/forge-engine';
 
 export const REVIEW_BATCH_SIZES = [10, 20, 40] as const;
+export interface ReviewScope { label: string; subjectIds: readonly string[]; }
 export interface ReviewTicket { question: Question; trackSignature: string; }
 interface Outcome { ticketIndex: number; question: Question; }
 export interface ScoredReview extends Outcome {
@@ -20,9 +21,10 @@ export interface ReviewSubmission {
 function signature(track?: Track): string {
   return track ? JSON.stringify([track.stage, track.due, track.reviews, track.correct, track.misses, track.updatedAt]) : '';
 }
-export function createReviewBatch(subjects: Subject[], forge: ForgeState, limit = 20, now = Date.now()): ReviewBatch {
+export function createReviewBatch(subjects: Subject[], forge: ForgeState, limit = 20, now = Date.now(), subjectIds?: readonly string[]): ReviewBatch {
   if (!(REVIEW_BATCH_SIZES as readonly number[]).includes(limit)) throw new Error('Choose 10, 20 or 40 questions.');
-  const tickets = dueQuestions(subjects, forge, now).slice(0, limit).map(question => ({
+  const selected = subjectIds ? new Set(subjectIds) : null;
+  const tickets = dueQuestions(subjects, forge, now).filter(q => !selected || selected.has(q.subject.id)).slice(0, limit).map(question => ({
     question, trackSignature: signature(forge.records[question.subject.id]?.[question.skill])
   }));
   return {tickets, cursor: 0, outcomes: [], closed: false};

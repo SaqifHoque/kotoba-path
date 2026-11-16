@@ -1,3 +1,4 @@
+<p class="note" *ngIf="review.scope">Review scope: {{review.scope.label}} · Due chapter subjects only.</p>
 <header><span class="eyebrow">Strengthen recall</span><h1>Meaning &amp; reading review</h1><p>One question at a time. Meaning and reading have separate review dates.</p></header>
 <ng-container *ngIf="review.allowed&&review.batch as batch; else setup">
   <ng-container *ngIf="review.summary as summary">

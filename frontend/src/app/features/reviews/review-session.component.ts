@@ -19,7 +19,7 @@ export class ReviewSessionComponent {
   constructor(public readonly review: ReviewSessionService) {}
   get note(): string { const id = this.review.question?.subject.id; return id ? this.review.sync.state.value.forge.records[id]?.note ?? '' : ''; }
   get nextDue(): number | null {
-    const times = Object.values(this.review.sync.state.value.forge.records).flatMap(record => [record.meaning, record.reading])
+    const times = Object.entries(this.review.sync.state.value.forge.records).filter(([id])=>this.review.includesSubject(id)).flatMap(([,record]) => [record.meaning, record.reading])
       .filter(track => track && track.due !== null && track.due > Date.now()).map(track => track!.due!);
     return times.length ? Math.min(...times) : null;
   }
@@ -29,7 +29,7 @@ export class ReviewSessionComponent {
   }
   next(): void { this.review.next(); this.focusNext(); }
   finish(): void { this.review.finish(); this.focusNext(); }
-  begin(): void { this.review.begin(Number(this.review.limit)); this.focusNext(); }
+  begin(): void { this.review.restart(Number(this.review.limit)); this.focusNext(); }
   private focusNext(): void {
     requestAnimationFrame(() => this.review.complete ? this.summaryHeading?.nativeElement.focus() : this.answer?.nativeElement.focus());
   }
