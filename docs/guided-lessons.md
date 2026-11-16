@@ -96,8 +96,8 @@ aliases receive the same validation as kanji aliases.
 
 No backend schema/API changes or new dependencies. Backend verification and real
 API-backed browser checks validate the existing persistence/history contract.
-Chapter progression/rewards, the association explorer, and audio remain later
-features in the roadmap.
+Chapter rewards remain a later feature. Chapter progression, the association
+explorer, reading practice and audio are documented separately.
 
 Local verification passed: all 15 frontend engine suites, 23 backend tests, and
 production/demo builds. Chrome against the real API and an isolated H2 database
@@ -114,3 +114,5 @@ answer without submitting a check or changing the review schedule.
 Word study cards now offer [Japanese device/browser pronunciation](vocabulary-audio.md). Hidden meaning/reading checks keep those controls out of the quiz.
 
 See [sentence and reading practice](reading-practice.md) for contextual reading, comprehension and tab-local results.
+
+See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.
