@@ -1,0 +1,69 @@
+<section class="journey" aria-label="Chapter journey">
+  <header>
+    <span class="eyebrow">Your chapter journey</span>
+    <h2>{{progress.chapter.title}}</h2>
+    <p>Introduce the words, then strengthen them through scheduled recall.</p>
+  </header>
+  <ng-container *ngIf="snapshot as p; else unavailable">
+    <ol class="milestones">
+      <li [class.reached]="p.introducedKanji === p.kanjiTotal">
+        <h3>1. Recognize the kanji</h3>
+        <strong>{{p.introducedKanji}} / {{p.kanjiTotal}} introduced</strong>
+        <progress [value]="p.introducedKanji" [max]="p.kanjiTotal" aria-label="Chapter kanji introduced"></progress>
+        <p>Meaning and reading tracks exist in your saved study progress.</p>
+      </li>
+      <li [class.reached]="p.introducedWords === p.wordTotal">
+        <h3>2. Connect whole words</h3>
+        <strong>{{p.introducedWords}} / {{p.wordTotal}} introduced</strong>
+        <progress [value]="p.introducedWords" [max]="p.wordTotal" aria-label="Chapter words introduced"></progress>
+        <p>Study each word's own reading and use it in context.</p>
+      </li>
+      <li [class.reached]="p.retentionReached">
+        <h3>3. Strengthen recall</h3>
+        <strong>{{p.retainedKanji + p.retainedWords}} / {{p.kanjiTotal + p.wordTotal}} at Guru or above</strong>
+        <progress [value]="p.retainedKanji + p.retainedWords" [max]="p.kanjiTotal + p.wordTotal" aria-label="Chapter subjects at Guru in both skills"></progress>
+        <p>Both meaning and reading must reach Guru I. This count can fall after a lapse.</p>
+      </li>
+    </ol>
+    <div class="next" aria-label="Next chapter action">
+      <ng-container [ngSwitch]="p.next">
+        <ng-container *ngSwitchCase="'reviews'">
+          <h3>Strengthen this chapter</h3>
+          <p>{{p.dueQuestions}} questions across {{p.dueSubjects}} chapter subjects are due. Meaning and reading count separately.</p>
+          <button type="button" (click)="reviews.emit()">Review this chapter</button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'lessons'">
+          <h3>Continue building the chapter</h3>
+          <p>Follow the guided lesson to introduce the remaining subjects. Your daily lesson limit still applies.</p>
+          <button type="button" (click)="guide.emit()">Open guided chapter</button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'wait'">
+          <h3>Introductions complete. Let recall grow.</h3>
+          <p>All {{p.kanjiTotal + p.wordTotal}} subjects are introduced. Their scheduled reviews build retention.</p>
+          <p *ngIf="p.nextReviewAt">Next chapter review: {{p.nextReviewAt | date:'medium'}}.</p>
+          <button type="button" (click)="reading.emit()">Read familiar words in context</button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'reading'">
+          <h3>A strong foundation for reading</h3>
+          <p>All chapter subjects currently have both skills at Guru I or above. Keep their scheduled reviews and use the words in sentences.</p>
+          <button type="button" (click)="reading.emit()">Read familiar words in context</button>
+        </ng-container>
+      </ng-container>
+    </div>
+    <div class="actions">
+      <button type="button" *ngIf="p.next !== 'lessons'" (click)="guide.emit()">Revisit guided chapter</button>
+      <button type="button" *ngIf="p.next === 'lessons' || p.next === 'reviews'" (click)="reading.emit()">Optional sentence practice</button>
+    </div>
+    <details>
+      <summary>See the {{p.kanjiTotal + p.wordTotal}} subjects and their skill stages</summary>
+      <ul class="subjects">
+        <li *ngFor="let item of p.items">
+          <button type="button" (click)="explore.emit(item.id)" [attr.aria-label]="'Explore chapter '+item.kind+' '+item.text"><span lang="ja">{{item.text}}</span> · {{item.kind}}</button>
+          <span>Meaning: {{item.meaning}} · Reading: {{item.reading}}</span>
+        </li>
+      </ul>
+    </details>
+    <p class="note">Progress is shared with your existing typed study records. Browsing, replaying lessons and sentence practice do not advance scheduled-review stages. This journey currently covers one published starter chapter.</p>
+  </ng-container>
+  <ng-template #unavailable><p role="status">Chapter progress will appear when your saved study catalog is ready.</p></ng-template>
+</section>
