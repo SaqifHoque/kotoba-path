@@ -2,6 +2,7 @@
 <ng-container *ngIf="sync.ready&&plan as p; else loading">
   <section class="open-sessions" *ngIf="sessions.length&&section!=='library'" aria-label="Your open sessions"><h2>Pick up where you left off</h2><button type="button" *ngFor="let session of sessions" (click)="resume.emit(session)">Continue {{session.label}} · {{session.remaining}} steps</button></section>
   <section class="recommended" *ngIf="section==='learning'||section==='library'"><h2>Read Japanese in context</h2><p>Six familiar sentences and a short story, with optional kana, grammar help and comprehension checks.</p><button type="button" (click)="readingPractice.emit()">Open reading practice</button></section>
+  <app-chapter-progress *ngIf="section==='learning'||section==='library'" [cards]="cards" (guide)="guide.emit()" (reviews)="chapterReviews.emit()" (reading)="readingPractice.emit()" (explore)="explore.emit($event)"></app-chapter-progress>
   <app-starter-chapter *ngIf="section==='learning'||section==='library'" [cards]="cards" (sentencePractice)="sentencePractice.emit($event)" (guide)="guide.emit()" (explore)="explore.emit($event)"></app-starter-chapter>
   <ng-container *ngIf="section==='learning'">
     <section class="recommended" aria-labelledby="lesson-title">

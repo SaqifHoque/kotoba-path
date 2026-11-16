@@ -8,7 +8,7 @@
       <h2 #heading tabindex="-1">You’ve practised this chapter.</h2>
       <p>New subjects start at Apprentice I, with their first review in four hours. Previously learned subjects keep their review dates and stages.</p>
       <p>Lasting recall comes from scheduled reviews. This practice does not award mastery.</p>
-      <button type="button" (click)="leave.emit('reviews')">See scheduled reviews</button>
+      <app-chapter-progress [cards]="cards" (guide)="lesson.begin()" (reviews)="chapterReviews.emit()" (reading)="readingPractice.emit()" (explore)="explore.emit($event)"></app-chapter-progress>
     </article>
     <ng-template #current>
       <article *ngIf="lesson.step as step">

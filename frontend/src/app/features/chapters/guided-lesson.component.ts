@@ -1,3 +1,4 @@
+import { ChapterProgressComponent } from './chapter-progress.component';
 import { WordAudioComponent } from '../audio/word-audio.component';
 import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -6,10 +7,12 @@ import { KanjiCard } from '../learn/kanji-curriculum';
 import { validateChapter } from './chapter';
 import { GuidedLessonService } from './guided-lesson.service';
 
-@Component({selector: 'app-guided-lesson', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent],
+@Component({selector: 'app-guided-lesson', standalone: true, imports: [CommonModule, FormsModule, WordAudioComponent, ChapterProgressComponent],
   templateUrl: './guided-lesson.component.html', styleUrls: ['./guided-lesson.component.scss']})
 export class GuidedLessonComponent implements OnChanges, OnDestroy {
   @Input() cards: KanjiCard[] = [];
+  @Output() chapterReviews = new EventEmitter<void>();
+  @Output() readingPractice = new EventEmitter<void>();
   @Output() sentencePractice = new EventEmitter<string>();
   @Output() explore = new EventEmitter<string>();
   @Output() leave = new EventEmitter<'learning' | 'reviews'>();
