@@ -98,3 +98,5 @@ Chapter review batches of 20 and 2 produced 22 actual scheduled history events.
 A subsequent empty chapter batch excluded unrelated due work; the global queue
 still exposed it. Lapses survived reload, while outside tracks, notes and the
 unlocked level were preserved. No browser runtime errors were reported.
+
+See [daily quests and study badges](quests-and-rewards.md) for effort goals, evidence reconciliation and reward boundaries.
