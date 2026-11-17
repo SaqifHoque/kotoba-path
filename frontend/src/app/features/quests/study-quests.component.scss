@@ -1,0 +1,19 @@
+:host { display: block; margin: 1.5rem 0; }
+.quests { padding: 1.5rem; background: #fbfdf8; border: 1px solid #c7d8c9; border-radius: 1rem; color: #243d30; }
+.eyebrow { text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; }
+p { line-height: 1.65; }
+.petals { font-size: 1.3rem; font-weight: 700; }
+.petals span { color: #8f493d; font-size: 2rem; }
+.goals { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+article, .badges li { padding: 1rem; background: white; border: 1px solid #d6dfd4; border-radius: .75rem; }
+.earned { border-color: #4e7855; }
+.complete { padding: 1rem; background: #e2efdf; border-radius: .75rem; }
+progress { display: block; width: 100%; margin: 1rem 0; accent-color: #4e7855; }
+button { font: inherit; min-height: 44px; max-width: 100%; padding: .6rem 1rem; margin: .3rem .5rem .3rem 0; border: 1px solid #6c8e78; border-radius: .5rem; background: white; color: inherit; cursor: pointer; }
+button:disabled { opacity: .6; }
+button:focus-visible { outline: 3px solid #9b6500; outline-offset: 3px; }
+.badges { display: grid; gap: .75rem; padding: 0; list-style: none; }
+.badges span { display: block; margin-top: .5rem; line-height: 1.5; }
+.note { font-size: .9rem; }
+@media(max-width:650px) { .goals { grid-template-columns: 1fr; } }
+@media(max-width:420px) { .quests { padding: 1rem; } }
