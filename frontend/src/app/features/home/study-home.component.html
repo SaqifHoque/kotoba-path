@@ -24,3 +24,5 @@
   <div class="home-links"><p *ngIf="p.nextReviewAt">Coming next: <b>{{p.nextReviewAt|date:'medium'}}</b>. Counts refresh while Today is open.</p><button type="button" (click)="open.emit('history')">View review history</button><button type="button" (click)="open.emit('library')">Browse Library</button></div>
 </ng-container>
 <ng-template #restoring><p class="restore-state" role="status">Restoring your study progress before choosing the next session…</p></ng-template>
+
+<app-study-quests (reviews)="open.emit('reviews')"></app-study-quests>
