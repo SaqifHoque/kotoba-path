@@ -19,7 +19,7 @@
         <p>Answer a scheduled meaning question and a reading question. A combined recall covers both. Earn 1 petal.</p>
       </article>
     </div>
-    <p class="note" *ngIf="quests.deviceOnly">Showing device attempts. Connect and refresh to include saved server history. Demo quests use this browser's pending history.</p>
+    <p class="note" *ngIf="quests.deviceOnly">{{quests.demo ? 'Demo quests use attempts kept in this browser.' : 'Showing device attempts. Connect and refresh to include saved history.'}}</p>
     <button type="button" (click)="reviews.emit()">See scheduled reviews</button>
     <button type="button" [disabled]="quests.loading" (click)="quests.refresh(true)">Refresh quests</button>
     <p class="note">Counts stop at each goal. Lessons, sentence practice and unscored retries do not count as scheduled reviews. Petals celebrate today's goals; they do not change mastery or review dates.</p>

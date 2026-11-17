@@ -9,6 +9,7 @@ import { ActivityWindow, activityWindow, parseActivity, pendingCandidates, quest
 
 @Injectable({providedIn:'root'})
 export class StudyQuestsService {
+  readonly demo = DEMO_MODE;
   loading = false;
   lastUpdated = 0;
   deviceOnly = false;
