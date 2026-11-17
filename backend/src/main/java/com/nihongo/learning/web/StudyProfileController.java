@@ -20,13 +20,15 @@ public class StudyProfileController {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final com.nihongo.learning.application.ReviewHistory history;
+    private final com.nihongo.learning.application.StudyActivity activity;
     private final com.nihongo.learning.account.AccountService accounts;
 
-    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json, com.nihongo.learning.account.AccountService accounts, com.nihongo.learning.application.ReviewHistory history) {
+    public StudyProfileController(JdbcTemplate jdbc, ObjectMapper json, com.nihongo.learning.account.AccountService accounts, com.nihongo.learning.application.ReviewHistory history, com.nihongo.learning.application.StudyActivity activity) {
         this.jdbc = jdbc;
         this.json = json;
         this.accounts = accounts;
         this.history = history;
+        this.activity = activity;
     }
 
     @GetMapping
@@ -113,6 +115,17 @@ public class StudyProfileController {
         id = accounts.studyProfile(request, id);
         if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Open your learning path first.");
         return history.page(id, before, limit);
+    }
+
+    @GetMapping("/activity")
+    public Map<String, Object> activity(@CookieValue(value="kotoba_profile", required=false) String id,
+            @RequestParam long from, @RequestParam long to,
+            @RequestParam(required=false, defaultValue="") List<String> pendingIds,
+            HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        id = accounts.studyProfile(request, id);
+        if (!validId(id)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Open your learning path first.");
+        return activity.summarize(id, from, to, pendingIds);
     }
 
     private boolean validId(String id) {
