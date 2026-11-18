@@ -24,7 +24,7 @@
       <app-association-explorer *ngIf="view==='associations'" [subjects]="lessons.sync.forgeSubjects" [subjectId]="associationId" [returnLabel]="associationReturnLabel" (selected)="associationId=$event" (leave)="navigate(associationReturn)"></app-association-explorer>
       <app-reading-practice *ngIf="view==='reading-practice'" (leave)="returnFromReading()" (explore)="explore($event)"></app-reading-practice>
       <app-review-session *ngIf="view==='typed-review'" (leave)="navigate('reviews')" (explore)="explore($event)"></app-review-session>
-      <app-study-home *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
+      <app-study-home (typedReviews)="startTypedReviews($event)" *ngIf="view==='home'" [cards]="cards" [currentSession]="currentSession" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)"></app-study-home>
       <app-kanji-path class="study-screen" *ngIf="pathVisited" [hidden]="view!=='learn'" [launch]="launch" (launched)="launched($event)"></app-kanji-path>
       <p *ngIf="demoMode && view==='catalog'" role="status" style="padding:24px">The encyclopedia and text reader require the Java API. Try Learning &amp; review or Kanji Forge in this demo.</p>
       <app-encyclopedia *ngIf="!demoMode && view==='catalog'"></app-encyclopedia>

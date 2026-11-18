@@ -30,7 +30,7 @@ export class ReviewSessionComponent {
   }
   next(): void { this.review.next(); this.focusNext(); }
   finish(): void { this.review.finish(); this.focusNext(); }
-  begin(): void { this.review.restart(Number(this.review.limit)); this.focusNext(); }
+  begin(limit = Number(this.review.limit)): void { this.review.restart(limit); this.focusNext(); }
   private focusNext(): void {
     requestAnimationFrame(() => this.review.complete ? this.summaryHeading?.nativeElement.focus() : this.answer?.nativeElement.focus());
   }
