@@ -1,5 +1,6 @@
 <header class="home-heading"><div><span class="eyebrow">{{now | date:'EEEE, MMMM d'}}</span><h1>A little Japanese,<br><em>every day.</em></h1><p>{{account.account.username ? 'Welcome back, '+account.account.username+'.' : 'Welcome to Kotoba Path.'}} Start with what is ready for you.</p></div><span class="home-mark" lang="ja" aria-hidden="true">日</span></header>
 <ng-container *ngIf="sync.ready && plan as p; else restoring">
+  <app-study-pacing (typedReviews)="typedReviews.emit($event)" (reviews)="open.emit('reviews')"></app-study-pacing>
   <section *ngIf="setupVisible" class="setup" aria-labelledby="setup-title">
     <span class="eyebrow">Your starting point</span><h2 id="setup-title">Adjust your starting point</h2><p>You can use both routines. They keep separate schedules; changing this choice preserves your work.</p>
     <form (ngSubmit)="saveSetup()">

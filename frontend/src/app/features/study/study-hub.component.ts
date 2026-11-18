@@ -1,3 +1,4 @@
+import { StudyPacingComponent } from '../pacing/study-pacing.component';
 import { ChapterProgressComponent } from '../chapters/chapter-progress.component';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { StudyRoutineService } from './study-routine.service';
 import { StarterChapterComponent } from '../chapters/starter-chapter.component';
 import { DEMO_MODE } from '../../demo-mode';
 
-@Component({selector:'app-study-hub',standalone:true,imports:[CommonModule, FormsModule, StarterChapterComponent, ChapterProgressComponent],
+@Component({selector:'app-study-hub',standalone:true,imports:[StudyPacingComponent, CommonModule, FormsModule, StarterChapterComponent, ChapterProgressComponent],
   templateUrl:'./study-hub.component.html',styleUrls:['./study-hub.component.scss']})
 export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
   @Output() chapterReviews = new EventEmitter<void>();
