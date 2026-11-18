@@ -36,3 +36,5 @@ with 10/20/40-question batches, per-answer saving and session summaries.
 See [sentence and reading practice](reading-practice.md) for contextual reading, comprehension and tab-local results.
 
 See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.
+
+See [study pacing and comeback guidance](study-pacing.md) for small sessions, workload explanations and the shared daily typed lesson limit.

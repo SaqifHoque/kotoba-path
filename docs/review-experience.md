@@ -117,3 +117,5 @@ Vocabulary feedback and mistake summaries now offer [pronunciation playback](voc
 See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.
 
 See [daily quests and study badges](quests-and-rewards.md) for effort goals, evidence reconciliation and reward boundaries.
+
+See [study pacing and comeback guidance](study-pacing.md) for small sessions, workload explanations and the shared daily typed lesson limit.
