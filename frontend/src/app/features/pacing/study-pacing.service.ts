@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AccountService } from '../account/account.service';
 import { StudySyncService } from '../learn/study-sync.service';
-import { studyPacing } from './study-pacing';
+import { studyPacing, withDailyLimit } from './study-pacing';
 
 @Injectable({providedIn:'root'})
 export class StudyPacingService {
@@ -13,7 +13,8 @@ export class StudyPacingService {
   setLimit(limit: number): boolean {
     if (!this.ready || ![5,10,20].includes(limit)) return false;
     const current = this.sync.state.value.forge;
-    if (current.dailyLimit !== limit) this.sync.updateForge({...current,dailyLimit:limit,settingsAt:Date.now()});
+    const updated = withDailyLimit(current,limit,Date.now());
+    if (updated !== current) this.sync.updateForge(updated);
     return true;
   }
 }

@@ -32,3 +32,8 @@ export function studyPacing(subjects: Subject[], state: ForgeState, now: number)
     heading:olderQuestions?'Pick up gently':due.length?'One small review session':'Make room for tomorrow'
   };
 }
+
+export function withDailyLimit(state: ForgeState, limit: number, now: number): ForgeState {
+  if (![5,10,20].includes(limit)) throw new Error('Choose 5, 10 or 20 typed subjects.');
+  return state.dailyLimit === limit ? state : {...state,dailyLimit:limit,settingsAt:now};
+}
