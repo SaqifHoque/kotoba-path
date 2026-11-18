@@ -44,3 +44,5 @@ Today also shows [upcoming review workload](review-forecast.md) for the next 24 
 ## Unified study experience
 
 The [unified study navigation](unified-study.md) adds Learn, Review, and Library hubs. Today now offers one main action, including resuming an open session. New learners can start immediately; starting-point setup is optional. Account access and progress files are in Profile.
+
+See [daily quests and study badges](quests-and-rewards.md) for effort goals, evidence reconciliation and reward boundaries.

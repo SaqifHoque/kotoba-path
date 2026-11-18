@@ -3,7 +3,7 @@ import { DEMO_MODE } from '../../demo-mode';
 import { saveStatus } from '../settings/save-status';
 import { Injectable } from '@angular/core';
 import { AccountService } from '../account/account.service';
-import { ReviewAttempt, ReviewOutbox } from './review-history';
+import { ReviewAttempt, ReviewEvent, ReviewOutbox } from './review-history';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, timeout } from 'rxjs';
 import { KanjiCard, ReviewProgress, parseProgress } from './kanji-engine';
@@ -40,6 +40,7 @@ export class StudySyncService {
   private connected = false;
   private version = 0;
   private outbox?: ReviewOutbox;
+  get pendingReviewEvents(): readonly ReviewEvent[] { return this.outbox?.batch(Number.MAX_SAFE_INTEGER) ?? []; }
   get pendingHistory(): number { return this.outbox?.batch(Number.MAX_SAFE_INTEGER).length ?? 0; }
 
   constructor(private readonly http: HttpClient, private readonly auth: AccountService) {}

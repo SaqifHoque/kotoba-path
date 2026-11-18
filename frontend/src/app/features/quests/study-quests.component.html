@@ -1,0 +1,36 @@
+<section class="quests" aria-label="Daily quests and study badges">
+  <header><span class="eyebrow">A little practice, a growing garden</span><h2>Today's learning quests</h2>
+    <p>Optional goals for your local calendar day. Incorrect scheduled answers count as effort too.</p>
+  </header>
+  <ng-container *ngIf="quests.visible && quests.result as q; else loading">
+    <p class="petals"><span aria-hidden="true">✿</span> {{q.petals}} / 3 petals today</p>
+    <p class="complete" *ngIf="q.complete" role="status">Today's garden is in bloom. Your practice counts—rest, or return when reviews are due.</p>
+    <div class="goals">
+      <article [class.earned]="q.recalls === 5">
+        <h3>Recall five questions</h3>
+        <strong>{{q.recalls}} / 5 scheduled answers</strong>
+        <progress [value]="q.recalls" max="5" aria-label="Scheduled answers toward the daily quest"></progress>
+        <p>Complete five scheduled questions in any study routine. Earn 2 petals.</p>
+      </article>
+      <article [class.earned]="q.skills === 2">
+        <h3>Connect meaning and reading</h3>
+        <strong>{{q.skills}} / 2 skills practised</strong>
+        <progress [value]="q.skills" max="2" aria-label="Meaning and reading skills practised today"></progress>
+        <p>Answer a scheduled meaning question and a reading question. A combined recall covers both. Earn 1 petal.</p>
+      </article>
+    </div>
+    <p class="note" *ngIf="quests.deviceOnly">{{quests.demo ? 'Demo quests use attempts kept in this browser.' : 'Showing device attempts. Connect and refresh to include saved history.'}}</p>
+    <button type="button" (click)="reviews.emit()">See scheduled reviews</button>
+    <button type="button" [disabled]="quests.loading" (click)="quests.refresh(true)">Refresh quests</button>
+    <p class="note">Counts stop at each goal. Lessons, sentence practice and unscored retries do not count as scheduled reviews. Petals celebrate today's goals; they do not change mastery or review dates.</p>
+    <h3>Your current study badges</h3>
+    <ul class="badges">
+      <li *ngFor="let badge of quests.badges" [class.earned]="badge.earned">
+        <strong>{{badge.earned ? '✿ ' : ''}}{{badge.name}}</strong>
+        <span>{{badge.earned ? 'Reached' : 'In progress'}} · {{badge.detail}}</span>
+      </li>
+    </ul>
+    <p class="note">Badges reflect your current saved typed-study progress, including imports. A retention badge can change after a review lapse. They are separate from daily petals.</p>
+  </ng-container>
+  <ng-template #loading><p role="status">Your quests will appear when today's study evidence is ready.</p></ng-template>
+</section>

@@ -115,3 +115,5 @@ scheduled-history event.
 Vocabulary feedback and mistake summaries now offer [pronunciation playback](vocabulary-audio.md) after scoring. Audio never scores another review and is absent from unanswered or unscored-retry questions.
 
 See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.
+
+See [daily quests and study badges](quests-and-rewards.md) for effort goals, evidence reconciliation and reward boundaries.

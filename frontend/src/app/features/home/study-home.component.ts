@@ -1,3 +1,4 @@
+import { StudyQuestsComponent } from '../quests/study-quests.component';
 import { StudyRoutineService } from '../study/study-routine.service';
 import { OpenSession, isReviewAction } from '../study/study-overview';
 import { ReviewForecast, reviewForecast } from './review-forecast';
@@ -13,7 +14,7 @@ import { Word, buildVocabulary } from '../learn/practice-engine';
 import { StudySyncService } from '../learn/study-sync.service';
 import { DailyPlan, StudyAction, StudyMode, StudyView, dailyPlan, hasStudyProgress } from './study-home';
 
-@Component({selector: 'app-study-home', standalone: true, imports: [CommonModule, FormsModule, ReviewForecastComponent],
+@Component({selector: 'app-study-home', standalone: true, imports: [StudyQuestsComponent, CommonModule, FormsModule, ReviewForecastComponent],
   templateUrl: './study-home.component.html', styleUrls: ['./study-home.component.scss']})
 export class StudyHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() currentSession: OpenSession | null = null;
