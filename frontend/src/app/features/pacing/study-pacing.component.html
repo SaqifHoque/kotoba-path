@@ -1,0 +1,38 @@
+<section class="pacing" aria-label="Study pacing">
+  <ng-container *ngIf="pacing.ready && model as p; else loading">
+    <span class="eyebrow">A manageable typed-study pace</span>
+    <h2>{{p.heading}}</h2>
+    <p *ngIf="p.olderQuestions">{{p.olderQuestions}} typed questions have been due for at least a week. Start with a small batch and stop when you need to.</p>
+    <p *ngIf="p.dueQuestions">{{p.dueQuestions}} typed questions across {{p.dueSubjects}} subjects are due. Meaning and reading count separately.</p>
+    <p *ngIf="p.oldestDue">Oldest typed review due: {{p.oldestDue | date:'medium'}}.</p>
+    <p *ngIf="!p.dueQuestions">Your typed queue is caught up for now.</p>
+    <p *ngIf="!p.dueQuestions && p.nextReviewAt">Next typed review: {{p.nextReviewAt | date:'medium'}}.</p>
+    <div class="actions">
+      <button type="button" *ngIf="p.dueQuestions" (click)="typedReviews.emit(10)">Take up to 10 typed questions</button>
+      <button type="button" (click)="reviews.emit()">See all review queues</button>
+    </div>
+    <p class="note">You can pause or finish a batch early. Unanswered questions remain due; scheduled answers save as you check them.</p>
+    <div class="workload" [ngSwitch]="p.reason">
+      <p *ngSwitchCase="'backlog'">New typed introductions are paused while 20 or more questions are due. Clear a little of the queue before adding more.</p>
+      <p *ngSwitchCase="'apprentice'">You have {{p.apprentice}} Apprentice subjects. New typed introductions wait until that count is below 50.</p>
+      <p *ngSwitchCase="'daily-limit'">Today's typed introduction limit is reached. Review familiar subjects or return another day.</p>
+      <p *ngSwitchCase="'available'">Room for up to {{p.allowance}} more typed introductions today. Prerequisite gates still apply.</p>
+    </div>
+    <details>
+      <summary>Choose a daily typed lesson limit</summary>
+      <p>{{p.introducedToday}} subjects introduced today · {{p.apprentice}} currently at Apprentice.</p>
+      <form (ngSubmit)="save()">
+        <label [for]="selectId">Maximum new typed subjects per local day</label>
+        <select [id]="selectId" name="daily-typed-limit" [(ngModel)]="draftLimit">
+          <option [ngValue]="5">5 · a lighter pace</option>
+          <option [ngValue]="10">10 · a steady pace</option>
+          <option [ngValue]="20">20 · more new material</option>
+        </select>
+        <button type="submit" [disabled]="!pacing.ready">Save daily limit</button>
+      </form>
+      <p class="note">This shared limit applies to the typed course and guided introductions. Reading-path lessons keep their existing rules. Lowering the limit keeps everything already introduced. Workload guards can reduce today's allowance further.</p>
+    </details>
+    <p *ngIf="notice" role="status">{{notice}}</p>
+  </ng-container>
+  <ng-template #loading><p role="status">Pacing guidance will appear when your study progress is ready.</p></ng-template>
+</section>
