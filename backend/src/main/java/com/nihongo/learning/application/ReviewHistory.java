@@ -27,8 +27,10 @@ public class ReviewHistory {
             if (!previous.isEmpty()) {
                 if (!json.readTree(previous.get(0)).equals(event)) throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "An attempt ID cannot be reused for different answers.");
             } else {
-                jdbc.update("insert into review_event(profile_id,event_id,kind,outcome,received_at,event_json) values(?,?,?,?,?,?)",
-                    profile, id, event.path("kind").asText(), event.path("outcome").asText(), System.currentTimeMillis(), event.toString());
+                ReviewActivityFields activity = ReviewActivityFields.from(event);
+                jdbc.update("insert into review_event(profile_id,event_id,kind,outcome,received_at,event_json,occurred_at,skill) values(?,?,?,?,?,?,?,?)",
+                    profile, id, event.path("kind").asText(), event.path("outcome").asText(), System.currentTimeMillis(), event.toString(),
+                    activity.occurredAt, activity.skill);
             }
             acknowledged.add(id);
         }

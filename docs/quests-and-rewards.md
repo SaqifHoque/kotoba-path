@@ -44,11 +44,11 @@ validated receipt IDs, and returns capped recalls, meaning/reading flags and
 which requested IDs are already included.
 
 The query reads immutable scheduled receipts by **occurrence time**, so late
-offline uploads count on their original day. It uses one streaming SQL statement
-and a small response. Because occurrence time remains inside the existing JSON
-receipt, query work is linear in a profile's scheduled history; this version adds
-no schema migration or occurrence-time index. Goal counts cap at five and parsing
-can skip irrelevant rows once both goals are established.
+offline uploads count on their original day. Indexed occurrence-time and skill
+projections support bounded recall/skill probes and profile-isolated pending-ID
+lookups. A read-only repeatable-read transaction keeps these results consistent.
+See [indexed quest activity](indexed-quest-activity.md) for the V5 backfill,
+deployment requirements and query validation.
 
 The client snapshots at most seven representative pending receipts: five recalls
 and a representative of each skill. Their UUIDs let it reconcile against the

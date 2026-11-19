@@ -83,6 +83,19 @@ class ReviewHistoryControllerTest {
         mvc.perform(get("/api/study-profile/activity").param("from","0").param("to","1000")).andExpect(status().isUnauthorized());
     }
 
+    @Autowired org.springframework.jdbc.core.JdbcTemplate activityJdbc;
+
+    @Test void newAndRetriedReceiptsKeepMatchingActivityFields() throws Exception {
+        Cookie cookie=guest(); ObjectNode attempt=event().put("occurredAt",123456).put("skill","reading");
+        assertEquals(200,save(cookie,withEvents(state(cookie),attempt)).getResponse().getStatus());
+        Map<String,Object> stored=activityJdbc.queryForMap("select occurred_at,skill,event_json,sequence_id,received_at from review_event where event_id=?",attempt.path("id").asText());
+        assertEquals(123456L,((Number)stored.get("occurred_at")).longValue());
+        assertEquals("reading",stored.get("skill"));
+        assertEquals(attempt,json.readTree((String)stored.get("event_json")));
+        assertEquals(200,save(cookie,withEvents(state(cookie),attempt)).getResponse().getStatus());
+        assertEquals(stored,activityJdbc.queryForMap("select occurred_at,skill,event_json,sequence_id,received_at from review_event where event_id=?",attempt.path("id").asText()));
+    }
+
     @Test void eventsAreAtomicWithSnapshotAndRetriesAreIdempotent() throws Exception {
         Cookie cookie = guest(); ObjectNode attempt = event(); ObjectNode state = withEvents(state(cookie), attempt);
         assertEquals(200, save(cookie, state).getResponse().getStatus());
