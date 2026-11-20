@@ -99,3 +99,5 @@ snapshots include a pending review event and are compared before/after browsing;
 network mutation requests and runtime errors are also checked.
 
 Selected words now offer [pronunciation audio](vocabulary-audio.md) from their published kana reading, with normal/slow playback and no progress changes.
+
+The explorer now offers explicit [personal memory-aid editing](explorer-memory-aids.md). Browsing still creates no writes; Save uses the existing note/synonym profile fields.

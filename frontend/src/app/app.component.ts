@@ -1,3 +1,4 @@
+import { PersonalMemoryService } from './features/memory/personal-memory.service';
 import { ChapterProgressService } from './features/chapters/chapter-progress.service';
 import { ReadingPracticeComponent } from './features/reading/reading-practice.component';
 import { ReadingPracticeService } from './features/reading/reading-practice.service';
@@ -46,7 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
   compactNavigation=this.media.matches;
   private readonly navChanged=()=>{this.compactNavigation=this.media.matches;this.menuOpen=false;};
   private nextLaunch = 0; private subscription?: Subscription;
-  constructor(private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
+  constructor(private readonly memory: PersonalMemoryService, private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.media.addEventListener('change',this.navChanged);this.loadCatalog(); }
   loadCatalog(): void {
     this.loading = true; this.error = ''; this.subscription?.unsubscribe();
@@ -111,11 +112,15 @@ export class AppComponent implements OnInit, OnDestroy {
   resume(session: OpenSession): void {
     this.navigate(session.view);this.section=session.review?'reviews':'learning';this.lastSessionView=session.view;
   }
-  resetSessions(): void { this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
+  resetSessions(): void { this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
   launched(id: number): void { if (this.launch?.id === id) this.launch = null; }
   toggleNavigation(): void { this.menuOpen=!this.menuOpen; }
   @HostListener('document:keydown.escape') closeNavigation(): void {
     if(this.menuOpen){this.menuOpen=false;this.menuToggle?.nativeElement.focus();}
+  }
+  @HostListener('window:beforeunload', ['$event'])
+  protectMemoryDrafts(event: BeforeUnloadEvent): void {
+    if (this.memory.hasUnsaved) { event.preventDefault(); event.returnValue = ''; }
   }
   private focusContent(): void { requestAnimationFrame(()=>this.content?.nativeElement.focus({preventScroll:true})); }
   ngOnDestroy(): void { this.audio.stop();this.subscription?.unsubscribe();this.media.removeEventListener('change',this.navChanged); }

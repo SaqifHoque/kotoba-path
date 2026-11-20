@@ -1,0 +1,24 @@
+<section class="memory-editor" aria-label="Personal memory aids">
+  <ng-container *ngIf="memory.ready">
+    <ng-container *ngIf="memory.draft(subjectId) as draft; else closed">
+      <h3>Your memory aids</h3>
+      <form (ngSubmit)="memory.save(draft)">
+        <label [for]="id+'-note'">Personal memory note</label>
+        <textarea [id]="id+'-note'" name="memory-note" [(ngModel)]="draft.note" maxlength="1000" rows="4" [disabled]="!memory.introduced(subjectId)"></textarea>
+        <p class="note" *ngIf="!memory.introduced(subjectId)">Introduce this subject before saving a memory note. Meaning synonyms can be saved now without introducing it.</p>
+        <label [for]="id+'-synonyms'">Accepted English meaning synonyms (one per line)</label>
+        <textarea [id]="id+'-synonyms'" name="meaning-synonyms" [(ngModel)]="draft.synonyms" rows="3" [attr.aria-describedby]="id+'-help'"></textarea>
+        <p class="note" [id]="id+'-help'">Up to eight synonyms, 80 characters each. These affect future meaning checks; Japanese readings stay as published. Clear the field to remove your synonyms.</p>
+        <div class="actions">
+          <button type="submit" [disabled]="!memory.ready || !memory.dirty(draft) || draft.conflict">Save memory aids</button>
+          <button type="button" (click)="memory.cancel(subjectId)">Cancel editing</button>
+          <button type="button" *ngIf="draft.conflict" (click)="memory.reload(subjectId)">Reload saved memory aids</button>
+        </div>
+      </form>
+      <p *ngIf="draft.message" role="status">{{draft.message}}</p>
+      <p *ngIf="draft.conflict" class="note">Reload replaces your unsaved draft with the current saved version.</p>
+      <p class="note">Unsaved edits stay in this tab when you follow connections or return to a lesson. Cancel discards this item's draft. Reloading or changing accounts closes unsaved drafts.</p>
+    </ng-container>
+    <ng-template #closed><button type="button" (click)="memory.open(subjectId)">Edit memory aids</button></ng-template>
+  </ng-container>
+</section>
