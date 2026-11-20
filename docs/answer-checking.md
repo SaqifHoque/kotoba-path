@@ -23,3 +23,5 @@ Japanese input in a Forge meaning check, non-kana input in a reading check, or a
 The API merges preferences under the existing profile row lock and optimistic revision check. Clients that omit the field cannot erase it. Input and merged maps are bounded to 6,000 entries; timestamps are bounded by JavaScript’s supported date range. No database migration is required.
 
 Run `npm run test:engines` and `npm run build` from `frontend`, and `mvn verify` from `backend`. The answer suite covers exact acceptance, annotations, wrong-field retries, kana distinctions, personal meanings, backup compatibility, and deterministic removals. API tests cover validation, old clients, stale snapshots, account migration, and profile isolation.
+
+See [explorer memory aids](explorer-memory-aids.md) for editing personal notes and meaning synonyms, draft recovery and save-conflict boundaries.

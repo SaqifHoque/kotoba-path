@@ -119,3 +119,5 @@ See [chapter progression](chapter-progression.md) for introduction/retention mil
 See [daily quests and study badges](quests-and-rewards.md) for effort goals, evidence reconciliation and reward boundaries.
 
 See [study pacing and comeback guidance](study-pacing.md) for small sessions, workload explanations and the shared daily typed lesson limit.
+
+See [explorer memory aids](explorer-memory-aids.md) for editing personal notes and meaning synonyms, draft recovery and save-conflict boundaries.
