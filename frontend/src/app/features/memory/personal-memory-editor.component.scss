@@ -1,0 +1,11 @@
+:host { display: block; margin-top: 1rem; }
+.memory-editor { padding: 1rem; border: 1px solid #b9cdc0; border-radius: .75rem; background: #f7faf4; color: #223e32; }
+label { display: block; font-weight: 600; margin: 1rem 0 .5rem; }
+textarea { display: block; width: 100%; max-width: 100%; box-sizing: border-box; font: inherit; padding: .75rem; border: 1px solid #789280; border-radius: .5rem; resize: vertical; }
+textarea:disabled { background: #ecefea; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+button { font: inherit; min-height: 44px; padding: .6rem 1rem; border: 1px solid #789280; border-radius: .5rem; background: white; color: inherit; cursor: pointer; }
+button:disabled { opacity: .6; cursor: default; }
+button:focus-visible, textarea:focus-visible { outline: 3px solid #9b6500; outline-offset: 3px; }
+p { line-height: 1.6; }
+.note { font-size: .9rem; }
