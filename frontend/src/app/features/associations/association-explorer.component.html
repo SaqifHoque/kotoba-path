@@ -25,6 +25,7 @@
         <ng-template #catalogHint><p *ngIf="!chapterKanji">{{d.subject.hint}}</p></ng-template>
         <p *ngIf="note" class="personal-note"><strong>Your memory note:</strong> {{note}}</p>
         <p *ngIf="synonyms.length"><strong>Your meaning synonyms:</strong> {{synonyms.join(' · ')}}</p>
+        <app-personal-memory-editor [subjectId]="d.subject.id"></app-personal-memory-editor>
       </article>
       <section *ngIf="d.subject.kind==='kanji'" aria-labelledby="components-title">
         <h3 id="components-title">Teaching components</h3>
