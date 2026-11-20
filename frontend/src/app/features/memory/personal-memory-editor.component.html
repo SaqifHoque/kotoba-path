@@ -16,7 +16,8 @@
         </div>
       </form>
       <p *ngIf="draft.message" role="status">{{draft.message}}</p>
-      <p class="note">Unsaved edits stay in this tab when you follow connections or return to a lesson. Cancel discards this item's draft.</p>
+      <p *ngIf="draft.conflict" class="note">Reload replaces your unsaved draft with the current saved version.</p>
+      <p class="note">Unsaved edits stay in this tab when you follow connections or return to a lesson. Cancel discards this item's draft. Reloading or changing accounts closes unsaved drafts.</p>
     </ng-container>
     <ng-template #closed><button type="button" (click)="memory.open(subjectId)">Edit memory aids</button></ng-template>
   </ng-container>
