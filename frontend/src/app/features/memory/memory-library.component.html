@@ -1,0 +1,34 @@
+<section class="memory-library">
+  <header><span class="eyebrow">Your own connections</span><h1>My memory aids</h1>
+    <p>Find the notes and meaning synonyms you have saved. Search stays in this browser.</p>
+    <button type="button" (click)="leave.emit()">Return to Library</button>
+  </header>
+  <ng-container *ngIf="library.snapshot() as result; else loading">
+    <div class="filters" *ngIf="result.total">
+      <label for="memory-search">Search saved memory aids</label>
+      <input id="memory-search" type="search" [(ngModel)]="library.filters.query" (ngModelChange)="library.changed()" maxlength="200" autocomplete="off" placeholder="Kanji, kana, meaning, note or synonym">
+      <div class="filter-options">
+        <label>Subject type<select aria-label="Memory subject type" [(ngModel)]="library.filters.kind" (ngModelChange)="library.changed()"><option value="all">All types</option><option value="kanji">Kanji</option><option value="vocabulary">Words</option><option value="radical">Dictionary radicals</option></select></label>
+        <label>Saved content<select aria-label="Saved memory content" [(ngModel)]="library.filters.content" (ngModelChange)="library.changed()"><option value="all">Notes or synonyms</option><option value="notes">With a note</option><option value="synonyms">With meaning synonyms</option></select></label>
+        <label>Sort<select aria-label="Memory sort order" [(ngModel)]="library.filters.sort" (ngModelChange)="library.changed()"><option value="recent">Recently edited</option><option value="text">Japanese text order</option></select></label>
+      </div>
+      <button type="button" (click)="library.clearFilters()">Reset memory filters</button>
+    </div>
+    <p *ngIf="result.total" role="status" aria-live="polite">Showing {{result.items.length}} of {{result.matched}} matches · {{result.total}} saved items.</p>
+    <ul class="items" *ngIf="result.items.length">
+      <li *ngFor="let item of result.items">
+        <span class="eyebrow">{{kind(item.kind)}} · {{item.introduced?'Introduced':'Not introduced'}}</span>
+        <h2><span lang="ja">{{item.text}}</span> · {{item.meaning}}</h2>
+        <p *ngIf="item.readings.length" lang="ja">{{item.readings.join(' · ')}}</p>
+        <p *ngIf="item.note" class="personal-note"><strong>Your note:</strong> {{item.note.slice(0,200)}}{{item.note.length>200?'…':''}}</p>
+        <p *ngIf="item.synonyms.length"><strong>Your meaning synonyms:</strong> {{item.synonyms.join(' · ')}}</p>
+        <button type="button" [id]="'memory-item-'+item.id" [attr.aria-label]="'View memory aids for '+kind(item.kind)+' '+item.text" (click)="explore.emit(item.id)">View and edit memory aids</button>
+      </li>
+    </ul>
+    <button type="button" *ngIf="result.items.length < result.matched" (click)="library.limit=library.limit+20">Show 20 more memory aids</button>
+    <div *ngIf="result.total && !result.matched" class="empty"><h2>No saved items match these filters</h2><p>Try another word or reset the filters.</p></div>
+    <div *ngIf="!result.total" class="empty"><h2>Make a memory your own</h2><p>Open an item in the explorer and choose Edit memory aids. Your saved notes and meaning synonyms will appear here.</p><button type="button" (click)="explore.emit('k:休')">Explore an item</button></div>
+    <p class="note">This list shows saved content only. Unsaved editor drafts stay in their item; saving or clearing an aid updates this list. Browsing does not introduce subjects or change review dates.</p>
+  </ng-container>
+  <ng-template #loading><p role="status">Your saved memory aids will appear when study progress is ready.</p></ng-template>
+</section>
