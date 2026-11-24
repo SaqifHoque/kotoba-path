@@ -8,7 +8,7 @@ export interface LearningMilestone { title: string; completed: number; total: nu
 export function sectionFor(view: StudyView): StudySection {
   if (view === 'reading-practice' || view === 'learn' || view === 'forge' || view === 'guided') return 'learning';
   if (view === 'history' || view === 'typed-review') return 'reviews';
-  if (view === 'catalog' || view === 'associations') return 'library';
+  if (view === 'memory-library' || view === 'catalog' || view === 'associations') return 'library';
   return view;
 }
 export function isReviewAction(action: StudyAction): boolean { return action === 'kanji-reviews' || action === 'vocabulary-reviews' || action === 'forge-reviews'; }

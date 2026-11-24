@@ -1,3 +1,4 @@
+import { MemoryLibraryComponent } from './features/memory/memory-library.component';
 import { PersonalMemoryService } from './features/memory/personal-memory.service';
 import { ChapterProgressService } from './features/chapters/chapter-progress.service';
 import { ReadingPracticeComponent } from './features/reading/reading-practice.component';
@@ -27,7 +28,7 @@ import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.comp
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [ReadingPracticeComponent, ReviewSessionComponent, AssociationExplorerComponent, GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [MemoryLibraryComponent, ReadingPracticeComponent, ReviewSessionComponent, AssociationExplorerComponent, GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
@@ -39,8 +40,8 @@ export class AppComponent implements OnInit, OnDestroy {
   @ViewChild(ForgeComponent) private forge?: ForgeComponent;
   private lastSessionView: OpenSession['view']|null = null;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
-  readonly titles: Record<StudyView, string> = {'reading-practice':'Reading practice','typed-review':'Scheduled typed review',associations:'Kanji & word explorer',guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
-  readonly subtitles: Record<StudyView, string> = {'reading-practice':'Reading practice','typed-review':'Recall · feedback · next review',associations:'Shapes · kanji · words',guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
+  readonly titles: Record<StudyView, string> = {'memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Scheduled typed review',associations:'Kanji & word explorer',guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
+  readonly subtitles: Record<StudyView, string> = {'memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Recall · feedback · next review',associations:'Shapes · kanji · words',guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
   @ViewChild('mainContent') private content?: ElementRef<HTMLElement>;
   @ViewChild('menuToggle') private menuToggle?: ElementRef<HTMLButtonElement>;
   private readonly media=window.matchMedia('(max-width:850px)');
