@@ -1,3 +1,4 @@
+import { MemoryLibraryService } from './features/memory/memory-library.service';
 import { MemoryLibraryComponent } from './features/memory/memory-library.component';
 import { PersonalMemoryService } from './features/memory/personal-memory.service';
 import { ChapterProgressService } from './features/chapters/chapter-progress.service';
@@ -48,7 +49,7 @@ export class AppComponent implements OnInit, OnDestroy {
   compactNavigation=this.media.matches;
   private readonly navChanged=()=>{this.compactNavigation=this.media.matches;this.menuOpen=false;};
   private nextLaunch = 0; private subscription?: Subscription;
-  constructor(private readonly memory: PersonalMemoryService, private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
+  constructor(private readonly memoryLibrary: MemoryLibraryService, private readonly memory: PersonalMemoryService, private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.media.addEventListener('change',this.navChanged);this.loadCatalog(); }
   loadCatalog(): void {
     this.loading = true; this.error = ''; this.subscription?.unsubscribe();
@@ -87,6 +88,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   explore(id: string): void { this.associationId = id; this.navigate('associations'); }
   get associationReturnLabel(): string {
+    if (this.associationReturn === 'memory-library') return 'Return to my memory aids';
     if (this.associationReturn === 'reading-practice') return 'Return to reading practice';
     if (this.associationReturn === 'typed-review') return 'Return to review session';
     return this.associationReturn === 'guided' ? 'Return to guided chapter' : this.associationReturn === 'learning' ? 'Return to Learn' : 'Return to Library';
@@ -113,7 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
   resume(session: OpenSession): void {
     this.navigate(session.view);this.section=session.review?'reviews':'learning';this.lastSessionView=session.view;
   }
-  resetSessions(): void { this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
+  resetSessions(): void { this.memoryLibrary.reset();this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
   launched(id: number): void { if (this.launch?.id === id) this.launch = null; }
   toggleNavigation(): void { this.menuOpen=!this.menuOpen; }
   @HostListener('document:keydown.escape') closeNavigation(): void {

@@ -40,7 +40,7 @@ export function memoryMatches(items: readonly SavedMemory[], filters: MemoryFilt
   const tokens = normalize(filters.query).trim().split(/\s+/).filter(Boolean);
   return items.filter(item => {
     if (filters.kind!=='all' && item.kind!==filters.kind) return false;
-    if (filters.content==='notes'&&!item.note || filters.content==='synonyms'&&!item.synonyms.length) return false;
+    if ((filters.content==='notes'&&!item.note) || (filters.content==='synonyms'&&!item.synonyms.length)) return false;
     const fields = [item.text,item.meaning,item.note,...item.readings,...item.synonyms].map(normalize);
     return tokens.every(token=>fields.some(field=>field.includes(token)));
   }).sort((a,b)=>(filters.sort==='recent'?b.editedAt-a.editedAt:compare(normalize(a.text),normalize(b.text)))||compare(a.id,b.id));

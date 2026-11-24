@@ -1,5 +1,5 @@
 <section class="memory-library">
-  <header><span class="eyebrow">Your own connections</span><h1>My memory aids</h1>
+  <header><span class="eyebrow">Your own connections</span><h1 #title tabindex="-1">My memory aids</h1>
     <p>Find the notes and meaning synonyms you have saved. Search stays in this browser.</p>
     <button type="button" (click)="leave.emit()">Return to Library</button>
   </header>
@@ -22,7 +22,7 @@
         <p *ngIf="item.readings.length" lang="ja">{{item.readings.join(' · ')}}</p>
         <p *ngIf="item.note" class="personal-note"><strong>Your note:</strong> {{item.note.slice(0,200)}}{{item.note.length>200?'…':''}}</p>
         <p *ngIf="item.synonyms.length"><strong>Your meaning synonyms:</strong> {{item.synonyms.join(' · ')}}</p>
-        <button type="button" [id]="'memory-item-'+item.id" [attr.aria-label]="'View memory aids for '+kind(item.kind)+' '+item.text" (click)="explore.emit(item.id)">View and edit memory aids</button>
+        <button type="button" [id]="'memory-item-'+item.id" [attr.aria-label]="'View memory aids for '+kind(item.kind)+' '+item.text" (click)="open(item.id)">View and edit memory aids</button>
       </li>
     </ul>
     <button type="button" *ngIf="result.items.length < result.matched" (click)="library.limit=library.limit+20">Show 20 more memory aids</button>
