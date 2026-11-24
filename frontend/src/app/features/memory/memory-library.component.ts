@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SavedMemory } from './memory-library';
 import { MemoryLibraryService } from './memory-library.service';
 
 @Component({selector:'app-memory-library',standalone:true,imports:[CommonModule,FormsModule],
@@ -24,5 +25,6 @@ export class MemoryLibraryComponent implements AfterViewInit, OnDestroy {
     });
   }
   ngOnDestroy(): void { if (this.frame !== undefined) cancelAnimationFrame(this.frame); }
+  trackItem(_index: number, item: SavedMemory): string { return item.id; }
   kind(kind: string): string { return kind==='vocabulary'?'Word':kind==='radical'?'Dictionary radical':'Kanji'; }
 }

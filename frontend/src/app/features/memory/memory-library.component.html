@@ -16,7 +16,7 @@
     </div>
     <p *ngIf="result.total" role="status" aria-live="polite">Showing {{result.items.length}} of {{result.matched}} matches · {{result.total}} saved items.</p>
     <ul class="items" *ngIf="result.items.length">
-      <li *ngFor="let item of result.items">
+      <li *ngFor="let item of result.items; trackBy:trackItem">
         <span class="eyebrow">{{kind(item.kind)}} · {{item.introduced?'Introduced':'Not introduced'}}</span>
         <h2><span lang="ja">{{item.text}}</span> · {{item.meaning}}</h2>
         <p *ngIf="item.readings.length" lang="ja">{{item.readings.join(' · ')}}</p>
