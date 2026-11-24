@@ -80,3 +80,5 @@ reload. No horizontal overflow or runtime errors occurred.
 
 Backend source/schema is unchanged. The test API applies the existing V5 migration
 on an isolated database; this PR introduces no additional rollout requirements.
+
+Use [My memory aids](memory-library.md) in Library to find saved notes/synonyms and return from the explorer with collection filters intact.

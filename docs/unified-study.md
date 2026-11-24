@@ -38,3 +38,5 @@ See [sentence and reading practice](reading-practice.md) for contextual reading,
 See [chapter progression](chapter-progression.md) for introduction/retention milestones and chapter-scoped scheduled reviews.
 
 See [study pacing and comeback guidance](study-pacing.md) for small sessions, workload explanations and the shared daily typed lesson limit.
+
+Use [My memory aids](memory-library.md) in Library to find saved notes/synonyms and return from the explorer with collection filters intact.

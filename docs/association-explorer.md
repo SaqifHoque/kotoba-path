@@ -101,3 +101,5 @@ network mutation requests and runtime errors are also checked.
 Selected words now offer [pronunciation audio](vocabulary-audio.md) from their published kana reading, with normal/slow playback and no progress changes.
 
 The explorer now offers explicit [personal memory-aid editing](explorer-memory-aids.md). Browsing still creates no writes; Save uses the existing note/synonym profile fields.
+
+Use [My memory aids](memory-library.md) in Library to find saved notes/synonyms and return from the explorer with collection filters intact.
