@@ -36,7 +36,7 @@ export class MistakePracticeService {
     return true;
   }
   check(reveal = false): void {
-    if (!this.allowed || !this.session || (!reveal&&!this.draft.trim())) return;
+    if (!this.allowed || !this.session || this.result || (!reveal&&!this.draft.trim())) return;
     const result = submitPractice(this.session,reveal?'':this.draft,this.question
       ?this.sync.state.value.forge.meaningSynonyms?.[this.question.subject.id]?.values:[]);
     this.session = result.session; this.feedback = result.feedback;

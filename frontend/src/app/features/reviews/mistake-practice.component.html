@@ -33,6 +33,9 @@
           <p>{{result.answer.message}}</p>
           <p><strong>Accepted {{q.skill}}:</strong> {{result.answer.accepted.join(' · ')}}</p>
           <p>{{q.subject.meaning}}</p>
+          <app-word-audio *ngIf="q.subject.kind==='vocabulary'" [wordId]="q.subject.id" [text]="q.subject.text" [readings]="q.subject.readings"></app-word-audio>
+          <details><summary>Memory aid and context</summary><p>{{q.subject.hint}}</p><p *ngIf="practice.note"><strong>Your memory note:</strong> {{practice.note}}</p></details>
+          <button type="button" (click)="explore.emit(q.subject.id)">Explore this practice item</button>
           <button type="button" (click)="next()">Continue practice</button>
         </section>
         <div class="actions"><button type="button" (click)="leave.emit()">Pause practice</button><button type="button" (click)="finish()">Finish practice for now</button></div>

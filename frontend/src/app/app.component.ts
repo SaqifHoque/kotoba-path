@@ -122,7 +122,7 @@ export class AppComponent implements OnInit, OnDestroy {
   resume(session: OpenSession): void {
     this.navigate(session.view);this.section=session.review?'reviews':'learning';this.lastSessionView=session.view;
   }
-  resetSessions(): void { this.memoryLibrary.reset();this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
+  resetSessions(): void { this.mistakePractice.clear();this.memoryLibrary.reset();this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
   launched(id: number): void { if (this.launch?.id === id) this.launch = null; }
   toggleNavigation(): void { this.menuOpen=!this.menuOpen; }
   @HostListener('document:keydown.escape') closeNavigation(): void {
