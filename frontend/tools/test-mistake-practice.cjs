@@ -1,0 +1,38 @@
+const assert=require('node:assert/strict'),path=require('node:path');
+const root=process.argv[2],p=require(path.join(root,'reviews/mistake-practice.js'));
+const f=require(path.join(root,'forge/forge-engine.js'));
+const subjects=f.buildForge(require('../src/assets/kanji-curriculum.json'));
+const person=subjects.find(s=>s.id==='k:人'),word=subjects.find(s=>s.id==='v:人:ひと'),radical=subjects.find(s=>s.kind==='radical');
+const wrong=(subject,skill,ticketIndex=0)=>({kind:'scored',ticketIndex,question:{subject,skill},correct:false,beforeStage:5,afterStage:3,nextDue:1000,accepted:['old answer']});
+const source=[wrong(person,'meaning'),wrong(person,'reading',1),wrong(word,'meaning',2),
+ {...wrong(word,'reading',3),correct:true},{kind:'skipped',ticketIndex:4,question:{subject:word,skill:'reading'}},
+ wrong(person,'meaning',5),wrong({...person,id:'k:missing'},'meaning',6),wrong(radical,'reading',7)];
+const before=JSON.stringify(source),catalog=JSON.stringify(subjects);
+let session=p.createMistakePractice(source,subjects);
+assert.equal(session.questions.length,3);
+assert.equal(session.questions[0].subject,person);
+assert.equal(p.nextPractice(session),session);
+const first=session;
+let result=p.submitPractice(session,'someone',['someone']);
+assert.equal(result.feedback.status,'correct');session=result.session;
+assert.equal(first.results.length,0);
+assert.equal(p.submitPractice(session,'wrong').session,session);
+session=p.nextPractice(session);
+result=p.submitPractice(session,'jin');
+assert.equal(result.feedback.status,'retry');assert.equal(result.session,session);
+assert.equal(p.nextPractice(session),session);
+result=p.submitPractice(session,person.readings[0]);assert.equal(result.feedback.status,'correct');
+session=p.nextPractice(result.session);
+result=p.submitPractice(session,'');assert.equal(result.feedback.status,'incorrect');
+session=p.nextPractice(result.session);
+assert.equal(session.closed,true);
+assert.deepEqual(p.practiceSummary(session),{total:3,answered:3,correct:2,incorrect:1,unanswered:0});
+assert.equal(p.submitPractice(session,'person').session,session);
+assert.equal(p.nextPractice(session),session);
+assert.equal(p.practiceQuestion(session),undefined);
+const early={...p.createMistakePractice(source,subjects),closed:true};
+assert.deepEqual(p.practiceSummary(early),{total:3,answered:0,correct:0,incorrect:0,unanswered:3});
+assert.equal(p.createMistakePractice([],subjects).questions.length,0);
+assert.equal(p.createMistakePractice([{...wrong(person,'meaning'),correct:true}],subjects).questions.length,0);
+assert.equal(JSON.stringify(source),before);assert.equal(JSON.stringify(subjects),catalog);
+console.log('PASS mistake practice: scored-mistake selection, distinct skill dedupe, canonical catalog, missing/invalid exclusions, personal meanings, kana retries, immutable first answers, early finish and unchanged source outcomes.');

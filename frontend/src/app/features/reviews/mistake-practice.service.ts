@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AccountService } from '../account/account.service';
 import { StudySyncService } from '../learn/study-sync.service';
 import { AnswerResult } from '../learn/answer-checker';
+import { ReviewBatch } from './review-session';
 import { ReviewSessionService } from './review-session.service';
 import { MistakePractice, createMistakePractice, nextPractice, practiceQuestion, practiceSummary, submitPractice } from './mistake-practice';
 
@@ -13,6 +14,7 @@ export class MistakePracticeService {
   notice = '';
   source = '';
   private owner?: string;
+  private sourceBatch?: ReviewBatch;
   constructor(private readonly sync: StudySyncService, private readonly account: AccountService,
       private readonly reviews: ReviewSessionService) {}
   get ready() { return this.sync.ready && !this.account.changing; }
@@ -29,8 +31,10 @@ export class MistakePracticeService {
   begin(): boolean {
     this.notice = '';
     if (!this.reviews.allowed || !this.reviews.complete || !this.reviews.batch) return false;
+    if (this.allowed && this.sourceBatch===this.reviews.batch && !this.complete) return true;
     const session = createMistakePractice(this.reviews.batch.outcomes,this.sync.forgeSubjects);
     if (!session.questions.length) { this.notice = 'No available scored mistakes in this batch.';return false; }
+    this.sourceBatch=this.reviews.batch;
     this.owner = this.account.account.id; this.session = session; this.draft = ''; this.feedback = undefined;
     this.source = this.reviews.scope?.label ?? 'Latest typed review batch';
     return true;
@@ -51,5 +55,5 @@ export class MistakePracticeService {
     this.session={...this.session,cursor:0,results:[],closed:false};this.draft='';this.feedback=undefined;
   }
   finish(): void { if (this.allowed && this.session) this.session={...this.session,closed:true}; }
-  clear(): void { this.session=null;this.owner=undefined;this.draft='';this.feedback=undefined;this.notice='';this.source=''; }
+  clear(): void { this.sourceBatch=undefined;this.session=null;this.owner=undefined;this.draft='';this.feedback=undefined;this.notice='';this.source=''; }
 }
