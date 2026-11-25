@@ -121,3 +121,5 @@ See [daily quests and study badges](quests-and-rewards.md) for effort goals, evi
 See [study pacing and comeback guidance](study-pacing.md) for small sessions, workload explanations and the shared daily typed lesson limit.
 
 See [explorer memory aids](explorer-memory-aids.md) for editing personal notes and meaning synonyms, draft recovery and save-conflict boundaries.
+
+See [focused mistake practice](mistake-practice.md) for retrying missed questions without changing scheduled results or review history.

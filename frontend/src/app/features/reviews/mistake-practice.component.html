@@ -1,0 +1,45 @@
+<section class="practice">
+  <header><span class="eyebrow">Recall, understand, try again</span><h1>Mistake practice</h1>
+    <p>Retry questions missed in your completed review batch. This practice leaves scheduled scores, stages, review dates and history unchanged.</p>
+    <p>Source: {{practice.source}}</p>
+    <button type="button" (click)="leave.emit()">Return to typed reviews</button>
+  </header>
+  <p *ngIf="!practice.allowed" role="status">Open mistake practice from a completed review batch after your account is ready.</p>
+  <ng-container *ngIf="practice.allowed && practice.session as session">
+    <article *ngIf="practice.complete; else question" aria-label="Mistake practice summary">
+      <ng-container *ngIf="practice.summary as summary">
+        <h2 #summaryHeading tabindex="-1">Practice complete for now</h2>
+        <p>{{summary.answered}} of {{summary.total}} practice questions answered.</p>
+        <p>{{summary.correct}} correct · {{summary.incorrect}} to revisit · {{summary.unanswered}} unanswered.</p>
+        <p>The original scheduled results remain saved. These practice results stay in this tab and close on reload.</p>
+        <button type="button" (click)="restart()">Repeat these mistake questions</button>
+        <button type="button" (click)="leave.emit()">Return to typed reviews</button>
+      </ng-container>
+    </article>
+    <ng-template #question>
+      <article *ngIf="practice.question as q" aria-label="Mistake practice question">
+        <p>Question {{session.cursor+1}} of {{session.questions.length}} · {{q.subject.kind}}</p>
+        <h2><img *ngIf="q.subject.image; else glyph" [src]="'assets/radicals/'+q.subject.image" alt="Radical shape"><ng-template #glyph><span lang="ja">{{q.subject.text}}</span></ng-template></h2>
+        <p class="skill">{{q.skill==='meaning'?'Meaning · answer in English':'Reading · answer in kana'}}</p>
+        <form *ngIf="!practice.result" (ngSubmit)="check()">
+          <label for="mistake-answer">{{q.skill==='meaning'?'Practice meaning in English':'Practice reading in hiragana or katakana'}}</label>
+          <input #answer id="mistake-answer" name="mistake-answer" [(ngModel)]="practice.draft" autocomplete="off" spellcheck="false" maxlength="200" [attr.lang]="q.skill==='reading'?'ja':'en'">
+          <div class="actions"><button type="submit" [disabled]="!practice.draft.trim()">Check practice answer</button>
+            <button type="button" (click)="check(true)">Reveal practice answer</button></div>
+          <p *ngIf="practice.feedback" role="status">{{practice.feedback.message}}</p>
+        </form>
+        <section *ngIf="practice.result as result">
+          <h3 #feedbackHeading tabindex="-1">{{result.answer.status==='correct'?'Correct practice answer':'Study this answer'}}</h3>
+          <p>{{result.answer.message}}</p>
+          <p><strong>Accepted {{q.skill}}:</strong> {{result.answer.accepted.join(' · ')}}</p>
+          <p>{{q.subject.meaning}}</p>
+          <app-word-audio *ngIf="q.subject.kind==='vocabulary'" [wordId]="q.subject.id" [text]="q.subject.text" [readings]="q.subject.readings"></app-word-audio>
+          <details><summary>Memory aid and context</summary><p>{{q.subject.hint}}</p><p *ngIf="practice.note"><strong>Your memory note:</strong> {{practice.note}}</p></details>
+          <button type="button" (click)="explore.emit(q.subject.id)">Explore this practice item</button>
+          <button type="button" (click)="next()">Continue practice</button>
+        </section>
+        <div class="actions"><button type="button" (click)="leave.emit()">Pause practice</button><button type="button" (click)="finish()">Finish practice for now</button></div>
+      </article>
+    </ng-template>
+  </ng-container>
+</section>

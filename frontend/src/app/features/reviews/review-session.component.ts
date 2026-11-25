@@ -11,6 +11,7 @@ import { ReviewSessionService } from './review-session.service';
   templateUrl: './review-session.component.html', styleUrls: ['./review-session.component.scss']})
 export class ReviewSessionComponent {
   @Output() leave = new EventEmitter<void>();
+  @Output() practiseMistakes = new EventEmitter<void>();
   @Output() explore = new EventEmitter<string>();
   @ViewChild('answer') private answer?: ElementRef<HTMLInputElement>;
   @ViewChild('feedbackHeading') private feedbackHeading?: ElementRef<HTMLElement>;
