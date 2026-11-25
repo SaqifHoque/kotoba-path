@@ -1,0 +1,15 @@
+:host { display: block; }
+.practice { max-width: 50rem; margin: auto; }
+header, article { padding: 1.5rem; border: 1px solid #cbd8cb; border-radius: .75rem; background: #fcfdf7; margin-bottom: 1rem; }
+.eyebrow { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+p { line-height: 1.65; }
+article h2 span { font-size: 3rem; }
+img { width: 5rem; height: 5rem; object-fit: contain; }
+label { display: block; margin: 1rem 0 .5rem; font-weight: 600; }
+input, button { font: inherit; min-height: 44px; max-width: 100%; box-sizing: border-box; padding: .65rem 1rem; border: 1px solid #789280; border-radius: .5rem; background: white; color: #233e32; }
+input { width: 100%; }
+button { cursor: pointer; margin: .25rem; }
+button:disabled { opacity: .6; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid #9b6500; outline-offset: 3px; }
+@media(max-width:420px) { header,article { padding: 1rem; } }
