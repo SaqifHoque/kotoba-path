@@ -82,3 +82,5 @@ Backend source/schema is unchanged. The test API applies the existing V5 migrati
 on an isolated database; this PR introduces no additional rollout requirements.
 
 Use [My memory aids](memory-library.md) in Library to find saved notes/synonyms and return from the explorer with collection filters intact.
+
+See [focused mistake practice](mistake-practice.md) for retrying missed questions without changing scheduled results or review history.

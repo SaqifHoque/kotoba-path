@@ -95,3 +95,5 @@ no horizontal overflow or browser runtime errors.
 
 Backend source and schema are unchanged; backend tests remain in CI. The local
 API flow used the backend artifact verified with the preceding quests feature.
+
+See [focused mistake practice](mistake-practice.md) for retrying missed questions without changing scheduled results or review history.
