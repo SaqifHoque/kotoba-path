@@ -21,6 +21,7 @@
     <ng-container *ngIf="cards.length && !account.changing">
       <app-study-hub *ngIf="view==='learning'||view==='reviews'||view==='library'" [cards]="cards" [section]="view" [sessions]="openSessions" (resume)="resume($event)" (start)="start($event)" (open)="navigate($event)" (guide)="startGuided()" (explore)="explore($event)" (typedReviews)="startTypedReviews($event)" (chapterReviews)="startChapterReviews()" (readingPractice)="startReading()" (sentencePractice)="startReading($event)"></app-study-hub>
       <app-guided-lesson (chapterReviews)="startChapterReviews()" (readingPractice)="startReading()" *ngIf="view==='guided'" [cards]="cards" (leave)="navigate($event)" (explore)="explore($event)" (sentencePractice)="startReading($event)"></app-guided-lesson>
+      <app-trouble-spots *ngIf="view==='trouble-spots'" (explore)="explore($event)" (leave)="navigate('reviews')"></app-trouble-spots>
       <app-memory-library *ngIf="view==='memory-library'" (explore)="explore($event)" (leave)="navigate('library')"></app-memory-library>
       <app-association-explorer *ngIf="view==='associations'" [subjects]="lessons.sync.forgeSubjects" [subjectId]="associationId" [returnLabel]="associationReturnLabel" (selected)="associationId=$event" (leave)="navigate(associationReturn)"></app-association-explorer>
       <app-reading-practice *ngIf="view==='reading-practice'" (leave)="returnFromReading()" (explore)="explore($event)"></app-reading-practice>

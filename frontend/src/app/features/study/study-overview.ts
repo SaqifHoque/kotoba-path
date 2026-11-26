@@ -7,7 +7,7 @@ export interface OpenSession { view: 'mistake-practice' | 'reading-practice' | '
 export interface LearningMilestone { title: string; completed: number; total: number; detail: string; }
 export function sectionFor(view: StudyView): StudySection {
   if (view === 'reading-practice' || view === 'learn' || view === 'forge' || view === 'guided') return 'learning';
-  if (view === 'mistake-practice' || view === 'history' || view === 'typed-review') return 'reviews';
+  if (view === 'trouble-spots' || view === 'mistake-practice' || view === 'history' || view === 'typed-review') return 'reviews';
   if (view === 'memory-library' || view === 'catalog' || view === 'associations') return 'library';
   return view;
 }
