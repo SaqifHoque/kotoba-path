@@ -5,7 +5,7 @@
   </header>
   <ng-container *ngIf="spots.snapshot(now) as list; else loading">
     <details class="explanation"><summary>How this list is chosen</summary>
-      <p>Each skill needs at least 3 saved scheduled misses and under 80% correct across its saved scheduled reviews. Burned skills are excluded. Highest miss counts come first, then lower accuracy.</p>
+      <p>Each skill needs at least 3 saved scheduled misses and under 80% correct across its saved scheduled reviews. Burned skills are excluded. Highest miss counts come first, then lower accuracy. Displayed percentages are rounded; the counts determine inclusion.</p>
       <p>These are lifetime counters from your saved typed-course progress, including imported progress. They are not recent history or a prediction of retention. Reading-path ratings and extra practice are excluded.</p>
       <p>Correct scheduled reviews can improve these counters and remove a skill from this list. Extra practice leaves counters, review dates, stages, history and quest credit unchanged.</p>
     </details>
@@ -13,14 +13,14 @@
       <label for="trouble-query">Find a kanji or word</label>
       <input id="trouble-query" name="query" [(ngModel)]="spots.filters.query" (ngModelChange)="spots.changed()" placeholder="Character, meaning, kana or personal synonym" maxlength="200">
       <div class="filter-options">
-        <label for="trouble-kind">Item type<select id="trouble-kind" name="kind" [(ngModel)]="spots.filters.kind" (ngModelChange)="spots.changed()"><option value="all">All items</option><option value="kanji">Kanji</option><option value="vocabulary">Words</option><option value="radical">Dictionary radicals</option></select></label>
-        <label for="trouble-skill">Skill<select id="trouble-skill" name="skill" [(ngModel)]="spots.filters.skill" (ngModelChange)="spots.changed()"><option value="all">Meaning and reading</option><option value="meaning">Meaning</option><option value="reading">Reading</option></select></label>
-        <label for="trouble-timing">Review timing<select id="trouble-timing" name="timing" [(ngModel)]="spots.filters.timing" (ngModelChange)="spots.changed()"><option value="all">Due now or later</option><option value="due">Due now</option></select></label>
+        <div><label for="trouble-kind">Item type</label><select id="trouble-kind" name="kind" [(ngModel)]="spots.filters.kind" (ngModelChange)="spots.changed()"><option value="all">All items</option><option value="kanji">Kanji</option><option value="vocabulary">Words</option><option value="radical">Dictionary radicals</option></select></div>
+        <div><label for="trouble-skill">Skill</label><select id="trouble-skill" name="skill" [(ngModel)]="spots.filters.skill" (ngModelChange)="spots.changed()"><option value="all">Meaning and reading</option><option value="meaning">Meaning</option><option value="reading">Reading</option></select></div>
+        <div><label for="trouble-timing">Review timing</label><select id="trouble-timing" name="timing" [(ngModel)]="spots.filters.timing" (ngModelChange)="spots.changed()"><option value="all">Due now or later</option><option value="due">Due now</option></select></div>
       </div><button type="button" (click)="spots.clearFilters()">Clear filters</button>
     </form>
     <section class="practice-entry" *ngIf="list.matched" aria-label="Optional focused practice">
       <h2>Try a small practice round</h2><p>Use the first {{list.questions.length}} matching skills in this list. This can include skills due later; their scheduled dates stay unchanged.</p>
-      <button type="button" (click)="practise.emit()">Start a new practice · {{list.questions.length}} questions</button>
+      <button type="button" (click)="practise.emit()">Start a new practice · {{list.questions.length}} {{list.questions.length===1?'question':'questions'}}</button>
       <p class="note">Starting a new round replaces any mistake-practice round already open in this tab.</p>
     </section>
     <p role="status">{{list.matched}} matching skills · {{list.total}} trouble spots in your typed course.</p>
