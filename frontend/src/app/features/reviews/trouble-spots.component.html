@@ -1,0 +1,42 @@
+<section class="trouble-spots">
+  <header><span class="eyebrow">Understand what needs another look</span><h1 #title tabindex="-1">Trouble spots</h1>
+    <p>Find meaning and reading skills with repeated misses in your typed course. A small, optional practice round can help you rebuild the connection.</p>
+    <button type="button" (click)="leave.emit()">Return to Review</button>
+  </header>
+  <ng-container *ngIf="spots.snapshot(now) as list; else loading">
+    <details class="explanation"><summary>How this list is chosen</summary>
+      <p>Each skill needs at least 3 saved scheduled misses and under 80% correct across its saved scheduled reviews. Burned skills are excluded. Highest miss counts come first, then lower accuracy.</p>
+      <p>These are lifetime counters from your saved typed-course progress, including imported progress. They are not recent history or a prediction of retention. Reading-path ratings and extra practice are excluded.</p>
+      <p>Correct scheduled reviews can improve these counters and remove a skill from this list. Extra practice leaves counters, review dates, stages, history and quest credit unchanged.</p>
+    </details>
+    <form class="filters" (submit)="$event.preventDefault()" aria-label="Filter trouble spots">
+      <label for="trouble-query">Find a kanji or word</label>
+      <input id="trouble-query" name="query" [(ngModel)]="spots.filters.query" (ngModelChange)="spots.changed()" placeholder="Character, meaning, kana or personal synonym" maxlength="200">
+      <div class="filter-options">
+        <label for="trouble-kind">Item type<select id="trouble-kind" name="kind" [(ngModel)]="spots.filters.kind" (ngModelChange)="spots.changed()"><option value="all">All items</option><option value="kanji">Kanji</option><option value="vocabulary">Words</option><option value="radical">Dictionary radicals</option></select></label>
+        <label for="trouble-skill">Skill<select id="trouble-skill" name="skill" [(ngModel)]="spots.filters.skill" (ngModelChange)="spots.changed()"><option value="all">Meaning and reading</option><option value="meaning">Meaning</option><option value="reading">Reading</option></select></label>
+        <label for="trouble-timing">Review timing<select id="trouble-timing" name="timing" [(ngModel)]="spots.filters.timing" (ngModelChange)="spots.changed()"><option value="all">Due now or later</option><option value="due">Due now</option></select></label>
+      </div><button type="button" (click)="spots.clearFilters()">Clear filters</button>
+    </form>
+    <section class="practice-entry" *ngIf="list.matched" aria-label="Optional focused practice">
+      <h2>Try a small practice round</h2><p>Use the first {{list.questions.length}} matching skills in this list. This can include skills due later; their scheduled dates stay unchanged.</p>
+      <button type="button" (click)="practise.emit()">Start a new practice · {{list.questions.length}} questions</button>
+      <p class="note">Starting a new round replaces any mistake-practice round already open in this tab.</p>
+    </section>
+    <p role="status">{{list.matched}} matching skills · {{list.total}} trouble spots in your typed course.</p>
+    <section *ngIf="!list.total" class="empty"><h2>No repeated-miss skills to show</h2><p>This list starts when a non-Burned skill has at least 3 scheduled misses and under 80% correct. Keep following your scheduled reviews; new and well-recalled skills stay out of this list.</p></section>
+    <section *ngIf="list.total&&!list.matched" class="empty"><h2>No skills match these filters</h2><p>Try another meaning, kana reading or item type.</p><button type="button" (click)="spots.clearFilters()">Show all trouble spots</button></section>
+    <ol class="items" aria-label="Skills to revisit">
+      <li *ngFor="let item of list.items;trackBy:track" [id]="'trouble-'+track(0,item)" tabindex="-1">
+        <div class="item-heading"><h2><span lang="ja">{{item.subject.text}}</span> · {{item.skill==='reading'?'Reading':'Meaning'}}</h2><span>{{kind(item)}}</span></div>
+        <p>{{item.subject.meaning}}<span *ngIf="item.subject.readings.length" lang="ja"> · {{item.subject.readings.join(' · ')}}</span></p>
+        <p><strong>{{item.track.misses}} misses</strong> · {{item.track.correct}} correct / {{item.track.reviews}} scheduled reviews · {{item.track.correct/item.track.reviews | percent:'1.0-1'}} correct</p>
+        <p>{{item.due?'Due now':'Due later'}} · {{item.track.due | date:'medium'}}</p>
+        <p *ngIf="item.note" class="personal-note"><strong>Your memory note:</strong> {{item.note}}</p>
+        <button type="button" (click)="open(item)">Explore {{item.subject.text}} and edit memory aids</button>
+      </li>
+    </ol>
+    <button type="button" *ngIf="list.items.length<list.matched" (click)="spots.limit=spots.limit+20">Show 20 more skills</button>
+  </ng-container>
+  <ng-template #loading><p role="status">Restoring your learning progress…</p></ng-template>
+</section>
