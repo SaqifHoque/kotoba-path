@@ -11,15 +11,17 @@ export interface MistakePractice {
 }
 /** Take only actual scored mistakes, preserving distinct meaning/reading questions. */
 export function createMistakePractice(outcomes: ReviewBatch['outcomes'], subjects: readonly Subject[]): MistakePractice {
-  const catalog = new Map(subjects.map(s=>[s.id,s])), seen = new Set<string>();
-  const questions: Question[] = [];
-  for (const outcome of outcomes) {
-    if (outcome.kind!=='scored'||outcome.correct) continue;
-    const subject = catalog.get(outcome.question.subject.id), skill = outcome.question.skill;
-    if (!subject || (skill==='reading'&&!subject.readings.length)) continue;
-    const key = subject.id+':'+skill;
-    if (seen.has(key)) continue;
-    seen.add(key); questions.push({subject,skill});
+  return createQuestionPractice(outcomes.flatMap(outcome=>
+    outcome.kind==='scored'&&!outcome.correct?[outcome.question]:[]),subjects);
+}
+/** Resolve canonical content and deduplicate skills for non-scheduled recall. */
+export function createQuestionPractice(selected: readonly Question[], subjects: readonly Subject[]): MistakePractice {
+  const catalog=new Map(subjects.map(s=>[s.id,s])), seen=new Set<string>();
+  const questions: Question[]=[];
+  for (const {subject:old,skill} of selected) {
+    const subject=catalog.get(old.id), key=old.id+':'+skill;
+    if (!subject || seen.has(key) || (skill==='reading'&&!subject.readings.length)) continue;
+    seen.add(key);questions.push({subject,skill});
   }
   return {questions,cursor:0,results:[],closed:false};
 }

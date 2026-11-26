@@ -82,6 +82,10 @@ export class AppComponent implements OnInit, OnDestroy {
     if (!this.mistakePractice.begin()) return;
     this.lastSessionView='mistake-practice';this.navigate('mistake-practice');
   }
+  startTroublePractice(): void {
+    if (!this.troubleSpots.ready || !this.mistakePractice.beginTroubleSpots(this.troubleSpots.filters)) return;
+    this.lastSessionView='mistake-practice';this.navigate('mistake-practice');
+  }
   startChapterReviews(): void {
     const progress = this.chapterProgress.snapshot();
     if (!progress) return;
