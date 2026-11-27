@@ -1,3 +1,5 @@
+import { KanjiComparisonComponent } from './features/associations/kanji-comparison.component';
+import { KanjiComparisonService } from './features/associations/kanji-comparison.service';
 import { TroubleSpotsComponent } from './features/reviews/trouble-spots.component';
 import { TroubleSpotsService } from './features/reviews/trouble-spots.service';
 import { MistakePracticeComponent } from './features/reviews/mistake-practice.component';
@@ -33,10 +35,12 @@ import { EncyclopediaComponent } from './features/encyclopedia/encyclopedia.comp
 import { ForgeComponent } from './features/forge/forge.component';
 
 @Component({selector: 'app-root', standalone: true,
-  imports: [TroubleSpotsComponent, MistakePracticeComponent, MemoryLibraryComponent, ReadingPracticeComponent, ReviewSessionComponent, AssociationExplorerComponent, GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
+  imports: [KanjiComparisonComponent, TroubleSpotsComponent, MistakePracticeComponent, MemoryLibraryComponent, ReadingPracticeComponent, ReviewSessionComponent, AssociationExplorerComponent, GuidedLessonComponent, StudyHubComponent, SaveStatusComponent, SettingsComponent, StudyHomeComponent, ReviewHistoryComponent, NgIf, KanjiPathComponent, EncyclopediaComponent, ForgeComponent],
   templateUrl: './app.component.html', styleUrls: ['./app.component.scss']})
 export class AppComponent implements OnInit, OnDestroy {
   readonly demoMode = DEMO_MODE;
+  comparisonReturn: StudyView = 'library';
+  private comparisonExplorer?: {id:string;returnView:StudyView};
   readingReturn: StudyView = 'learning';
   associationId = 'k:休';
   associationReturn: StudyView = 'library';
@@ -45,15 +49,15 @@ export class AppComponent implements OnInit, OnDestroy {
   @ViewChild(ForgeComponent) private forge?: ForgeComponent;
   private lastSessionView: OpenSession['view']|null = null;
   cards: KanjiCard[] = []; loading = true; error = ''; launch: StudyLaunch | null = null;
-  readonly titles: Record<StudyView, string> = {'trouble-spots':'Trouble spots','mistake-practice':'Mistake practice','memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Scheduled typed review',associations:'Kanji & word explorer',guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
-  readonly subtitles: Record<StudyView, string> = {'trouble-spots':'Notice · connect · practise','mistake-practice':'Retry · understand · remember','memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Recall · feedback · next review',associations:'Shapes · kanji · words',guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
+  readonly titles: Record<StudyView, string> = {'kanji-comparison':'Compare similar kanji','trouble-spots':'Trouble spots','mistake-practice':'Mistake practice','memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Scheduled typed review',associations:'Kanji & word explorer',guided:'Guided chapter',home:'Your study day',learn:'Your kanji journey',forge:'Kanji Forge',catalog:'Visual reference',history:'Review history',settings:'Profile',learning:'Learn',reviews:'Review',library:'Library'};
+  readonly subtitles: Record<StudyView, string> = {'kanji-comparison':'Notice · compare · connect','trouble-spots':'Notice · connect · practise','mistake-practice':'Retry · understand · remember','memory-library':'My memory aids','reading-practice':'Reading practice','typed-review':'Recall · feedback · next review',associations:'Shapes · kanji · words',guided:'Study · recall · remember',home:'A clear next step',learn:'Learn · recall · repeat',forge:'Learn · temper · master',catalog:'Reading encyclopedia',history:'Your saved attempts',settings:'Account · data & privacy',learning:'Your next lesson',reviews:'Strengthen what you know',library:'Explore Japanese'};
   @ViewChild('mainContent') private content?: ElementRef<HTMLElement>;
   @ViewChild('menuToggle') private menuToggle?: ElementRef<HTMLButtonElement>;
   private readonly media=window.matchMedia('(max-width:850px)');
   compactNavigation=this.media.matches;
   private readonly navChanged=()=>{this.compactNavigation=this.media.matches;this.menuOpen=false;};
   private nextLaunch = 0; private subscription?: Subscription;
-  constructor(private readonly troubleSpots: TroubleSpotsService, public readonly mistakePractice: MistakePracticeService, private readonly memoryLibrary: MemoryLibraryService, private readonly memory: PersonalMemoryService, private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
+  constructor(private readonly comparison: KanjiComparisonService, private readonly troubleSpots: TroubleSpotsService, public readonly mistakePractice: MistakePracticeService, private readonly memoryLibrary: MemoryLibraryService, private readonly memory: PersonalMemoryService, private readonly chapterProgress: ChapterProgressService, public readonly reading: ReadingPracticeService, private readonly audio: WordAudioService, public readonly reviews: ReviewSessionService, public readonly lessons: GuidedLessonService, public readonly account: AccountService, private readonly catalog: StudyCatalogService) {}
   ngOnInit(): void { this.media.addEventListener('change',this.navChanged);this.loadCatalog(); }
   loadCatalog(): void {
     this.loading = true; this.error = ''; this.subscription?.unsubscribe();
@@ -98,8 +102,23 @@ export class AppComponent implements OnInit, OnDestroy {
     if (!this.reviews.allowed) return;
     this.lastSessionView = 'typed-review'; this.navigate('typed-review');
   }
+  compareKanji(id?: string): void {
+    if (!this.comparison.open(id)) return;
+    if (this.view!=='kanji-comparison') {
+      this.comparisonReturn=this.view;
+      this.comparisonExplorer=this.view==='associations'?{id:this.associationId,returnView:this.associationReturn}:undefined;
+    }
+    this.navigate('kanji-comparison');
+  }
+  returnFromComparison(): void {
+    this.navigate(this.comparisonReturn);
+    if (this.comparisonReturn==='associations'&&this.comparisonExplorer) {
+      this.associationId=this.comparisonExplorer.id;this.associationReturn=this.comparisonExplorer.returnView;
+    }
+  }
   explore(id: string): void { this.associationId = id; this.navigate('associations'); }
   get associationReturnLabel(): string {
+    if (this.associationReturn === 'kanji-comparison') return 'Return to kanji comparison';
     if (this.associationReturn === 'trouble-spots') return 'Return to trouble spots';
     if (this.associationReturn === 'mistake-practice') return 'Return to mistake practice';
     if (this.associationReturn === 'memory-library') return 'Return to my memory aids';
@@ -129,7 +148,7 @@ export class AppComponent implements OnInit, OnDestroy {
   resume(session: OpenSession): void {
     this.navigate(session.view);this.section=session.review?'reviews':'learning';this.lastSessionView=session.view;
   }
-  resetSessions(): void { this.troubleSpots.reset();this.mistakePractice.clear();this.memoryLibrary.reset();this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
+  resetSessions(): void { this.comparison.reset();this.comparisonExplorer=undefined;this.comparisonReturn='library';this.troubleSpots.reset();this.mistakePractice.clear();this.memoryLibrary.reset();this.memory.clear();this.audio.stop();this.reading.clear();this.reviews.clear();this.lessons.clear();this.pathVisited=false;this.forgeVisited=false;this.launch=null;this.lastSessionView=null; }
   launched(id: number): void { if (this.launch?.id === id) this.launch = null; }
   toggleNavigation(): void { this.menuOpen=!this.menuOpen; }
   @HostListener('document:keydown.escape') closeNavigation(): void {

@@ -1,3 +1,4 @@
+import { KanjiComparisonService } from './kanji-comparison.service';
 import { PersonalMemoryEditorComponent } from '../memory/personal-memory-editor.component';
 import { WordAudioComponent } from '../audio/word-audio.component';
 import { CommonModule } from '@angular/common';
@@ -15,6 +16,7 @@ export class AssociationExplorerComponent implements OnChanges {
   @Input() subjects: Subject[] = [];
   @Input() subjectId = 'k:休';
   @Input() returnLabel = 'Return to Library';
+  @Output() compare = new EventEmitter<string>();
   @Output() selected = new EventEmitter<string>();
   @Output() leave = new EventEmitter<void>();
   @ViewChild('itemHeading') private heading?: ElementRef<HTMLElement>;
@@ -28,7 +30,7 @@ export class AssociationExplorerComponent implements OnChanges {
   private history: string[] = [];
   private index?: AssociationIndex;
   private search?: AssociationSearch;
-  constructor(private readonly sync: StudySyncService) {}
+  constructor(public readonly comparison: KanjiComparisonService, private readonly sync: StudySyncService) {}
   ngOnChanges(changes: SimpleChanges): void {
     try {
       if (changes['subjects']) {

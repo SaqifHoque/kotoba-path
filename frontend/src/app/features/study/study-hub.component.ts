@@ -22,6 +22,7 @@ export class StudyHubComponent implements OnInit, OnChanges, OnDestroy {
   reviewLimit = 20;
   @Output() typedReviews = new EventEmitter<number>();
   @Input() sessions: OpenSession[] = [];
+  @Output() compare = new EventEmitter<void>();
   @Output() explore = new EventEmitter<string>();
   @Output() guide = new EventEmitter<void>();
   @Output() resume = new EventEmitter<OpenSession>();

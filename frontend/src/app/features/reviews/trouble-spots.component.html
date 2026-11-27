@@ -33,6 +33,7 @@
         <p><strong>{{item.track.misses}} misses</strong> · {{item.track.correct}} correct / {{item.track.reviews}} scheduled reviews · {{item.track.correct/item.track.reviews | percent:'1.0-1'}} correct</p>
         <p>{{item.due?'Due now':'Due later'}} · {{item.track.due | date:'medium'}}</p>
         <p *ngIf="item.note" class="personal-note"><strong>Your memory note:</strong> {{item.note}}</p>
+        <button *ngIf="comparison.canCompare(item.subject.id)" type="button" (click)="compareItem(item)">Compare kanji {{item.subject.text}}</button>
         <button type="button" (click)="open(item)">Explore {{item.subject.text}} and edit memory aids</button>
       </li>
     </ol>
