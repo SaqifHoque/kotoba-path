@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { KanjiComparisonService } from './kanji-comparison.service';
+import { Subject } from '../forge/forge-engine';
 
 @Component({selector:'app-kanji-comparison',standalone:true,imports:[CommonModule,FormsModule],
   templateUrl:'./kanji-comparison.component.html',styleUrls:['./kanji-comparison.component.scss']})
@@ -11,6 +12,7 @@ export class KanjiComparisonComponent implements AfterViewInit, OnDestroy {
   @ViewChild('title') private title?: ElementRef<HTMLElement>;
   private frame?: number;
   constructor(public readonly comparison: KanjiComparisonService) {}
+  trackSide(_index: number,side: {subject:Subject}): string { return side.subject.id; }
   open(id: string,buttonId: string): void {
     this.comparison.returnItem=buttonId;this.comparison.scrollY=window.scrollY;this.explore.emit(id);
   }

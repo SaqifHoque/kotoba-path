@@ -104,7 +104,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   compareKanji(id?: string): void {
     if (!this.comparison.open(id)) return;
-    if (this.view!=='kanji-comparison') {
+    const returningFromComparison=this.view==='associations'&&this.associationReturn==='kanji-comparison';
+    if (this.view!=='kanji-comparison'&&!returningFromComparison) {
       this.comparisonReturn=this.view;
       this.comparisonExplorer=this.view==='associations'?{id:this.associationId,returnView:this.associationReturn}:undefined;
     }

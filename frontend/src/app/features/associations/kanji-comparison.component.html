@@ -12,8 +12,11 @@
       </form>
       <p class="study-tip">Trace each outline with your eyes. Describe one visual difference, then read a word using each character. Save your own memory link in the explorer.</p>
       <p role="status">Comparing <span lang="ja">{{pair.left.subject.text}}</span> and <span lang="ja">{{pair.right.subject.text}}</span>. Browsing leaves your review dates, stages and history unchanged.</p>
+      <div class="shape-preview" aria-label="Compare both outlines together">
+        <div *ngFor="let side of [pair.left,pair.right];trackBy:trackSide"><span lang="ja">{{side.subject.text}}</span><strong>{{side.subject.meaning}}</strong></div>
+      </div>
       <div class="comparison-grid">
-        <article *ngFor="let side of [pair.left,pair.right]" [attr.aria-label]="side.subject.text+' study details'">
+        <article *ngFor="let side of [pair.left,pair.right];trackBy:trackSide" [attr.aria-label]="side.subject.text+' study details'">
           <h2 lang="ja" class="glyph">{{side.subject.text}}</h2><p class="meaning">{{side.subject.meaning}}</p>
           <h3>Typed-review target reading</h3><p lang="ja">{{side.subject.readings.length?side.subject.readings.join(' · '):'—'}}</p>
           <p *ngIf="side.subject.otherReadings?.length"><strong>Other listed readings:</strong> <span lang="ja">{{side.subject.otherReadings?.join(' · ')}}</span></p>

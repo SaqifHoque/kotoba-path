@@ -50,6 +50,7 @@ export class KanjiComparisonService {
   snapshot() {
     if (!this.prepare()) return null;
     if (!this.index!.peers.has(this.leftId)) this.open();
+    else if (!this.index!.peers.get(this.leftId)!.some(s=>s.id===this.rightId)) this.chooseLeft(this.leftId);
     const pair=kanjiComparison(this.index!,this.leftId,this.rightId,this.sync.state.value.forge);
     return {candidates:this.index!.candidates,peers:this.index!.peers.get(this.leftId)??[],pair};
   }
