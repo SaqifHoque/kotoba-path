@@ -103,3 +103,5 @@ Selected words now offer [pronunciation audio](vocabulary-audio.md) from their p
 The explorer now offers explicit [personal memory-aid editing](explorer-memory-aids.md). Browsing still creates no writes; Save uses the existing note/synonym profile fields.
 
 Use [My memory aids](memory-library.md) in Library to find saved notes/synonyms and return from the explorer with collection filters intact.
+
+Supported kanji now link to [side-by-side comparison](kanji-comparison.md), preserving the original study return path and saved progress.
