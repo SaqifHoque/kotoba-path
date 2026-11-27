@@ -91,3 +91,5 @@ removing that meaning skill while preserving its separate reading trouble spot.
 early finish, no-match feedback and saved-counter persistence after reload. Empty
 profiles and device-only demo practice also passed, with no horizontal overflow
 or browser runtime errors. Backend source and schema are unchanged.
+
+Supported kanji now link to [side-by-side comparison](kanji-comparison.md), preserving the original study return path and saved progress.

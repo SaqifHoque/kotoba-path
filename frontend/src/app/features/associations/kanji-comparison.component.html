@@ -1,0 +1,44 @@
+<section class="kanji-comparison">
+  <header><span class="eyebrow">Notice the shape, remember the word</span><h1 #title tabindex="-1">Compare similar kanji</h1>
+    <p>Study two similar-looking characters side by side. These curated groups are study suggestions, not evidence that you have confused them.</p>
+    <button type="button" (click)="leave.emit()">Return to previous study screen</button>
+  </header>
+  <p *ngIf="comparison.error" role="alert">{{comparison.error}}</p>
+  <ng-container *ngIf="comparison.snapshot() as view; else loading">
+    <ng-container *ngIf="view.pair as pair; else empty">
+      <form class="pair-picker" (submit)="$event.preventDefault()" aria-label="Choose kanji to compare">
+        <div><label for="comparison-left">First kanji</label><select id="comparison-left" name="left" [ngModel]="comparison.leftId" (ngModelChange)="comparison.chooseLeft($event)"><option *ngFor="let candidate of view.candidates" [value]="candidate.id">{{candidate.text}} · {{candidate.meaning}}</option></select></div>
+        <div><label for="comparison-right">Similar kanji</label><select id="comparison-right" name="right" [ngModel]="comparison.rightId" (ngModelChange)="comparison.chooseRight($event)"><option *ngFor="let candidate of view.peers" [value]="candidate.id">{{candidate.text}} · {{candidate.meaning}}</option></select></div>
+      </form>
+      <p class="study-tip">Trace each outline with your eyes. Describe one visual difference, then read a word using each character. Save your own memory link in the explorer.</p>
+      <p role="status">Comparing <span lang="ja">{{pair.left.subject.text}}</span> and <span lang="ja">{{pair.right.subject.text}}</span>. Browsing leaves your review dates, stages and history unchanged.</p>
+      <div class="shape-preview" aria-label="Compare both outlines together">
+        <div *ngFor="let side of [pair.left,pair.right];trackBy:trackSide"><span lang="ja">{{side.subject.text}}</span><strong>{{side.subject.meaning}}</strong></div>
+      </div>
+      <div class="comparison-grid">
+        <article *ngFor="let side of [pair.left,pair.right];trackBy:trackSide" [attr.aria-label]="side.subject.text+' study details'">
+          <h2 lang="ja" class="glyph">{{side.subject.text}}</h2><p class="meaning">{{side.subject.meaning}}</p>
+          <h3>Typed-review target reading</h3><p lang="ja">{{side.subject.readings.length?side.subject.readings.join(' · '):'—'}}</p>
+          <p *ngIf="side.subject.otherReadings?.length"><strong>Other listed readings:</strong> <span lang="ja">{{side.subject.otherReadings?.join(' · ')}}</span></p>
+          <p class="note">Word readings belong to whole words below. A kanji target reading does not apply to every word.</p>
+          <section><h3>Teaching components</h3>
+            <ul *ngIf="side.components.length; else noComponents"><li *ngFor="let component of side.components"><span lang="ja">{{component.form}}</span> · {{component.subject.meaning}}</li></ul>
+            <ng-template #noComponents><p>No teaching components have been authored for this kanji yet.</p></ng-template>
+            <p class="note">Published visual memory links may be incomplete; they are not an etymology.</p>
+          </section>
+          <section><h3>Dictionary radical</h3><ul *ngIf="side.radicals.length; else noRadical"><li *ngFor="let radical of side.radicals"><img *ngIf="radical.image" [src]="'assets/radicals/'+radical.image" alt=""><span lang="ja">{{radical.text}}</span> · {{radical.meaning}}</li></ul><ng-template #noRadical><p>No dictionary radical is linked in this catalog.</p></ng-template><p class="note">Dictionary classification is separate from teaching components.</p></section>
+          <details><summary>Memory prompt</summary><p>{{side.subject.hint}}</p></details>
+          <section><h3>Your memory aids</h3><p *ngIf="side.note; else noNote" class="personal-note">{{side.note}}</p><ng-template #noNote><p>No saved personal note.</p></ng-template><p *ngIf="side.synonyms.length"><strong>Your accepted meaning synonyms:</strong> {{side.synonyms.join(' · ')}}</p>
+            <button type="button" [id]="'compare-item-'+side.subject.id" (click)="open(side.subject.id,'compare-item-'+side.subject.id)">Explore {{side.subject.text}} and edit memory aids</button>
+          </section>
+          <section><h3>Typed-course progress</h3><p *ngIf="!side.introduced">Not introduced. Browsing does not start a lesson or unlock this item.</p><p *ngIf="side.introduced">Meaning: {{side.meaningStage}}<span *ngIf="side.subject.readings.length"> · Reading: {{side.readingStage}}</span></p></section>
+          <section><h3>Words using <span lang="ja">{{side.subject.text}}</span></h3><p *ngIf="side.wordCount">Showing {{side.words.length}} of {{side.wordCount}} catalog words. Explore a word for its context and audio.</p><p *ngIf="!side.wordCount">No related words are available in this catalog.</p>
+            <ul class="words"><li *ngFor="let word of side.words"><ruby lang="ja">{{word.text}}<rt>{{word.readings.join(' · ')}}</rt></ruby><p>{{word.meaning}}</p><button type="button" [id]="'compare-word-'+side.subject.id+'-'+word.id" (click)="open(word.id,'compare-word-'+side.subject.id+'-'+word.id)">Explore word {{word.text}}</button></li></ul>
+          </section>
+        </article>
+      </div>
+    </ng-container>
+    <ng-template #empty><section class="empty"><h2>No comparison pairs available</h2><p>The current catalog does not contain two kanji from the existing visual groups. You can still explore individual kanji.</p></section></ng-template>
+  </ng-container>
+  <ng-template #loading><p *ngIf="!comparison.error" role="status">Restoring your learning progress…</p></ng-template>
+</section>

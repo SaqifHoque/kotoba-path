@@ -151,3 +151,5 @@ Learning progress saves automatically. Use Settings for account access and [prog
 Study navigation is organized around Today, Learn, Review, Library, and Profile. See the [unified study guide](docs/unified-study.md) for session continuity and how existing progress is preserved.
 
 Find repeated meaning/reading misses through Review’s [Trouble spots](docs/trouble-spots.md), with focused practice that preserves scheduled progress.
+
+Study [similar-looking kanji side by side](docs/kanji-comparison.md), with separate meanings, readings, related words and personal memory aids.
