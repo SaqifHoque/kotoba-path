@@ -83,3 +83,5 @@ through practice. The scheduled summary still showed its original results.
 Import reset, a partially finished source batch, mobile keyboard/audio controls,
 reload closure and persisted scheduled records/history also passed. No horizontal
 overflow or browser runtime errors occurred. Backend source/schema is unchanged.
+
+[Trouble spots](trouble-spots.md) also starts focused practice from saved repeated-miss counters. Those sessions return to Trouble spots, use at most ten matched skills, and share the same non-writing player and support gates.

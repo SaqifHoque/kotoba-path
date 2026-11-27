@@ -1,0 +1,17 @@
+:host { display:block; }
+.trouble-spots { max-width:64rem; margin:auto; }
+header, .filters, .items li, .empty, .practice-entry, .explanation { padding:1.5rem; border:1px solid #d0dbd1; border-radius:.75rem; background:#fcfdf9; margin-bottom:1rem; }
+.eyebrow { text-transform:uppercase; letter-spacing:.06em; font-size:.8rem; }
+h1, h2 { line-height:1.4; overflow-wrap:anywhere; }
+p { line-height:1.65; overflow-wrap:anywhere; }
+label { display:block; margin:.6rem 0; font-weight:600; }
+.filter-options, .item-heading { display:flex; flex-wrap:wrap; gap:1rem; align-items:center; }
+input, select, button { font:inherit; min-height:44px; max-width:100%; box-sizing:border-box; border:1px solid #789280; border-radius:.5rem; padding:.65rem .8rem; background:white; color:#223c31; }
+input { width:100%; }
+select { display:block; margin-top:.5rem; }
+button, summary { cursor:pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, li:focus { outline:3px solid #9b6500; outline-offset:3px; }
+.items { list-style:none; padding:0; }
+.personal-note { white-space:pre-line; }
+.note { font-size:.9rem; }
+@media(max-width:420px) { header,.filters,.items li,.empty,.practice-entry,.explanation { padding:1rem; } }

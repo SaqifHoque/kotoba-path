@@ -1,19 +1,19 @@
 <section class="practice">
   <header><span class="eyebrow">Recall, understand, try again</span><h1>Mistake practice</h1>
-    <p>Retry questions missed in your completed review batch. This practice leaves scheduled scores, stages, review dates and history unchanged.</p>
+    <p>{{practice.origin==='batch'?'Retry questions missed in your completed review batch.':'Practise skills with repeated misses from your saved typed-course progress.'}} This practice leaves scheduled scores, stages, review dates and history unchanged.</p>
     <p>Source: {{practice.source}}</p>
-    <button type="button" (click)="leave.emit()">Return to typed reviews</button>
+    <button type="button" (click)="leave.emit()">{{practice.returnLabel}}</button>
   </header>
-  <p *ngIf="!practice.allowed" role="status">Open mistake practice from a completed review batch after your account is ready.</p>
+  <p *ngIf="!practice.allowed" role="status">Open mistake practice from a completed review batch or Trouble spots after your account is ready.</p>
   <ng-container *ngIf="practice.allowed && practice.session as session">
     <article *ngIf="practice.complete; else question" aria-label="Mistake practice summary">
       <ng-container *ngIf="practice.summary as summary">
         <h2 #summaryHeading tabindex="-1">Practice complete for now</h2>
         <p>{{summary.answered}} of {{summary.total}} practice questions answered.</p>
         <p>{{summary.correct}} correct · {{summary.incorrect}} to revisit · {{summary.unanswered}} unanswered.</p>
-        <p>The original scheduled results remain saved. These practice results stay in this tab and close on reload.</p>
-        <button type="button" (click)="restart()">Repeat these mistake questions</button>
-        <button type="button" (click)="leave.emit()">Return to typed reviews</button>
+        <p>Your scheduled results remain saved. These practice results stay in this tab and close on reload.</p>
+        <button type="button" (click)="restart()">Repeat these practice questions</button>
+        <button type="button" (click)="leave.emit()">{{practice.returnLabel}}</button>
       </ng-container>
     </article>
     <ng-template #question>
